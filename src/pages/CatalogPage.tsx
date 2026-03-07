@@ -1,0 +1,76 @@
+import { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
+import Seo from "@/components/common/Seo";
+import ProductCard from "@/components/catalog/ProductCard";
+import CatalogFilters from "@/components/catalog/CatalogFilters";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
+import { useDebounce } from "@/hooks/useDebounce";
+import type { Category, Product, ProductSort } from "@/types";
+import { categoryService } from "@/services/categoryService";
+import { productService } from "@/services/productService";
+
+export default function CatalogPage() {
+  const params = useParams();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<ProductSort>("newest");
+  const [category, setCategory] = useState(params.categorySlug ?? "");
+  const [loading, setLoading] = useState(true);
+  const debouncedSearch = useDebounce(search);
+
+  useEffect(() => {
+    setCategory(params.categorySlug ?? "");
+  }, [params.categorySlug]);
+
+  useEffect(() => {
+    categoryService.getAll().then(setCategories);
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    productService
+      .list({
+        categorySlug: category || undefined,
+        search: debouncedSearch || undefined,
+        sort,
+        onlyAvailable: true
+      })
+      .then(setProducts)
+      .finally(() => setLoading(false));
+  }, [category, debouncedSearch, sort]);
+
+  const filterCategories = useMemo(
+    () => categories.map((item) => ({ slug: item.slug, name: item.name })),
+    [categories]
+  );
+
+  return (
+    <div className="container-shell py-10">
+      <Seo title="Catalog" description="Browse women, men, kids and offers products." />
+      <h1 className="mb-5 text-3xl font-semibold">Catalog</h1>
+      <CatalogFilters
+        search={search}
+        onSearchChange={setSearch}
+        sort={sort}
+        onSortChange={setSort}
+        category={category}
+        categories={filterCategories}
+        onCategoryChange={setCategory}
+      />
+
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <AnimatePresence>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </AnimatePresence>
+      )}
+    </div>
+  );
+}

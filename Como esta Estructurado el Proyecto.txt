@@ -1,0 +1,49 @@
+Como esta Estructurado el Proyecto
+Aquí va una explicación rápida de tu proyecto de lo más pequeño a lo más grande y con las tecnologías:
+
+1) Funciones pequeñas (helpers/utilidades)
+En src/utils/format.ts, formatCurrency() convierte números a moneda USD ($).
+En src/utils/share.ts, funciones como getFacebookShareUrl(), getTwitterShareUrl() y getWhatsAppProductUrl() construyen links para compartir productos.
+En src/hooks/useDebounce.ts (usado en catálogo), se retrasa la búsqueda para no consultar en cada tecla.
+2) Capa de acceso a datos (services)
+src/services/productService.ts maneja CRUD de productos: listar, buscar, filtrar, ordenar, actualizar y borrar.
+src/services/categoryService.ts hace CRUD de categorías.
+src/services/storageService.ts sube imágenes al bucket product-images en Supabase Storage.
+src/services/authService.ts maneja login por email/password y GitHub OAuth, logout y validación de rol admin.
+src/services/contactService.ts usa axios para enviar formularios a un endpoint /contact (si está configurado).
+3) Clientes/base técnica
+src/lib/supabase.ts crea el cliente de Supabase (auth + DB + storage).
+src/lib/http.ts crea cliente Axios con baseURL desde variables de entorno.
+src/config/env.ts centraliza variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_APP_URL, etc).
+4) Estado global y seguridad
+src/contexts/AuthContext.tsx guarda sesión, carga inicial y isAdmin.
+Escucha cambios de sesión (onAuthStateChange) y actualiza el estado.
+src/components/auth/ProtectedRoute.tsx protege rutas /admin; si no eres admin, redirige a /admin/login.
+5) Componentes y páginas (UI/UX)
+Componentes de layout: Navbar, MainLayout, Footer.
+Catálogo: CatalogFilters, ProductCard, ProductDetailPage.
+Admin: dashboard, categorías y productos (/admin/products) con creación/edición/borrado.
+SEO por página con react-helmet-async (Seo component).
+6) Flujo funcional grande (arquitectura)
+src/main.tsx monta la app con BrowserRouter, HelmetProvider y AuthProvider.
+src/App.tsx define rutas públicas y rutas admin protegidas.
+Flujo típico:
+Usuario entra a catálogo.
+Se consultan productos desde Supabase.
+Se renderizan tarjetas y detalle.
+Admin autenticado puede gestionar productos/categorías.
+7) Tecnologías principales que usa tu proyecto
+Frontend: React 18 + TypeScript
+Build/Dev server: Vite
+Ruteo: React Router DOM
+Estilos: Tailwind CSS + PostCSS + Autoprefixer
+Animaciones: Framer Motion
+SEO meta tags: react-helmet-async
+Backend as a Service: Supabase
+Postgres (datos)
+Auth (email + GitHub OAuth)
+Storage (imágenes)
+SQL/RLS en carpeta supabase/
+HTTP extra: Axios (para contacto/edge endpoint)
+Calidad de código: ESLint + Prettier
+Si quieres, en el siguiente paso te hago un diagrama simple de arquitectura (Frontend -> Services -> Supabase) en 1 sola vista.
