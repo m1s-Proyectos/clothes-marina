@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import type { Product } from "@/types";
 import { formatCurrency } from "@/utils/format";
-import { getFacebookShareUrl, getTwitterShareUrl, getWhatsAppProductUrl } from "@/utils/share";
+import { getFacebookShareUrl, getTwitterShareUrl, getWhatsAppOrderUrl, getWhatsAppProductUrl } from "@/utils/share";
 import { whatsAppLeadService } from "@/services/whatsAppLeadService";
 import OptimizedImage from "@/components/common/OptimizedImage";
 
@@ -53,10 +53,19 @@ export default function ProductCard({ product }: ProductCardProps) {
             className="rounded bg-green-600 px-3 py-2 hover:bg-green-700"
             target="_blank"
             rel="noreferrer"
-            href={getWhatsAppProductUrl(product.name)}
+            href={getWhatsAppProductUrl(product.id, product.name, product.main_image_url)}
             onClick={() => void whatsAppLeadService.trackProductInquiry({ productId: product.id, productName: product.name })}
           >
-            WhatsApp
+            Compartir por WhatsApp
+          </a>
+          <a
+            className="rounded bg-emerald-700 px-3 py-2 font-semibold hover:bg-emerald-800"
+            target="_blank"
+            rel="noreferrer"
+            href={getWhatsAppOrderUrl(product.id, product.name)}
+            onClick={() => void whatsAppLeadService.trackProductInquiry({ productId: product.id, productName: product.name })}
+          >
+            Solicitar producto
           </a>
         </div>
       </div>

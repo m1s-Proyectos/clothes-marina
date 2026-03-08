@@ -5,7 +5,7 @@ import LoadingSpinner from "@/components/common/LoadingSpinner";
 import type { Product } from "@/types";
 import { productService } from "@/services/productService";
 import { formatCurrency } from "@/utils/format";
-import { getWhatsAppProductUrl } from "@/utils/share";
+import { getWhatsAppOrderUrl, getWhatsAppProductUrl } from "@/utils/share";
 import { whatsAppLeadService } from "@/services/whatsAppLeadService";
 import OptimizedImage from "@/components/common/OptimizedImage";
 
@@ -56,15 +56,26 @@ export default function ProductDetailPage() {
           <h2 className="mt-4 text-lg font-semibold text-luxury-100">Caracteristicas del producto</h2>
           <p className="mt-2 text-neutral-300">{product.description}</p>
           <p className="mt-4 text-xl text-luxury-100">{formatCurrency(product.reference_price)}</p>
-          <a
-            href={getWhatsAppProductUrl(product.name)}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-6 inline-block rounded bg-green-600 px-5 py-3"
-            onClick={() => void whatsAppLeadService.trackProductInquiry({ productId: product.id, productName: product.name })}
-          >
-            Consultar por WhatsApp
-          </a>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a
+              href={getWhatsAppProductUrl(product.id, product.name, product.main_image_url)}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-block rounded bg-green-600 px-5 py-3"
+              onClick={() => void whatsAppLeadService.trackProductInquiry({ productId: product.id, productName: product.name })}
+            >
+              Compartir por WhatsApp
+            </a>
+            <a
+              href={getWhatsAppOrderUrl(product.id, product.name)}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-block rounded bg-emerald-700 px-5 py-3 font-semibold"
+              onClick={() => void whatsAppLeadService.trackProductInquiry({ productId: product.id, productName: product.name })}
+            >
+              Solicitar producto
+            </a>
+          </div>
         </div>
       </div>
     </div>

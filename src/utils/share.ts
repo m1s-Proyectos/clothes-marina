@@ -4,6 +4,10 @@ export function buildProductUrl(productId: string): string {
   return `${env.appUrl}/product/${productId}`;
 }
 
+function normalizePhone(rawPhone: string): string {
+  return rawPhone.replace(/[^\d]/g, "");
+}
+
 export function getFacebookShareUrl(productId: string): string {
   return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(buildProductUrl(productId))}`;
 }
@@ -12,7 +16,22 @@ export function getTwitterShareUrl(productId: string): string {
   return `https://twitter.com/intent/tweet?url=${encodeURIComponent(buildProductUrl(productId))}`;
 }
 
-export function getWhatsAppProductUrl(productName: string): string {
-  const text = `Hola, quiero informacion sobre ${productName}`;
-  return `https://wa.me/${env.whatsappPhone}?text=${encodeURIComponent(text)}`;
+export function getWhatsAppProductUrl(productId: string, productName: string, productImageUrl?: string): string {
+  const productLink = buildProductUrl(productId);
+  const lines = [
+    `Hola, me interesa este producto: ${productName}.`,
+    `Link: ${productLink}`,
+    productImageUrl ? `Imagen: ${productImageUrl}` : ""
+  ].filter(Boolean);
+  return `https://wa.me/${normalizePhone(env.whatsappPhone)}?text=${encodeURIComponent(lines.join("\n"))}`;
+}
+
+export function getWhatsAppOrderUrl(productId: string, productName: string): string {
+  const productLink = buildProductUrl(productId);
+  const text = [
+    `Hola, quiero solicitar el producto: ${productName}.`,
+    "Quiero coordinar la entrega.",
+    `Link: ${productLink}`
+  ].join("\n");
+  return `https://wa.me/${normalizePhone(env.whatsappPhone)}?text=${encodeURIComponent(text)}`;
 }
