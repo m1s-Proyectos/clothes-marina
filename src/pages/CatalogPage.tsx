@@ -48,8 +48,8 @@ export default function CatalogPage() {
 
   return (
     <div className="container-shell py-10">
-      <Seo title="Catalog" description="Browse women, men, kids and offers products." />
-      <h1 className="mb-5 text-3xl font-semibold">Catalog</h1>
+      <Seo title="Catalogo" description="Explora productos de mujer, hombre, ninos y ofertas." />
+      <h1 className="mb-5 text-3xl font-semibold">Catalogo</h1>
       <CatalogFilters
         search={search}
         onSearchChange={setSearch}

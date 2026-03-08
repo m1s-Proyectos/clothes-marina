@@ -13,6 +13,6 @@ export function getTwitterShareUrl(productId: string): string {
 }
 
 export function getWhatsAppProductUrl(productName: string): string {
-  const text = `Hello I want information about ${productName}`;
+  const text = `Hola, quiero informacion sobre ${productName}`;
   return `https://wa.me/${env.whatsappPhone}?text=${encodeURIComponent(text)}`;
 }

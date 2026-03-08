@@ -8,7 +8,7 @@ interface SeoProps {
 export default function Seo({ title, description }: SeoProps) {
   return (
     <Helmet>
-      <title>{title} | Clothes Marina</title>
+      <title>{title} | Marina's clothes</title>
       <meta name="description" content={description} />
     </Helmet>
   );

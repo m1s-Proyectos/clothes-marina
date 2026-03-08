@@ -176,6 +176,7 @@ Service layer keeps UI decoupled from query logic and supports future caching/an
    1. `supabase/schema.sql`
    2. `supabase/rls.sql`
    3. `supabase/storage.sql`
+   4. `supabase/admin_security.sql`
 3. Create admin user via Auth UI.
 4. Assign app metadata role `admin`.
 5. (Optional) Deploy Edge Function:
@@ -196,3 +197,36 @@ Service layer keeps UI decoupled from query logic and supports future caching/an
 - Set image CDN/cache headers
 - Add backup/restore strategy for Postgres
 - Restrict admin emails and enforce MFA
+
+## 11) Security hardening for Vercel + Supabase
+
+### Vercel
+
+- Keep `vercel.json` headers enabled (CSP, HSTS, X-Frame-Options, nosniff, Permissions-Policy).
+- Use only HTTPS URLs for all assets and callbacks.
+- Add all production domains in Vercel and force HTTPS.
+- Do not expose any service role key in Vercel env vars (frontend must only use anon key).
+
+### Supabase Auth
+
+- In Auth settings, set:
+  - Site URL: your production domain
+  - Redirect URLs: exact allowed URLs (prod + localhost dev)
+- Disable unused providers.
+- Enable bot protection/CAPTCHA and rate limits.
+- Enforce MFA for admin users.
+- Disable public signups if your flow does not require customer accounts.
+
+### Supabase Database & Storage
+
+- Keep RLS enabled on all public tables.
+- Verify all write policies require `public.is_admin()`.
+- Ensure bucket write policies are admin-only.
+- Rotate keys if leaked and review API logs periodically.
+
+### Operational security
+
+- Store env vars only in Vercel project settings, never in repository.
+- Use strong passwords and 2FA on Vercel, GitHub, and Supabase accounts.
+- Run periodic dependency updates and `npm audit` checks.
+- Set up monitoring/alerts for auth failures and suspicious admin activity.

@@ -14,8 +14,11 @@ export const authService = {
   },
 
   async loginWithGitHub(): Promise<void> {
-    const redirectBase =
-      typeof window !== "undefined" && window.location?.origin ? window.location.origin : env.appUrl;
+    const currentOrigin = typeof window !== "undefined" && window.location?.origin ? window.location.origin : "";
+    const isLocalHost =
+      typeof window !== "undefined" &&
+      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+    const redirectBase = isLocalHost && currentOrigin ? currentOrigin : env.appUrl;
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "github",

@@ -9,10 +9,13 @@ import ProductDetailPage from "@/pages/ProductDetailPage";
 import CollectionsPage from "@/pages/CollectionsPage";
 import AboutPage from "@/pages/AboutPage";
 import ContactPage from "@/pages/ContactPage";
+import NuestraInformacionPage from "@/pages/NuestraInformacionPage";
 import AdminLoginPage from "@/pages/admin/AdminLoginPage";
 import AdminDashboardPage from "@/pages/admin/AdminDashboardPage";
 import AdminCategoriesPage from "@/pages/admin/AdminCategoriesPage";
 import AdminProductsPage from "@/pages/admin/AdminProductsPage";
+import AdminInboxPage from "@/pages/admin/AdminInboxPage";
+import AdminAccessRequestsPage from "@/pages/admin/AdminAccessRequestsPage";
 
 export default function App() {
   return (
@@ -24,6 +27,7 @@ export default function App() {
           <Route path="/catalog/:categorySlug" element={<CatalogPage />} />
           <Route path="/collections" element={<CollectionsPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/nuestra-informacion" element={<NuestraInformacionPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/product/:productId" element={<ProductDetailPage />} />
         </Route>
@@ -40,6 +44,8 @@ export default function App() {
           <Route index element={<AdminDashboardPage />} />
           <Route path="categories" element={<AdminCategoriesPage />} />
           <Route path="products" element={<AdminProductsPage />} />
+          <Route path="inbox" element={<AdminInboxPage />} />
+          <Route path="access-requests" element={<AdminAccessRequestsPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

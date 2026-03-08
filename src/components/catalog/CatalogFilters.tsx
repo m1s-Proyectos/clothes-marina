@@ -24,18 +24,18 @@ export default function CatalogFilters({
       <input
         value={search}
         onChange={(event) => onSearchChange(event.target.value)}
-        placeholder="Search products..."
+        placeholder="Buscar productos..."
         className="rounded bg-neutral-800 px-3 py-2 text-sm"
       />
       <select value={sort} onChange={(event) => onSortChange(event.target.value as ProductSort)} className="rounded bg-neutral-800 px-3 py-2 text-sm">
-        <option value="newest">Newest</option>
-        <option value="featured">Featured</option>
-        <option value="alphabetical">Alphabetical</option>
-        <option value="availability">Availability</option>
+        <option value="newest">Mas recientes</option>
+        <option value="featured">Destacados</option>
+        <option value="alphabetical">Alfabetico</option>
+        <option value="availability">Disponibilidad</option>
       </select>
       <select value={category} onChange={(event) => onCategoryChange(event.target.value)} className="rounded bg-neutral-800 px-3 py-2 text-sm">
-        <option value="">All categories</option>
-        <option value="offers">Offers</option>
+        <option value="">Todas las categorias</option>
+        <option value="offers">Ofertas</option>
         {categories.map((item) => (
           <option key={item.slug} value={item.slug}>
             {item.name}

@@ -3,11 +3,11 @@ import Seo from "@/components/common/Seo";
 export default function AboutPage() {
   return (
     <div className="container-shell py-16">
-      <Seo title="About Us" description="About Clothes Marina and our clothing philosophy." />
-      <h1 className="text-3xl font-semibold">About Us</h1>
+      <Seo title="Sobre Nosotros" description="Sobre Marina's Clothes y nuestra filosofia de ropa." />
+      <h1 className="text-3xl font-semibold">Sobre Nosotros</h1>
       <p className="mt-4 max-w-3xl text-neutral-300">
-        Clothes Marina is a modern clothing showroom focused on premium style and in-store experience.
-        Our digital catalog helps customers discover products and contact us instantly via WhatsApp.
+        Marina's Clothes es un showroom moderno de ropa enfocado en estilo premium y experiencia en tienda.
+        Nuestro catalogo digital ayuda a los clientes a descubrir productos y contactarnos al instante por WhatsApp.
       </p>
     </div>
   );

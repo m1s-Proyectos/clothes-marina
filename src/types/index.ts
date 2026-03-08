@@ -26,4 +26,34 @@ export interface Product {
   product_images?: ProductImage[];
 }
 
+export interface ContactRequest {
+  id: string;
+  name: string;
+  phone: string;
+  message: string;
+  status: "new" | "resolved";
+  source: string;
+  created_at: string;
+}
+
+export interface WhatsAppLead {
+  id: string;
+  product_id: string | null;
+  product_name: string;
+  source: string;
+  created_at: string;
+}
+
+export interface AdminAccessRequest {
+  id: string;
+  user_id: string;
+  email: string;
+  full_name: string | null;
+  status: "pending" | "approved" | "denied";
+  notes: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+}
+
 export type ProductSort = "newest" | "featured" | "alphabetical" | "availability";

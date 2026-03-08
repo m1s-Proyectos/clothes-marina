@@ -16,10 +16,12 @@ export default function AdminLayout() {
         </div>
       </header>
       <div className="container-shell py-8">
-        <nav className="mb-6 flex gap-3 text-sm">
+        <nav className="mb-6 flex flex-wrap gap-3 text-sm">
           <Link to="/admin">Dashboard</Link>
           <Link to="/admin/categories">Categories</Link>
           <Link to="/admin/products">Products</Link>
+          <Link to="/admin/inbox">Inbox</Link>
+          <Link to="/admin/access-requests">Admin Access</Link>
         </nav>
         <Outlet />
       </div>
