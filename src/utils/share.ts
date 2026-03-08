@@ -31,7 +31,7 @@ export function getWhatsAppProductUrl(productId: string, productName: string, pr
     `Link: ${productLink}`,
     productImageUrl ? `Imagen: ${productImageUrl}` : ""
   ].filter(Boolean);
-  return `https://wa.me/${getSafeWhatsAppPhone()}?text=${encodeURIComponent(lines.join("\n"))}`;
+  return `https://wa.me/?text=${encodeURIComponent(lines.join("\n"))}`;
 }
 
 export function getWhatsAppOrderUrl(productId: string, productName: string): string {

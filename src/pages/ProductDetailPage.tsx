@@ -62,7 +62,6 @@ export default function ProductDetailPage() {
               target="_blank"
               rel="noreferrer"
               className="inline-block rounded bg-green-600 px-5 py-3"
-              onClick={() => void whatsAppLeadService.trackProductInquiry({ productId: product.id, productName: product.name })}
             >
               Compartir por WhatsApp
             </a>

@@ -54,7 +54,6 @@ export default function ProductCard({ product }: ProductCardProps) {
             target="_blank"
             rel="noreferrer"
             href={getWhatsAppProductUrl(product.id, product.name, product.main_image_url)}
-            onClick={() => void whatsAppLeadService.trackProductInquiry({ productId: product.id, productName: product.name })}
           >
             Compartir por WhatsApp
           </a>
