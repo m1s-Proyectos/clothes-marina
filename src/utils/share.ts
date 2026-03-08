@@ -24,10 +24,9 @@ export function getTwitterShareUrl(productId: string): string {
   return `https://twitter.com/intent/tweet?url=${encodeURIComponent(buildProductUrl(productId))}`;
 }
 
-export function getWhatsAppProductUrl(productId: string, productName: string, productImageUrl?: string): string {
+export function getWhatsAppProductUrl(productId: string, _productName: string, productImageUrl?: string): string {
   const productLink = buildProductUrl(productId);
   const lines = [
-    `Hola, me interesa este producto: ${productName}.`,
     `Link: ${productLink}`,
     productImageUrl ? `Imagen: ${productImageUrl}` : ""
   ].filter(Boolean);
