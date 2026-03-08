@@ -1,11 +1,19 @@
 import env from "@/config/env";
 
+const DEFAULT_WHATSAPP_PHONE = "50379128469";
+
 export function buildProductUrl(productId: string): string {
   return `${env.appUrl}/product/${productId}`;
 }
 
 function normalizePhone(rawPhone: string): string {
   return rawPhone.replace(/[^\d]/g, "");
+}
+
+function getSafeWhatsAppPhone(): string {
+  const normalized = normalizePhone(env.whatsappPhone);
+  if (normalized.length >= 8) return normalized;
+  return DEFAULT_WHATSAPP_PHONE;
 }
 
 export function getFacebookShareUrl(productId: string): string {
@@ -23,7 +31,7 @@ export function getWhatsAppProductUrl(productId: string, productName: string, pr
     `Link: ${productLink}`,
     productImageUrl ? `Imagen: ${productImageUrl}` : ""
   ].filter(Boolean);
-  return `https://wa.me/${normalizePhone(env.whatsappPhone)}?text=${encodeURIComponent(lines.join("\n"))}`;
+  return `https://wa.me/${getSafeWhatsAppPhone()}?text=${encodeURIComponent(lines.join("\n"))}`;
 }
 
 export function getWhatsAppOrderUrl(productId: string, productName: string): string {
@@ -33,5 +41,5 @@ export function getWhatsAppOrderUrl(productId: string, productName: string): str
     "Quiero coordinar la entrega.",
     `Link: ${productLink}`
   ].join("\n");
-  return `https://wa.me/${normalizePhone(env.whatsappPhone)}?text=${encodeURIComponent(text)}`;
+  return `https://wa.me/${getSafeWhatsAppPhone()}?text=${encodeURIComponent(text)}`;
 }
