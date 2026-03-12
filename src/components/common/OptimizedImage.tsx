@@ -8,7 +8,9 @@ interface OptimizedImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 
 }
 
 export default function OptimizedImage({ src, transform, responsiveWidths, ...imgProps }: OptimizedImageProps) {
-  const canOptimize = isSupabasePublicImage(src);
+  // Some Supabase projects return 403 for image transformation endpoints.
+  // Keep direct public URLs enabled for maximum compatibility.
+  const canOptimize = false && isSupabasePublicImage(src);
   const optimizedSrc = useMemo(() => (canOptimize ? getOptimizedImageUrl(src, transform) : src), [canOptimize, src, transform]);
 
   const [currentSrc, setCurrentSrc] = useState(optimizedSrc);

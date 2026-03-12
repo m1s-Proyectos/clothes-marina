@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { Product } from "@/types";
 import { formatCurrency } from "@/utils/format";
 import { buildProductUrl, getFacebookShareUrl, getTwitterShareUrl, getWhatsAppOrderUrl, getWhatsAppProductUrl } from "@/utils/share";
 import { whatsAppLeadService } from "@/services/whatsAppLeadService";
 import OptimizedImage from "@/components/common/OptimizedImage";
+import ReturnToSiteBar from "@/components/common/ReturnToSiteBar";
 
 interface ProductCardProps {
   product: Product;
@@ -17,6 +18,9 @@ export default function ProductCard({ product }: ProductCardProps) {
   const productUrl = `/product/${product.id}`;
   const [shareModal, setShareModal] = useState<SharePlatform | null>(null);
   const [shareNote, setShareNote] = useState("");
+  const [showReturnButton, setShowReturnButton] = useState(false);
+  const [clickSpotlight, setClickSpotlight] = useState(false);
+  const clickSpotlightTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!shareModal) return;
@@ -31,6 +35,24 @@ export default function ProductCard({ product }: ProductCardProps) {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [shareModal]);
+
+  useEffect(() => {
+    return () => {
+      if (clickSpotlightTimeoutRef.current !== null) {
+        window.clearTimeout(clickSpotlightTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  function triggerClickSpotlight(): void {
+    setClickSpotlight(true);
+    if (clickSpotlightTimeoutRef.current !== null) {
+      window.clearTimeout(clickSpotlightTimeoutRef.current);
+    }
+    clickSpotlightTimeoutRef.current = window.setTimeout(() => {
+      setClickSpotlight(false);
+    }, 1200);
+  }
 
   async function copyProductLinkToClipboard(): Promise<void> {
     const link = buildProductUrl(product.id);
@@ -61,6 +83,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       window.open(getTwitterShareUrl(product.id), "_blank", "noopener,noreferrer");
     }
 
+    setShowReturnButton(true);
     closeShareModal();
   }
 
@@ -73,6 +96,18 @@ export default function ProductCard({ product }: ProductCardProps) {
     } else {
       window.open("https://x.com/messages", "_blank", "noopener,noreferrer");
     }
+    setShowReturnButton(true);
+  }
+
+  function openWhatsAppShare(): void {
+    window.open(getWhatsAppProductUrl(product.id, product.name, product.main_image_url), "_blank", "noopener,noreferrer");
+    setShowReturnButton(true);
+  }
+
+  function openWhatsAppOrder(): void {
+    void whatsAppLeadService.trackProductInquiry({ productId: product.id, productName: product.name });
+    window.open(getWhatsAppOrderUrl(product.id, product.name), "_blank", "noopener,noreferrer");
+    setShowReturnButton(true);
   }
 
   return (
@@ -80,7 +115,15 @@ export default function ProductCard({ product }: ProductCardProps) {
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900"
+      whileHover={{ y: -8, scale: 1.02 }}
+      whileTap={{ scale: 0.99 }}
+      transition={{ type: "spring", stiffness: 280, damping: 24 }}
+      onPointerDown={triggerClickSpotlight}
+      className={`overflow-hidden rounded-xl border bg-neutral-900 transition-all duration-200 ${
+        clickSpotlight
+          ? "z-20 border-luxury-500 ring-2 ring-luxury-500/50 shadow-2xl shadow-luxury-500/25"
+          : "border-neutral-800 hover:z-20 hover:border-luxury-500/70 hover:shadow-2xl hover:shadow-luxury-500/20"
+      }`}
     >
       <Link to={productUrl} aria-label={`Ver detalles de ${product.name}`}>
         <OptimizedImage
@@ -105,29 +148,18 @@ export default function ProductCard({ product }: ProductCardProps) {
           <Link to={productUrl} className="rounded bg-luxury-500 px-3 py-2 font-semibold text-neutral-950 hover:bg-luxury-400">
             Ver detalles
           </Link>
-          <button type="button" className="rounded bg-neutral-800 px-3 py-2 hover:bg-neutral-700" onClick={() => openShareModal("facebook")}>
-            Facebook
+          <button type="button" className="rounded bg-blue-600 px-3 py-2 text-white hover:bg-blue-700" onClick={() => openShareModal("facebook")}>
+            <span className="mr-1 font-bold">f</span>Facebook
           </button>
-          <button type="button" className="rounded bg-neutral-800 px-3 py-2 hover:bg-neutral-700" onClick={() => openShareModal("twitter")}>
-            Twitter
+          <button type="button" className="rounded bg-gray-600 px-3 py-2 text-white hover:bg-gray-700" onClick={() => openShareModal("twitter")}>
+            <span className="mr-1 font-bold">X</span>Twitter
           </button>
-          <a
-            className="rounded bg-green-600 px-3 py-2 hover:bg-green-700"
-            target="_blank"
-            rel="noreferrer"
-            href={getWhatsAppProductUrl(product.id, product.name, product.main_image_url)}
-          >
+          <button type="button" className="rounded bg-green-600 px-3 py-2 hover:bg-green-700" onClick={openWhatsAppShare}>
             Compartir por WhatsApp
-          </a>
-          <a
-            className="rounded bg-emerald-700 px-3 py-2 font-semibold hover:bg-emerald-800"
-            target="_blank"
-            rel="noreferrer"
-            href={getWhatsAppOrderUrl(product.id, product.name)}
-            onClick={() => void whatsAppLeadService.trackProductInquiry({ productId: product.id, productName: product.name })}
-          >
+          </button>
+          <button type="button" className="rounded bg-emerald-700 px-3 py-2 font-semibold hover:bg-emerald-800" onClick={openWhatsAppOrder}>
             Solicitar producto
-          </a>
+          </button>
         </div>
       </div>
 
@@ -161,6 +193,8 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
         </div>
       )}
+
+      {showReturnButton && <ReturnToSiteBar onClose={() => setShowReturnButton(false)} />}
     </motion.article>
   );
 }

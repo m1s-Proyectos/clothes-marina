@@ -8,12 +8,14 @@ import { formatCurrency } from "@/utils/format";
 import { getWhatsAppOrderUrl, getWhatsAppProductUrl } from "@/utils/share";
 import { whatsAppLeadService } from "@/services/whatsAppLeadService";
 import OptimizedImage from "@/components/common/OptimizedImage";
+import ReturnToSiteBar from "@/components/common/ReturnToSiteBar";
 
 export default function ProductDetailPage() {
   const navigate = useNavigate();
   const { productId } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showReturnButton, setShowReturnButton] = useState(false);
 
   useEffect(() => {
     if (!productId) return;
@@ -57,24 +59,29 @@ export default function ProductDetailPage() {
           <p className="mt-2 text-neutral-300">{product.description}</p>
           <p className="mt-4 text-xl text-luxury-100">{formatCurrency(product.reference_price)}</p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <a
-              href={getWhatsAppProductUrl(product.id, product.name, product.main_image_url)}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={() => {
+                window.open(getWhatsAppProductUrl(product.id, product.name, product.main_image_url), "_blank", "noopener,noreferrer");
+                setShowReturnButton(true);
+              }}
               className="inline-block rounded bg-green-600 px-5 py-3"
             >
               Compartir por WhatsApp
-            </a>
-            <a
-              href={getWhatsAppOrderUrl(product.id, product.name)}
-              target="_blank"
-              rel="noreferrer"
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                void whatsAppLeadService.trackProductInquiry({ productId: product.id, productName: product.name });
+                window.open(getWhatsAppOrderUrl(product.id, product.name), "_blank", "noopener,noreferrer");
+                setShowReturnButton(true);
+              }}
               className="inline-block rounded bg-emerald-700 px-5 py-3 font-semibold"
-              onClick={() => void whatsAppLeadService.trackProductInquiry({ productId: product.id, productName: product.name })}
             >
               Solicitar producto
-            </a>
+            </button>
           </div>
+          {showReturnButton && <ReturnToSiteBar onClose={() => setShowReturnButton(false)} />}
         </div>
       </div>
     </div>
