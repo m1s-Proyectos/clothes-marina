@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import type { Product } from "@/types";
 import { formatCurrency } from "@/utils/format";
@@ -19,8 +19,6 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [shareModal, setShareModal] = useState<SharePlatform | null>(null);
   const [shareNote, setShareNote] = useState("");
   const [showReturnButton, setShowReturnButton] = useState(false);
-  const [clickSpotlight, setClickSpotlight] = useState(false);
-  const clickSpotlightTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!shareModal) return;
@@ -33,26 +31,14 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
 
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [shareModal]);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
-  useEffect(() => {
     return () => {
-      if (clickSpotlightTimeoutRef.current !== null) {
-        window.clearTimeout(clickSpotlightTimeoutRef.current);
-      }
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
     };
-  }, []);
-
-  function triggerClickSpotlight(): void {
-    setClickSpotlight(true);
-    if (clickSpotlightTimeoutRef.current !== null) {
-      window.clearTimeout(clickSpotlightTimeoutRef.current);
-    }
-    clickSpotlightTimeoutRef.current = window.setTimeout(() => {
-      setClickSpotlight(false);
-    }, 1200);
-  }
+  }, [shareModal]);
 
   async function copyProductLinkToClipboard(): Promise<void> {
     const link = buildProductUrl(product.id);
@@ -115,15 +101,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -8, scale: 1.02 }}
-      whileTap={{ scale: 0.99 }}
-      transition={{ type: "spring", stiffness: 280, damping: 24 }}
-      onPointerDown={triggerClickSpotlight}
-      className={`overflow-hidden rounded-xl border bg-neutral-900 transition-all duration-200 ${
-        clickSpotlight
-          ? "z-20 border-luxury-500 ring-2 ring-luxury-500/50 shadow-2xl shadow-luxury-500/25"
-          : "border-neutral-800 hover:z-20 hover:border-luxury-500/70 hover:shadow-2xl hover:shadow-luxury-500/20"
-      }`}
+      className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900"
     >
       <Link to={productUrl} aria-label={`Ver detalles de ${product.name}`}>
         <OptimizedImage
@@ -171,7 +149,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           onClick={closeShareModal}
         >
           <div
-            className="w-full max-w-md rounded-xl border border-neutral-700 bg-neutral-900 p-5 shadow-2xl"
+            className="w-full max-w-md rounded-xl border border-neutral-700 bg-neutral-900 p-5 shadow-2xl md:p-6"
             onClick={(event) => event.stopPropagation()}
           >
             <h4 className="text-lg font-semibold text-white">Compartir en {shareModal === "facebook" ? "Facebook" : "X (Twitter)"}</h4>
