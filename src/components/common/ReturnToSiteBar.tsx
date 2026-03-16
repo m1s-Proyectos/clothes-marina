@@ -1,9 +1,21 @@
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+
 interface ReturnToSiteBarProps {
   onClose: () => void;
 }
 
 export default function ReturnToSiteBar({ onClose }: ReturnToSiteBarProps) {
-  return (
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(
     <div className="fixed inset-x-0 bottom-0 z-[60] border-t border-luxury-700 bg-neutral-900/95 p-3 backdrop-blur">
       <div className="container-shell">
         <button
@@ -18,6 +30,7 @@ export default function ReturnToSiteBar({ onClose }: ReturnToSiteBarProps) {
           Volver al sitio
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

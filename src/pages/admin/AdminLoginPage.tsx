@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import Seo from "@/components/common/Seo";
 import { useAuth } from "@/contexts/AuthContext";
@@ -67,8 +68,11 @@ export default function AdminLoginPage() {
 
   return (
     <div className="container-shell py-20">
-      <Seo title="Admin Login" description="Admin login for Marina's Clothes." />
+      <Seo title="Admin Login" description="Admin login for Marina's Clothes." path="/admin/login" noindex />
       <div className="mx-auto max-w-md rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+        <Link to="/" className="inline-block rounded border border-neutral-700 px-3 py-1 text-xs text-neutral-200 hover:bg-neutral-800">
+          Regresar a inicio
+        </Link>
         <h1 className="text-2xl font-semibold">Admin Login</h1>
         <form className="mt-4 space-y-3" onSubmit={onSubmit}>
           <input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email" className="w-full rounded bg-neutral-800 px-3 py-2" />
