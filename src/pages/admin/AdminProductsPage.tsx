@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import type { Category, Product } from "@/types";
 import { categoryService } from "@/services/categoryService";
@@ -32,12 +32,9 @@ export default function AdminProductsPage() {
   const [form, setForm] = useState<ProductForm>(initialForm);
   const [uploading, setUploading] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
-  const [descriptionDraft, setDescriptionDraft] = useState("");
-  const [priceDraft, setPriceDraft] = useState("");
-  const [imageDraft, setImageDraft] = useState("");
-  const [availableDraft, setAvailableDraft] = useState(true);
-  const [savingProductEdits, setSavingProductEdits] = useState(false);
-  const [uploadingEditImage, setUploadingEditImage] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const load = () => productService.list({ sort: "newest" }).then(setProducts);
 
@@ -58,73 +55,68 @@ export default function AdminProductsPage() {
     }
   }
 
+  function resetForm() {
+    setForm(initialForm);
+    setEditingProductId(null);
+  }
+
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
-    await productService.create({
-      name: form.name,
-      description: form.description,
-      reference_price: Number(form.reference_price),
+    const referencePrice = form.reference_price.trim() ? Number(form.reference_price) : null;
+    if (referencePrice !== null && (Number.isNaN(referencePrice) || referencePrice < 0)) return;
+
+    const payload = {
+      name: form.name.trim(),
+      description: form.description.trim(),
+      reference_price: referencePrice,
       category_id: form.category_id,
-      main_image_url: form.main_image_url,
+      main_image_url: form.main_image_url.trim(),
       available: form.available,
       featured: form.featured
-    });
-    setForm(initialForm);
-    await load();
+    };
+
+    setSaving(true);
+    try {
+      if (editingProductId) {
+        await productService.update(editingProductId, payload);
+      } else {
+        await productService.create(payload);
+      }
+      resetForm();
+      await load();
+    } finally {
+      setSaving(false);
+    }
   }
 
   function startEditingProduct(product: Product) {
     setEditingProductId(product.id);
-    setDescriptionDraft(product.description ?? "");
-    setPriceDraft(product.reference_price === null ? "" : String(product.reference_price));
-    setImageDraft(product.main_image_url ?? "");
-    setAvailableDraft(product.available);
+    setForm({
+      name: product.name,
+      description: product.description ?? "",
+      reference_price: product.reference_price === null ? "" : String(product.reference_price),
+      category_id: product.category_id,
+      main_image_url: product.main_image_url ?? "",
+      available: product.available,
+      featured: product.featured
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function cancelEditingProduct() {
-    setEditingProductId(null);
-    setDescriptionDraft("");
-    setPriceDraft("");
-    setImageDraft("");
-    setAvailableDraft(true);
-  }
-
-  async function saveProductEdits(productId: string) {
-    const nextDescription = descriptionDraft.trim();
-    const nextPrice = Number(priceDraft);
-    const nextImage = imageDraft.trim();
-    if (!nextDescription || Number.isNaN(nextPrice) || nextPrice < 0 || !nextImage) return;
-
-    setSavingProductEdits(true);
-    try {
-      await productService.update(productId, {
-        description: nextDescription,
-        reference_price: nextPrice,
-        main_image_url: nextImage,
-        available: availableDraft
-      });
-      await load();
-      cancelEditingProduct();
-    } finally {
-      setSavingProductEdits(false);
-    }
-  }
-
-  async function handleEditImageUpload(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    setUploadingEditImage(true);
-    try {
-      const url = await storageService.upload(file);
-      setImageDraft(url);
-    } finally {
-      setUploadingEditImage(false);
-    }
-  }
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      const byName = product.name.toLowerCase().includes(searchTerm.trim().toLowerCase());
+      const byCategory = !categoryFilter || product.category_id === categoryFilter;
+      return byName && byCategory;
+    });
+  }, [products, searchTerm, categoryFilter]);
 
   return (
     <section>
       <h1 className="text-2xl font-semibold">Manage Products</h1>
+      <p className="mt-1 text-sm text-neutral-400">
+        {editingProductId ? "Editing selected product in this same form." : "Create a new product."}
+      </p>
       <form onSubmit={onSubmit} className="mt-4 grid gap-3 rounded border border-neutral-800 bg-neutral-900 p-4 md:grid-cols-2">
         <input required value={form.name} onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))} placeholder="Name" className="rounded bg-neutral-800 px-3 py-2" />
         <select required value={form.category_id} onChange={(event) => setForm((prev) => ({ ...prev, category_id: event.target.value }))} className="rounded bg-neutral-800 px-3 py-2">
@@ -136,7 +128,6 @@ export default function AdminProductsPage() {
           ))}
         </select>
         <input
-          required
           type="number"
           min="0"
           step="0.01"
@@ -159,11 +150,37 @@ export default function AdminProductsPage() {
           <input type="checkbox" checked={form.featured} onChange={(event) => setForm((prev) => ({ ...prev, featured: event.target.checked }))} />
           Featured
         </label>
-        <button className="rounded bg-luxury-500 px-3 py-2 font-semibold text-neutral-950 md:col-span-2">Create Product</button>
+        <div className="flex gap-2 md:col-span-2">
+          <button disabled={saving} className="rounded bg-luxury-500 px-3 py-2 font-semibold text-neutral-950 disabled:opacity-60">
+            {saving ? "Saving..." : editingProductId ? "Guardar producto" : "Create Product"}
+          </button>
+          {editingProductId && (
+            <button type="button" onClick={resetForm} disabled={saving} className="rounded bg-neutral-800 px-3 py-2">
+              Cancel edit
+            </button>
+          )}
+        </div>
       </form>
 
-      <div className="mt-6 space-y-2">
-        {products.map((product) => (
+      <div className="mt-6 grid gap-3 rounded border border-neutral-800 bg-neutral-900 p-4 md:grid-cols-2">
+        <input
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+          placeholder="Search by product name..."
+          className="rounded bg-neutral-800 px-3 py-2"
+        />
+        <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)} className="rounded bg-neutral-800 px-3 py-2">
+          <option value="">All categories</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="mt-4 space-y-2">
+        {filteredProducts.map((product) => (
           <div key={product.id} className="rounded border border-neutral-800 bg-neutral-900 px-4 py-3 text-sm">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
@@ -171,7 +188,7 @@ export default function AdminProductsPage() {
                 <p className="mt-1 line-clamp-2 text-xs text-neutral-300">{product.description}</p>
                 <p className="text-xs text-luxury-100">{formatCurrency(product.reference_price)}</p>
                 <p className="text-xs text-neutral-400">
-                  {product.available ? "Available" : "Unavailable"} · {product.featured ? "Featured" : "Standard"}
+                  {product.categories?.name ?? "No category"} · {product.available ? "Available" : "Unavailable"} · {product.featured ? "Featured" : "Standard"}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -181,6 +198,9 @@ export default function AdminProductsPage() {
                 <button onClick={() => startEditingProduct(product)} className="rounded bg-luxury-500 px-2 py-1 font-semibold text-neutral-950">
                   Edit product
                 </button>
+                <button onClick={() => void productService.update(product.id, { available: !product.available }).then(load)} className="rounded bg-neutral-800 px-2 py-1">
+                  Toggle availability
+                </button>
                 <button onClick={() => void productService.update(product.id, { featured: !product.featured }).then(load)} className="rounded bg-neutral-800 px-2 py-1">
                   Feature
                 </button>
@@ -189,53 +209,13 @@ export default function AdminProductsPage() {
                 </button>
               </div>
             </div>
-
-            {editingProductId === product.id && (
-              <div className="mt-3 space-y-2 border-t border-neutral-800 pt-3">
-                <label className="block text-xs text-neutral-400">Product features / Description</label>
-                <textarea
-                  value={descriptionDraft}
-                  onChange={(event) => setDescriptionDraft(event.target.value)}
-                  className="h-24 w-full rounded bg-neutral-800 px-3 py-2"
-                />
-                <label className="block text-xs text-neutral-400">Price</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={priceDraft}
-                  onChange={(event) => setPriceDraft(event.target.value)}
-                  className="w-full rounded bg-neutral-800 px-3 py-2"
-                />
-                <label className="block text-xs text-neutral-400">Main image URL</label>
-                <input
-                  type="url"
-                  value={imageDraft}
-                  onChange={(event) => setImageDraft(event.target.value)}
-                  className="w-full rounded bg-neutral-800 px-3 py-2"
-                />
-                <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={availableDraft} onChange={(event) => setAvailableDraft(event.target.checked)} />
-                  Available
-                </label>
-                <input type="file" accept="image/*" onChange={handleEditImageUpload} />
-                {uploadingEditImage && <p className="text-xs text-neutral-300">Uploading image...</p>}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => void saveProductEdits(product.id)}
-                    disabled={savingProductEdits || !descriptionDraft.trim() || !imageDraft.trim() || Number.isNaN(Number(priceDraft)) || Number(priceDraft) < 0}
-                    className="rounded bg-luxury-500 px-3 py-2 font-semibold text-neutral-950 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {savingProductEdits ? "Saving..." : "Save changes"}
-                  </button>
-                  <button onClick={cancelEditingProduct} disabled={savingProductEdits} className="rounded bg-neutral-800 px-3 py-2">
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         ))}
+        {filteredProducts.length === 0 && (
+          <p className="rounded border border-neutral-800 bg-neutral-900 px-4 py-6 text-sm text-neutral-400">
+            No products match this search/filter.
+          </p>
+        )}
       </div>
     </section>
   );
