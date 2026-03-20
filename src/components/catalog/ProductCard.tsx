@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, type SyntheticEvent } from "react";
 import { Link } from "react-router-dom";
 import type { Product } from "@/types";
 import { formatCurrency } from "@/utils/format";
@@ -15,6 +15,13 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const productUrl = `/product/${product.id}`;
   const [showReturnButton, setShowReturnButton] = useState(false);
+  const [isLandscapeImage, setIsLandscapeImage] = useState(false);
+
+  function handleImageLoad(event: SyntheticEvent<HTMLImageElement>): void {
+    const { naturalWidth, naturalHeight } = event.currentTarget;
+    if (!naturalWidth || !naturalHeight) return;
+    setIsLandscapeImage(naturalWidth > naturalHeight);
+  }
 
   function openWhatsAppOrder(): void {
     void whatsAppLeadService.trackProductInquiry({ productId: product.id, productName: product.name });
@@ -36,10 +43,13 @@ export default function ProductCard({ product }: ProductCardProps) {
             alt={product.name}
             loading="lazy"
             decoding="async"
+            onLoad={handleImageLoad}
             transform={{ width: 640, quality: 70, format: "webp", resize: "contain" }}
             responsiveWidths={[320, 480, 640]}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="h-full w-full rounded-xl object-contain transition hover:scale-[1.02]"
+            className={`h-full w-full rounded-xl object-contain transition hover:scale-[1.02] ${
+              isLandscapeImage ? "scale-[1.22]" : ""
+            }`}
           />
         </div>
       </Link>
