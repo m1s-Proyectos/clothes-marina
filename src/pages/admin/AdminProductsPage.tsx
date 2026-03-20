@@ -26,6 +26,14 @@ const initialForm: ProductForm = {
   featured: false
 };
 
+function normalizeSearchText(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
 export default function AdminProductsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -104,8 +112,11 @@ export default function AdminProductsPage() {
   }
 
   const filteredProducts = useMemo(() => {
+    const normalizedSearch = normalizeSearchText(searchTerm);
+
     return products.filter((product) => {
-      const byName = product.name.toLowerCase().includes(searchTerm.trim().toLowerCase());
+      const normalizedName = normalizeSearchText(product.name);
+      const byName = !normalizedSearch || normalizedName.includes(normalizedSearch);
       const byCategory = !categoryFilter || product.category_id === categoryFilter;
       return byName && byCategory;
     });
