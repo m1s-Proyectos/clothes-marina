@@ -5,7 +5,7 @@ import LoadingSpinner from "@/components/common/LoadingSpinner";
 import type { Product } from "@/types";
 import { productService } from "@/services/productService";
 import { formatCurrency } from "@/utils/format";
-import { getWhatsAppOrderUrl, getWhatsAppProductUrl } from "@/utils/share";
+import { buildProductUrl, getFacebookShareUrl, getInstagramUrl, getTwitterShareUrl, getWhatsAppOrderUrl, getWhatsAppProductUrl } from "@/utils/share";
 import { whatsAppLeadService } from "@/services/whatsAppLeadService";
 import OptimizedImage from "@/components/common/OptimizedImage";
 import ReturnToSiteBar from "@/components/common/ReturnToSiteBar";
@@ -16,6 +16,7 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [showReturnButton, setShowReturnButton] = useState(false);
+  const [shareNote, setShareNote] = useState("");
 
   useEffect(() => {
     if (!productId) return;
@@ -25,24 +26,42 @@ export default function ProductDetailPage() {
       .finally(() => setLoading(false));
   }, [productId]);
 
+  async function copyProductLinkToClipboard(): Promise<void> {
+    if (!product) return;
+    try {
+      await navigator.clipboard.writeText(buildProductUrl(product.id));
+      setShareNote("Enlace copiado. Ya puedes pegarlo en tu publicacion.");
+    } catch {
+      setShareNote("No se pudo copiar automaticamente. Copia el enlace desde la barra del navegador.");
+    }
+  }
+
   if (loading) return <LoadingSpinner />;
   if (!product) return <div className="container-shell py-20">Producto no encontrado.</div>;
 
   return (
     <div className="container-shell py-10">
-      <Seo title={product.name} description={product.description} />
+      <Seo
+        title={product.name}
+        description={product.description}
+        path={`/product/${product.id}`}
+        image={product.main_image_url}
+        type="article"
+      />
       <div className="grid gap-8 lg:grid-cols-2">
-        <OptimizedImage
-          src={product.main_image_url}
-          alt={product.name}
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
-          transform={{ width: 1200, quality: 75, format: "webp", resize: "cover" }}
-          responsiveWidths={[640, 960, 1200]}
-          sizes="(max-width: 1024px) 100vw, 50vw"
-          className="h-[500px] w-full rounded-xl object-cover"
-        />
+        <div className="flex min-h-[420px] items-center justify-center rounded-xl bg-white p-3">
+          <OptimizedImage
+            src={product.main_image_url}
+            alt={product.name}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            transform={{ width: 1200, quality: 75, format: "webp", resize: "contain" }}
+            responsiveWidths={[640, 960, 1200]}
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            className="max-h-[70vh] w-full rounded-xl object-contain"
+          />
+        </div>
         <div>
           <button
             type="button"
@@ -57,8 +76,41 @@ export default function ProductDetailPage() {
           <h1 className="text-3xl font-semibold">{product.name}</h1>
           <h2 className="mt-4 text-lg font-semibold text-luxury-100">Caracteristicas del producto</h2>
           <p className="mt-2 text-neutral-300">{product.description}</p>
-          <p className="mt-4 text-xl text-luxury-100">{formatCurrency(product.reference_price)}</p>
+          <p className="mt-4 inline-flex rounded-lg bg-luxury-500/20 px-4 py-2 text-2xl font-extrabold tracking-wide text-luxury-100">
+            {formatCurrency(product.reference_price)}
+          </p>
           <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                window.open(getFacebookShareUrl(product.id, product.name), "_blank", "noopener,noreferrer");
+                setShowReturnButton(true);
+              }}
+              className="inline-block rounded bg-blue-600 px-5 py-3 text-white hover:bg-blue-700"
+            >
+              Compartir Facebook
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                window.open(getTwitterShareUrl(product.id), "_blank", "noopener,noreferrer");
+                setShowReturnButton(true);
+              }}
+              className="inline-block rounded bg-gray-600 px-5 py-3 text-white hover:bg-gray-700"
+            >
+              Compartir X
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                void copyProductLinkToClipboard();
+                window.open(getInstagramUrl(), "_blank", "noopener,noreferrer");
+                setShowReturnButton(true);
+              }}
+              className="inline-block rounded bg-pink-600 px-5 py-3 text-white hover:bg-pink-700"
+            >
+              Compartir Instagram
+            </button>
             <button
               type="button"
               onClick={() => {
@@ -67,7 +119,7 @@ export default function ProductDetailPage() {
               }}
               className="inline-block rounded bg-green-600 px-5 py-3"
             >
-              Compartir por WhatsApp
+              Compartir WhatsApp
             </button>
             <button
               type="button"
@@ -76,11 +128,12 @@ export default function ProductDetailPage() {
                 window.open(getWhatsAppOrderUrl(product.id, product.name), "_blank", "noopener,noreferrer");
                 setShowReturnButton(true);
               }}
-              className="inline-block rounded bg-emerald-700 px-5 py-3 font-semibold"
+              className="inline-block rounded-lg bg-luxury-500 px-6 py-3 text-base font-extrabold text-neutral-950 shadow-lg shadow-luxury-900/30 transition hover:bg-luxury-400"
             >
               Solicitar producto
             </button>
           </div>
+          {shareNote && <p className="mt-3 text-sm text-neutral-300">{shareNote}</p>}
           {showReturnButton && <ReturnToSiteBar onClose={() => setShowReturnButton(false)} />}
         </div>
       </div>

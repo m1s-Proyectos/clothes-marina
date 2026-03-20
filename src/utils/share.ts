@@ -16,12 +16,18 @@ function getSafeWhatsAppPhone(): string {
   return DEFAULT_WHATSAPP_PHONE;
 }
 
-export function getFacebookShareUrl(productId: string): string {
-  return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(buildProductUrl(productId))}`;
+export function getFacebookShareUrl(productId: string, productName?: string): string {
+  const productUrl = buildProductUrl(productId);
+  const quote = productName ? `Mira este producto: ${productName}` : "Mira este producto";
+  return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}&quote=${encodeURIComponent(quote)}`;
 }
 
 export function getTwitterShareUrl(productId: string): string {
   return `https://twitter.com/intent/tweet?url=${encodeURIComponent(buildProductUrl(productId))}`;
+}
+
+export function getInstagramUrl(): string {
+  return "https://www.instagram.com/";
 }
 
 export function getWhatsAppProductUrl(productId: string, _productName: string, productImageUrl?: string): string {
