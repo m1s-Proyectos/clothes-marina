@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency } from "@/utils/format";
 import OptimizedImage from "@/components/common/OptimizedImage";
@@ -97,6 +98,13 @@ export default function AdminDashboardPage() {
                 <p className="text-sm text-luxury-100">{formatCurrency(product.reference_price)}</p>
                 <p className="text-xs text-neutral-400">{product.available ? "Disponible" : "No disponible"}</p>
                 <p className="text-xs text-neutral-400">{product.featured ? "Destacado" : "Estandar"}</p>
+                <Link
+                  to="/admin/products"
+                  state={{ editProductId: product.id }}
+                  className="mt-2 inline-block rounded bg-luxury-500 px-3 py-1 text-xs font-semibold text-neutral-950 hover:bg-luxury-400"
+                >
+                  Editar producto
+                </Link>
               </div>
             </article>
           ))}

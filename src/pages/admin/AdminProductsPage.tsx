@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import type { Category, Product } from "@/types";
 import { categoryService } from "@/services/categoryService";
 import { productService } from "@/services/productService";
@@ -35,6 +35,7 @@ function normalizeSearchText(value: string): string {
 }
 
 export default function AdminProductsPage() {
+  const location = useLocation();
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [form, setForm] = useState<ProductForm>(initialForm);
@@ -50,6 +51,16 @@ export default function AdminProductsPage() {
     categoryService.getAll().then(setCategories);
     void load();
   }, []);
+
+  useEffect(() => {
+    const editId = (location.state as { editProductId?: string } | null)?.editProductId;
+    if (!editId || products.length === 0) return;
+    const target = products.find((p) => p.id === editId);
+    if (target) {
+      startEditingProduct(target);
+      window.history.replaceState({}, "");
+    }
+  }, [location.state, products]);
 
   async function handleUpload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -193,31 +204,41 @@ export default function AdminProductsPage() {
       <div className="mt-4 space-y-2">
         {filteredProducts.map((product) => (
           <div key={product.id} className="rounded border border-neutral-800 bg-neutral-900 px-4 py-3 text-sm">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <p className="font-semibold">{product.name}</p>
-                <p className="mt-1 line-clamp-2 text-xs text-neutral-300">{product.description}</p>
-                <p className="text-xs text-luxury-100">{formatCurrency(product.reference_price)}</p>
-                <p className="text-xs text-neutral-400">
-                  {product.categories?.name ?? "No category"} · {product.available ? "Available" : "Unavailable"} · {product.featured ? "Featured" : "Standard"}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Link target="_blank" to={`/product/${product.id}`} className="rounded bg-neutral-800 px-2 py-1">
-                  Preview
-                </Link>
-                <button onClick={() => startEditingProduct(product)} className="rounded bg-luxury-500 px-2 py-1 font-semibold text-neutral-950">
-                  Edit product
-                </button>
-                <button onClick={() => void productService.update(product.id, { available: !product.available }).then(load)} className="rounded bg-neutral-800 px-2 py-1">
-                  Toggle availability
-                </button>
-                <button onClick={() => void productService.update(product.id, { featured: !product.featured }).then(load)} className="rounded bg-neutral-800 px-2 py-1">
-                  Feature
-                </button>
-                <button onClick={() => void productService.remove(product.id).then(load)} className="rounded bg-red-700 px-2 py-1">
-                  Delete
-                </button>
+            <div className="flex items-center gap-3">
+              {product.main_image_url && (
+                <img
+                  src={product.main_image_url}
+                  alt={product.name}
+                  loading="lazy"
+                  className="h-16 w-16 flex-shrink-0 rounded-lg border border-neutral-700 object-cover"
+                />
+              )}
+              <div className="flex flex-1 flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="font-semibold">{product.name}</p>
+                  <p className="mt-1 line-clamp-2 text-xs text-neutral-300">{product.description}</p>
+                  <p className="text-xs text-luxury-100">{formatCurrency(product.reference_price)}</p>
+                  <p className="text-xs text-neutral-400">
+                    {product.categories?.name ?? "No category"} · {product.available ? "Available" : "Unavailable"} · {product.featured ? "Featured" : "Standard"}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Link target="_blank" to={`/product/${product.id}`} className="rounded bg-neutral-800 px-2 py-1">
+                    Preview
+                  </Link>
+                  <button onClick={() => startEditingProduct(product)} className="rounded bg-luxury-500 px-2 py-1 font-semibold text-neutral-950">
+                    Edit product
+                  </button>
+                  <button onClick={() => void productService.update(product.id, { available: !product.available }).then(load)} className="rounded bg-neutral-800 px-2 py-1">
+                    Toggle availability
+                  </button>
+                  <button onClick={() => void productService.update(product.id, { featured: !product.featured }).then(load)} className="rounded bg-neutral-800 px-2 py-1">
+                    Feature
+                  </button>
+                  <button onClick={() => void productService.remove(product.id).then(load)} className="rounded bg-red-700 px-2 py-1">
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           </div>
