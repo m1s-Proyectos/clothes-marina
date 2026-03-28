@@ -6,6 +6,10 @@ export function buildProductUrl(productId: string): string {
   return `${env.appUrl}/product/${productId}`;
 }
 
+export function buildProductShareUrl(productId: string): string {
+  return `${env.appUrl}/api/share/product?id=${encodeURIComponent(productId)}`;
+}
+
 function normalizePhone(rawPhone: string): string {
   return rawPhone.replace(/[^\d]/g, "");
 }
@@ -17,13 +21,13 @@ function getSafeWhatsAppPhone(): string {
 }
 
 export function getFacebookShareUrl(productId: string, productName?: string): string {
-  const productUrl = buildProductUrl(productId);
+  const productUrl = buildProductShareUrl(productId);
   const quote = productName ? `Mira este producto: ${productName}` : "Mira este producto";
   return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}&quote=${encodeURIComponent(quote)}`;
 }
 
 export function getTwitterShareUrl(productId: string): string {
-  return `https://twitter.com/intent/tweet?url=${encodeURIComponent(buildProductUrl(productId))}`;
+  return `https://twitter.com/intent/tweet?url=${encodeURIComponent(buildProductShareUrl(productId))}`;
 }
 
 export function getInstagramUrl(): string {

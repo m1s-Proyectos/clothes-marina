@@ -1,0 +1,111 @@
+function getEnv(name: string, fallback = ""): string {
+  return process.env[name] || fallback;
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function truncate(value: string, max = 220): string {
+  if (value.length <= max) return value;
+  return `${value.slice(0, max - 1)}…`;
+}
+
+async function fetchProduct(productId: string) {
+  const supabaseUrl = getEnv("SUPABASE_URL", getEnv("VITE_SUPABASE_URL"));
+  const supabaseAnonKey = getEnv("SUPABASE_ANON_KEY", getEnv("VITE_SUPABASE_ANON_KEY"));
+  if (!supabaseUrl || !supabaseAnonKey) return null;
+
+  const url = `${supabaseUrl}/rest/v1/products?id=eq.${encodeURIComponent(productId)}&select=id,name,description,main_image_url,available`;
+  const response = await fetch(url, {
+    headers: {
+      apikey: supabaseAnonKey,
+      Authorization: `Bearer ${supabaseAnonKey}`,
+      Accept: "application/json"
+    }
+  });
+
+  if (!response.ok) return null;
+  const data = await response.json();
+  const item = Array.isArray(data) ? data[0] : null;
+  if (!item || item.available === false) return null;
+  return item;
+}
+
+function renderShareHtml({
+  siteUrl,
+  productUrl,
+  title,
+  description,
+  image
+}: {
+  siteUrl: string;
+  productUrl: string;
+  title: string;
+  description: string;
+  image: string;
+}): string {
+  return `<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${escapeHtml(title)} | Marina's clothes</title>
+    <meta name="description" content="${escapeHtml(description)}" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Marina's clothes" />
+    <meta property="og:title" content="${escapeHtml(title)} | Marina's clothes" />
+    <meta property="og:description" content="${escapeHtml(description)}" />
+    <meta property="og:url" content="${escapeHtml(productUrl)}" />
+    <meta property="og:image" content="${escapeHtml(image)}" />
+    <meta property="og:image:secure_url" content="${escapeHtml(image)}" />
+    <meta property="og:image:alt" content="${escapeHtml(title)}" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${escapeHtml(title)} | Marina's clothes" />
+    <meta name="twitter:description" content="${escapeHtml(description)}" />
+    <meta name="twitter:image" content="${escapeHtml(image)}" />
+    <link rel="canonical" href="${escapeHtml(productUrl)}" />
+    <meta http-equiv="refresh" content="0; url=${escapeHtml(productUrl)}" />
+  </head>
+  <body>
+    <p>Redirigiendo a <a href="${escapeHtml(productUrl)}">${escapeHtml(siteUrl)}</a>…</p>
+  </body>
+</html>`;
+}
+
+export default async function handler(req: any, res: any) {
+  const productId = typeof req.query?.id === "string" ? req.query.id : "";
+  const siteUrl = getEnv("SITE_URL", getEnv("VITE_APP_URL", "https://clothes-marina.vercel.app"));
+
+  if (!productId) {
+    res.status(400).send("Missing product id");
+    return;
+  }
+
+  const productUrl = `${siteUrl.replace(/\/$/, "")}/product/${encodeURIComponent(productId)}`;
+
+  try {
+    const product = await fetchProduct(productId);
+    if (!product) {
+      res.writeHead(302, { Location: productUrl });
+      res.end();
+      return;
+    }
+
+    const title = product.name || "Producto";
+    const description = truncate(product.description || "Descubre este producto en Marina's clothes.");
+    const image = product.main_image_url || `${siteUrl.replace(/\/$/, "")}/og-default.jpg`;
+    const html = renderShareHtml({ siteUrl, productUrl, title, description, image });
+
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.status(200).send(html);
+  } catch {
+    res.writeHead(302, { Location: productUrl });
+    res.end();
+  }
+}
