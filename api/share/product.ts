@@ -48,19 +48,26 @@ async function fetchProduct(productId: string) {
   return item;
 }
 
+function buildShareCanonical(siteUrl: string, productId: string): string {
+  return `${siteUrl.replace(/\/$/, "")}/api/share/product?id=${encodeURIComponent(productId)}`;
+}
+
 function renderShareHtml({
   siteUrl,
+  productId,
   productUrl,
   title,
   description,
   image
 }: {
   siteUrl: string;
+  productId: string;
   productUrl: string;
   title: string;
   description: string;
   image: string;
 }): string {
+  const ogUrl = buildShareCanonical(siteUrl, productId);
   return `<!doctype html>
 <html lang="es">
   <head>
@@ -72,7 +79,7 @@ function renderShareHtml({
     <meta property="og:site_name" content="Marina's clothes" />
     <meta property="og:title" content="${escapeHtml(title)} | Marina's clothes" />
     <meta property="og:description" content="${escapeHtml(description)}" />
-    <meta property="og:url" content="${escapeAttr(productUrl)}" />
+    <meta property="og:url" content="${escapeAttr(ogUrl)}" />
     <meta property="og:image" content="${escapeAttr(image)}" />
     <meta property="og:image:secure_url" content="${escapeAttr(image)}" />
     <meta property="og:image:alt" content="${escapeHtml(title)}" />
@@ -82,11 +89,11 @@ function renderShareHtml({
     <meta name="twitter:title" content="${escapeHtml(title)} | Marina's clothes" />
     <meta name="twitter:description" content="${escapeHtml(description)}" />
     <meta name="twitter:image" content="${escapeAttr(image)}" />
-    <link rel="canonical" href="${escapeAttr(productUrl)}" />
+    <link rel="canonical" href="${escapeAttr(ogUrl)}" />
   </head>
   <body>
     <p>${escapeHtml(title)} - ${escapeHtml(description)}</p>
-    <p><a href="${escapeHtml(productUrl)}">Ver producto</a></p>
+    <p><a href="${escapeAttr(productUrl)}">Ver producto</a></p>
   </body>
 </html>`;
 }
@@ -133,7 +140,7 @@ export default async function handler(req: any, res: any) {
       const title = titleFromQuery;
       const description = truncate(descriptionFromQuery || "Descubre este producto en Marina's clothes.");
       const image = buildProxyImageUrl(siteUrl, productId, imageFromQuery);
-      const html = renderShareHtml({ siteUrl, productUrl, title, description, image });
+      const html = renderShareHtml({ siteUrl, productId, productUrl, title, description, image });
 
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       res.status(200).send(html);
@@ -150,7 +157,7 @@ export default async function handler(req: any, res: any) {
     const title = product.name || "Producto";
     const description = truncate(product.description || "Descubre este producto en Marina's clothes.");
     const image = buildProxyImageUrl(siteUrl, productId, product.main_image_url);
-    const html = renderShareHtml({ siteUrl, productUrl, title, description, image });
+    const html = renderShareHtml({ siteUrl, productId, productUrl, title, description, image });
 
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.setHeader("Cache-Control", "public, max-age=0, s-maxage=60, stale-while-revalidate=600");
