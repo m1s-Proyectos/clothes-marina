@@ -87,6 +87,17 @@ export default function ProductDetailPage() {
             <button
               type="button"
               onClick={() => {
+                void whatsAppLeadService.trackProductInquiry({ productId: product.id, productName: product.name });
+                window.open(getWhatsAppOrderUrl(shareParams), "_blank", "noopener,noreferrer");
+                setShowReturnButton(true);
+              }}
+              className="inline-block rounded-lg bg-luxury-500 px-6 py-3 text-base font-extrabold text-neutral-950 shadow-lg shadow-luxury-900/30 transition hover:bg-luxury-400"
+            >
+              Solicitar producto
+            </button>
+            <button
+              type="button"
+              onClick={() => {
                 window.open(getFacebookShareUrl(shareParams), "_blank", "noopener,noreferrer");
                 setShowReturnButton(true);
               }}
@@ -134,17 +145,6 @@ export default function ProductDetailPage() {
               className="inline-block rounded bg-green-600 px-5 py-3"
             >
               Compartir WhatsApp
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                void whatsAppLeadService.trackProductInquiry({ productId: product.id, productName: product.name });
-                window.open(getWhatsAppOrderUrl(shareParams), "_blank", "noopener,noreferrer");
-                setShowReturnButton(true);
-              }}
-              className="inline-block rounded-lg bg-luxury-500 px-6 py-3 text-base font-extrabold text-neutral-950 shadow-lg shadow-luxury-900/30 transition hover:bg-luxury-400"
-            >
-              Solicitar producto
             </button>
           </div>
           {shareNote && <p className="mt-3 text-sm text-neutral-300">{shareNote}</p>}
