@@ -11,6 +11,10 @@ function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
+function escapeAttr(value: string): string {
+  return value.replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
 function truncate(value: string, max = 220): string {
   if (value.length <= max) return value;
   return `${value.slice(0, max - 1)}…`;
@@ -68,17 +72,17 @@ function renderShareHtml({
     <meta property="og:site_name" content="Marina's clothes" />
     <meta property="og:title" content="${escapeHtml(title)} | Marina's clothes" />
     <meta property="og:description" content="${escapeHtml(description)}" />
-    <meta property="og:url" content="${escapeHtml(productUrl)}" />
-    <meta property="og:image" content="${escapeHtml(image)}" />
-    <meta property="og:image:secure_url" content="${escapeHtml(image)}" />
+    <meta property="og:url" content="${escapeAttr(productUrl)}" />
+    <meta property="og:image" content="${escapeAttr(image)}" />
+    <meta property="og:image:secure_url" content="${escapeAttr(image)}" />
     <meta property="og:image:alt" content="${escapeHtml(title)}" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${escapeHtml(title)} | Marina's clothes" />
     <meta name="twitter:description" content="${escapeHtml(description)}" />
-    <meta name="twitter:image" content="${escapeHtml(image)}" />
-    <link rel="canonical" href="${escapeHtml(productUrl)}" />
+    <meta name="twitter:image" content="${escapeAttr(image)}" />
+    <link rel="canonical" href="${escapeAttr(productUrl)}" />
   </head>
   <body>
     <p>${escapeHtml(title)} - ${escapeHtml(description)}</p>
