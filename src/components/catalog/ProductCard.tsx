@@ -23,9 +23,11 @@ export default function ProductCard({ product }: ProductCardProps) {
     setIsLandscapeImage(naturalWidth > naturalHeight);
   }
 
+  const shareParams = { productId: product.id, productName: product.name, productImageUrl: product.main_image_url, productDescription: product.description };
+
   function openWhatsAppOrder(): void {
     void whatsAppLeadService.trackProductInquiry({ productId: product.id, productName: product.name });
-    window.open(getWhatsAppOrderUrl(product.id, product.name), "_blank", "noopener,noreferrer");
+    window.open(getWhatsAppOrderUrl(shareParams), "_blank", "noopener,noreferrer");
     setShowReturnButton(true);
   }
 

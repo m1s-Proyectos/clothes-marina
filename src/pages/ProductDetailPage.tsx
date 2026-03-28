@@ -5,7 +5,7 @@ import LoadingSpinner from "@/components/common/LoadingSpinner";
 import type { Product } from "@/types";
 import { productService } from "@/services/productService";
 import { formatCurrency } from "@/utils/format";
-import { buildProductUrl, getFacebookShareUrl, getInstagramUrl, getTwitterShareUrl, getWhatsAppOrderUrl, getWhatsAppProductUrl } from "@/utils/share";
+import { getFacebookShareUrl, getInstagramShareUrl, getMessengerShareUrl, getTwitterShareUrl, getWhatsAppOrderUrl, getWhatsAppProductUrl, type ShareParams } from "@/utils/share";
 import { whatsAppLeadService } from "@/services/whatsAppLeadService";
 import OptimizedImage from "@/components/common/OptimizedImage";
 import ReturnToSiteBar from "@/components/common/ReturnToSiteBar";
@@ -26,18 +26,22 @@ export default function ProductDetailPage() {
       .finally(() => setLoading(false));
   }, [productId]);
 
-  async function copyProductLinkToClipboard(): Promise<void> {
-    if (!product) return;
+  const shareParams: ShareParams | null = product
+    ? { productId: product.id, productName: product.name, productImageUrl: product.main_image_url, productDescription: product.description }
+    : null;
+
+  async function copyShareLinkToClipboard(): Promise<void> {
+    if (!shareParams) return;
     try {
-      await navigator.clipboard.writeText(buildProductUrl(product.id));
-      setShareNote("Enlace copiado. Ya puedes pegarlo en tu publicacion.");
+      await navigator.clipboard.writeText(getInstagramShareUrl(shareParams));
+      setShareNote("Enlace copiado. Ya puedes pegarlo en tu publicacion de Instagram.");
     } catch {
       setShareNote("No se pudo copiar automaticamente. Copia el enlace desde la barra del navegador.");
     }
   }
 
   if (loading) return <LoadingSpinner />;
-  if (!product) return <div className="container-shell py-20">Producto no encontrado.</div>;
+  if (!product || !shareParams) return <div className="container-shell py-20">Producto no encontrado.</div>;
 
   return (
     <div className="container-shell py-10">
@@ -83,11 +87,7 @@ export default function ProductDetailPage() {
             <button
               type="button"
               onClick={() => {
-                window.open(
-                  getFacebookShareUrl(product.id, product.name, product.main_image_url, product.description),
-                  "_blank",
-                  "noopener,noreferrer"
-                );
+                window.open(getFacebookShareUrl(shareParams), "_blank", "noopener,noreferrer");
                 setShowReturnButton(true);
               }}
               className="inline-block rounded bg-blue-600 px-5 py-3 text-white hover:bg-blue-700"
@@ -97,11 +97,17 @@ export default function ProductDetailPage() {
             <button
               type="button"
               onClick={() => {
-                window.open(
-                  getTwitterShareUrl(product.id, product.name, product.main_image_url, product.description),
-                  "_blank",
-                  "noopener,noreferrer"
-                );
+                window.open(getMessengerShareUrl(shareParams), "_blank", "noopener,noreferrer");
+                setShowReturnButton(true);
+              }}
+              className="inline-block rounded bg-blue-500 px-5 py-3 text-white hover:bg-blue-600"
+            >
+              Compartir Messenger
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                window.open(getTwitterShareUrl(shareParams), "_blank", "noopener,noreferrer");
                 setShowReturnButton(true);
               }}
               className="inline-block rounded bg-gray-600 px-5 py-3 text-white hover:bg-gray-700"
@@ -111,8 +117,8 @@ export default function ProductDetailPage() {
             <button
               type="button"
               onClick={() => {
-                void copyProductLinkToClipboard();
-                window.open(getInstagramUrl(), "_blank", "noopener,noreferrer");
+                void copyShareLinkToClipboard();
+                window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
                 setShowReturnButton(true);
               }}
               className="inline-block rounded bg-pink-600 px-5 py-3 text-white hover:bg-pink-700"
@@ -122,7 +128,7 @@ export default function ProductDetailPage() {
             <button
               type="button"
               onClick={() => {
-                window.open(getWhatsAppProductUrl(product.id, product.name, product.main_image_url), "_blank", "noopener,noreferrer");
+                window.open(getWhatsAppProductUrl(shareParams), "_blank", "noopener,noreferrer");
                 setShowReturnButton(true);
               }}
               className="inline-block rounded bg-green-600 px-5 py-3"
@@ -133,7 +139,7 @@ export default function ProductDetailPage() {
               type="button"
               onClick={() => {
                 void whatsAppLeadService.trackProductInquiry({ productId: product.id, productName: product.name });
-                window.open(getWhatsAppOrderUrl(product.id, product.name), "_blank", "noopener,noreferrer");
+                window.open(getWhatsAppOrderUrl(shareParams), "_blank", "noopener,noreferrer");
                 setShowReturnButton(true);
               }}
               className="inline-block rounded-lg bg-luxury-500 px-6 py-3 text-base font-extrabold text-neutral-950 shadow-lg shadow-luxury-900/30 transition hover:bg-luxury-400"

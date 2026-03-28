@@ -2,6 +2,13 @@ import env from "@/config/env";
 
 const DEFAULT_WHATSAPP_PHONE = "50379128469";
 
+export interface ShareParams {
+  productId: string;
+  productName: string;
+  productImageUrl?: string;
+  productDescription?: string;
+}
+
 export function buildProductUrl(productId: string): string {
   return `${env.appUrl}/product/${productId}`;
 }
@@ -11,12 +18,12 @@ function trimForQuery(value: string, maxLength: number): string {
   return clean.length > maxLength ? `${clean.slice(0, maxLength - 1)}…` : clean;
 }
 
-export function buildProductShareUrl(productId: string, productName?: string, productImageUrl?: string, productDescription?: string): string {
-  const params = new URLSearchParams({ id: productId });
+export function buildProductShareUrl(p: ShareParams): string {
+  const params = new URLSearchParams({ id: p.productId });
   params.set("v", Date.now().toString());
-  if (productName) params.set("t", trimForQuery(productName, 120));
-  if (productImageUrl) params.set("img", productImageUrl);
-  if (productDescription) params.set("d", trimForQuery(productDescription, 220));
+  if (p.productName) params.set("t", trimForQuery(p.productName, 120));
+  if (p.productImageUrl) params.set("img", p.productImageUrl);
+  if (p.productDescription) params.set("d", trimForQuery(p.productDescription, 220));
   return `${env.appUrl}/api/share/product?${params.toString()}`;
 }
 
@@ -30,37 +37,37 @@ function getSafeWhatsAppPhone(): string {
   return DEFAULT_WHATSAPP_PHONE;
 }
 
-export function getFacebookShareUrl(productId: string, productName?: string, productImageUrl?: string, productDescription?: string): string {
-  const productUrl = buildProductShareUrl(productId, productName, productImageUrl, productDescription);
-  const quote = productName ? `Mira este producto: ${productName}` : "Mira este producto";
-  return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}&quote=${encodeURIComponent(quote)}`;
+export function getFacebookShareUrl(p: ShareParams): string {
+  const shareUrl = buildProductShareUrl(p);
+  const quote = p.productName ? `Mira este producto: ${p.productName}` : "Mira este producto";
+  return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(quote)}`;
 }
 
-export function getTwitterShareUrl(productId: string, productName?: string, productImageUrl?: string, productDescription?: string): string {
-  return `https://twitter.com/intent/tweet?url=${encodeURIComponent(
-    buildProductShareUrl(productId, productName, productImageUrl, productDescription)
-  )}`;
+export function getTwitterShareUrl(p: ShareParams): string {
+  return `https://twitter.com/intent/tweet?url=${encodeURIComponent(buildProductShareUrl(p))}`;
 }
 
-export function getInstagramUrl(): string {
-  return "https://www.instagram.com/";
+export function getMessengerShareUrl(p: ShareParams): string {
+  const shareUrl = buildProductShareUrl(p);
+  return `fb-messenger://share/?link=${encodeURIComponent(shareUrl)}`;
 }
 
-export function getWhatsAppProductUrl(productId: string, _productName: string, productImageUrl?: string): string {
-  const productLink = buildProductUrl(productId);
-  const lines = [
-    `Link: ${productLink}`,
-    productImageUrl ? `Imagen: ${productImageUrl}` : ""
-  ].filter(Boolean);
-  return `https://wa.me/?text=${encodeURIComponent(lines.join("\n"))}`;
+export function getInstagramShareUrl(p: ShareParams): string {
+  return buildProductShareUrl(p);
 }
 
-export function getWhatsAppOrderUrl(productId: string, productName: string): string {
-  const productLink = buildProductUrl(productId);
+export function getWhatsAppProductUrl(p: ShareParams): string {
+  const shareUrl = buildProductShareUrl(p);
+  const text = `Mira este producto: ${p.productName}\n${shareUrl}`;
+  return `https://wa.me/?text=${encodeURIComponent(text)}`;
+}
+
+export function getWhatsAppOrderUrl(p: ShareParams): string {
+  const shareUrl = buildProductShareUrl(p);
   const text = [
-    `Hola, quiero solicitar el producto: ${productName}.`,
+    `Hola, quiero solicitar el producto: ${p.productName}.`,
     "Quiero coordinar la entrega.",
-    `Link: ${productLink}`
+    shareUrl,
   ].join("\n");
   return `https://wa.me/${getSafeWhatsAppPhone()}?text=${encodeURIComponent(text)}`;
 }
