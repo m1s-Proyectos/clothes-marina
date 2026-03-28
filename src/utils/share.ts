@@ -13,6 +13,7 @@ function trimForQuery(value: string, maxLength: number): string {
 
 export function buildProductShareUrl(productId: string, productName?: string, productImageUrl?: string, productDescription?: string): string {
   const params = new URLSearchParams({ id: productId });
+  params.set("v", Date.now().toString());
   if (productName) params.set("t", trimForQuery(productName, 120));
   if (productImageUrl) params.set("img", productImageUrl);
   if (productDescription) params.set("d", trimForQuery(productDescription, 220));
