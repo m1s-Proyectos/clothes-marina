@@ -80,6 +80,9 @@ function renderShareHtml({
 
 export default async function handler(req: any, res: any) {
   const productId = typeof req.query?.id === "string" ? req.query.id : "";
+  const titleFromQuery = typeof req.query?.t === "string" ? req.query.t : "";
+  const descriptionFromQuery = typeof req.query?.d === "string" ? req.query.d : "";
+  const imageFromQuery = typeof req.query?.img === "string" ? req.query.img : "";
   const siteUrl = getEnv("SITE_URL", getEnv("VITE_APP_URL", "https://clothes-marina.vercel.app"));
 
   if (!productId) {
@@ -90,6 +93,17 @@ export default async function handler(req: any, res: any) {
   const productUrl = `${siteUrl.replace(/\/$/, "")}/product/${encodeURIComponent(productId)}`;
 
   try {
+    if (titleFromQuery && imageFromQuery) {
+      const title = titleFromQuery;
+      const description = truncate(descriptionFromQuery || "Descubre este producto en Marina's clothes.");
+      const image = imageFromQuery;
+      const html = renderShareHtml({ siteUrl, productUrl, title, description, image });
+
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.status(200).send(html);
+      return;
+    }
+
     const product = await fetchProduct(productId);
     if (!product) {
       res.writeHead(302, { Location: productUrl });

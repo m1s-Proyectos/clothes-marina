@@ -6,8 +6,17 @@ export function buildProductUrl(productId: string): string {
   return `${env.appUrl}/product/${productId}`;
 }
 
-export function buildProductShareUrl(productId: string): string {
-  return `${env.appUrl}/api/share/product?id=${encodeURIComponent(productId)}`;
+function trimForQuery(value: string, maxLength: number): string {
+  const clean = value.trim();
+  return clean.length > maxLength ? `${clean.slice(0, maxLength - 1)}…` : clean;
+}
+
+export function buildProductShareUrl(productId: string, productName?: string, productImageUrl?: string, productDescription?: string): string {
+  const params = new URLSearchParams({ id: productId });
+  if (productName) params.set("t", trimForQuery(productName, 120));
+  if (productImageUrl) params.set("img", productImageUrl);
+  if (productDescription) params.set("d", trimForQuery(productDescription, 220));
+  return `${env.appUrl}/api/share/product?${params.toString()}`;
 }
 
 function normalizePhone(rawPhone: string): string {
@@ -20,14 +29,16 @@ function getSafeWhatsAppPhone(): string {
   return DEFAULT_WHATSAPP_PHONE;
 }
 
-export function getFacebookShareUrl(productId: string, productName?: string): string {
-  const productUrl = buildProductShareUrl(productId);
+export function getFacebookShareUrl(productId: string, productName?: string, productImageUrl?: string, productDescription?: string): string {
+  const productUrl = buildProductShareUrl(productId, productName, productImageUrl, productDescription);
   const quote = productName ? `Mira este producto: ${productName}` : "Mira este producto";
   return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}&quote=${encodeURIComponent(quote)}`;
 }
 
-export function getTwitterShareUrl(productId: string): string {
-  return `https://twitter.com/intent/tweet?url=${encodeURIComponent(buildProductShareUrl(productId))}`;
+export function getTwitterShareUrl(productId: string, productName?: string, productImageUrl?: string, productDescription?: string): string {
+  return `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+    buildProductShareUrl(productId, productName, productImageUrl, productDescription)
+  )}`;
 }
 
 export function getInstagramUrl(): string {

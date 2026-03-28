@@ -83,7 +83,11 @@ export default function ProductDetailPage() {
             <button
               type="button"
               onClick={() => {
-                window.open(getFacebookShareUrl(product.id, product.name), "_blank", "noopener,noreferrer");
+                window.open(
+                  getFacebookShareUrl(product.id, product.name, product.main_image_url, product.description),
+                  "_blank",
+                  "noopener,noreferrer"
+                );
                 setShowReturnButton(true);
               }}
               className="inline-block rounded bg-blue-600 px-5 py-3 text-white hover:bg-blue-700"
@@ -93,7 +97,11 @@ export default function ProductDetailPage() {
             <button
               type="button"
               onClick={() => {
-                window.open(getTwitterShareUrl(product.id), "_blank", "noopener,noreferrer");
+                window.open(
+                  getTwitterShareUrl(product.id, product.name, product.main_image_url, product.description),
+                  "_blank",
+                  "noopener,noreferrer"
+                );
                 setShowReturnButton(true);
               }}
               className="inline-block rounded bg-gray-600 px-5 py-3 text-white hover:bg-gray-700"
