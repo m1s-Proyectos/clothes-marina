@@ -65,15 +65,17 @@ function renderShareHtml({
     <meta property="og:image" content="${escapeHtml(image)}" />
     <meta property="og:image:secure_url" content="${escapeHtml(image)}" />
     <meta property="og:image:alt" content="${escapeHtml(title)}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${escapeHtml(title)} | Marina's clothes" />
     <meta name="twitter:description" content="${escapeHtml(description)}" />
     <meta name="twitter:image" content="${escapeHtml(image)}" />
     <link rel="canonical" href="${escapeHtml(productUrl)}" />
-    <meta http-equiv="refresh" content="0; url=${escapeHtml(productUrl)}" />
   </head>
   <body>
-    <p>Redirigiendo a <a href="${escapeHtml(productUrl)}">${escapeHtml(siteUrl)}</a>…</p>
+    <p>${escapeHtml(title)} - ${escapeHtml(description)}</p>
+    <p><a href="${escapeHtml(productUrl)}">Ver producto</a></p>
   </body>
 </html>`;
 }
