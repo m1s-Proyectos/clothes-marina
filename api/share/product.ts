@@ -78,6 +78,20 @@ function renderShareHtml({
 </html>`;
 }
 
+function isSocialCrawler(userAgent: string): boolean {
+  const ua = userAgent.toLowerCase();
+  return (
+    ua.includes("facebookexternalhit") ||
+    ua.includes("facebot") ||
+    ua.includes("twitterbot") ||
+    ua.includes("linkedinbot") ||
+    ua.includes("slackbot") ||
+    ua.includes("whatsapp") ||
+    ua.includes("discordbot") ||
+    ua.includes("telegrambot")
+  );
+}
+
 export default async function handler(req: any, res: any) {
   const productId = typeof req.query?.id === "string" ? req.query.id : "";
   const titleFromQuery = typeof req.query?.t === "string" ? req.query.t : "";
@@ -91,6 +105,15 @@ export default async function handler(req: any, res: any) {
   }
 
   const productUrl = `${siteUrl.replace(/\/$/, "")}/product/${encodeURIComponent(productId)}`;
+  const userAgent = typeof req.headers?.["user-agent"] === "string" ? req.headers["user-agent"] : "";
+  const crawlerRequest = isSocialCrawler(userAgent);
+
+  // Real users should never stay on the share endpoint.
+  if (!crawlerRequest) {
+    res.writeHead(302, { Location: productUrl });
+    res.end();
+    return;
+  }
 
   try {
     if (titleFromQuery && imageFromQuery) {
@@ -117,6 +140,7 @@ export default async function handler(req: any, res: any) {
     const html = renderShareHtml({ siteUrl, productUrl, title, description, image });
 
     res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=0, s-maxage=60, stale-while-revalidate=600");
     res.status(200).send(html);
   } catch {
     res.writeHead(302, { Location: productUrl });
