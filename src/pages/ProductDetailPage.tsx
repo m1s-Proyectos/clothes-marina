@@ -5,6 +5,7 @@ import LoadingSpinner from "@/components/common/LoadingSpinner";
 import type { Product } from "@/types";
 import { productService } from "@/services/productService";
 import { formatCurrency } from "@/utils/format";
+import env from "@/config/env";
 import { getFacebookShareUrl, getInstagramShareUrl, getMessengerShareUrl, getTwitterShareUrl, getWhatsAppOrderUrl, getWhatsAppProductUrl, type ShareParams } from "@/utils/share";
 import { whatsAppLeadService } from "@/services/whatsAppLeadService";
 import OptimizedImage from "@/components/common/OptimizedImage";
@@ -30,14 +31,49 @@ export default function ProductDetailPage() {
     ? { productId: product.id, productName: product.name, productImageUrl: product.main_image_url, productDescription: product.description }
     : null;
 
-  async function copyShareLinkToClipboard(): Promise<void> {
-    if (!shareParams) return;
-    try {
-      await navigator.clipboard.writeText(getInstagramShareUrl(shareParams));
-      setShareNote("Enlace copiado. Ya puedes pegarlo en tu publicacion de Instagram.");
-    } catch {
-      setShareNote("No se pudo copiar automaticamente. Copia el enlace desde la barra del navegador.");
+  async function shareToInstagram(): Promise<void> {
+    if (!shareParams || !product) return;
+
+    const shareUrl = getInstagramShareUrl(shareParams);
+
+    if (navigator.share) {
+      try {
+        const shareData: ShareData = {
+          title: product.name,
+          text: `Mira este producto: ${product.name}`,
+          url: shareUrl,
+        };
+
+        if (navigator.canShare) {
+          try {
+            const proxyUrl = `${env.appUrl}/api/share/image?id=${product.id}&img=${encodeURIComponent(product.main_image_url)}`;
+            const imgRes = await fetch(proxyUrl);
+            if (imgRes.ok) {
+              const blob = await imgRes.blob();
+              const file = new File([blob], `${product.name}.jpg`, { type: "image/jpeg" });
+              if (navigator.canShare({ files: [file] })) {
+                shareData.files = [file];
+              }
+            }
+          } catch {
+            /* share without image */
+          }
+        }
+
+        await navigator.share(shareData);
+        return;
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") return;
+      }
     }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareNote("Enlace copiado. Pegalo en tu historia de Instagram.");
+    } catch {
+      setShareNote("No se pudo copiar. Copia el enlace desde la barra del navegador.");
+    }
+    window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
   }
 
   if (loading) return <LoadingSpinner />;
@@ -128,8 +164,7 @@ export default function ProductDetailPage() {
             <button
               type="button"
               onClick={() => {
-                void copyShareLinkToClipboard();
-                window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+                void shareToInstagram();
                 setShowReturnButton(true);
               }}
               className="inline-block rounded bg-pink-600 px-5 py-3 text-white hover:bg-pink-700"
