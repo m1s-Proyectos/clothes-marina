@@ -40,6 +40,7 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [form, setForm] = useState<ProductForm>(initialForm);
   const [uploading, setUploading] = useState(false);
+  const [uploadInfo, setUploadInfo] = useState("");
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
@@ -66,9 +67,12 @@ export default function AdminProductsPage() {
     const file = event.target.files?.[0];
     if (!file) return;
     setUploading(true);
+    setUploadInfo("");
+    const originalKB = (file.size / 1024).toFixed(0);
     try {
       const url = await storageService.upload(file);
       setForm((prev) => ({ ...prev, main_image_url: url }));
+      setUploadInfo(`Original: ${originalKB} KB → Optimizada y subida como WebP.`);
     } finally {
       setUploading(false);
     }
@@ -161,7 +165,8 @@ export default function AdminProductsPage() {
         <input required value={form.main_image_url} onChange={(event) => setForm((prev) => ({ ...prev, main_image_url: event.target.value }))} placeholder="Main image URL" className="rounded bg-neutral-800 px-3 py-2" />
         <div className="md:col-span-2">
           <input type="file" accept="image/*" onChange={handleUpload} />
-          {uploading && <p className="text-xs text-neutral-300">Uploading image...</p>}
+          {uploading && <p className="text-xs text-neutral-300">Optimizando y subiendo imagen...</p>}
+          {uploadInfo && <p className="text-xs text-green-400">{uploadInfo}</p>}
         </div>
         <textarea required value={form.description} onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))} placeholder="Description" className="h-24 rounded bg-neutral-800 px-3 py-2 md:col-span-2" />
         <label className="flex items-center gap-2 text-sm">
