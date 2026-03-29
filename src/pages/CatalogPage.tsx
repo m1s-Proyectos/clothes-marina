@@ -58,9 +58,8 @@ export default function CatalogPage() {
     if (!debouncedSearch) return products;
     const term = normalize(debouncedSearch);
     return products.filter((p) => {
-      const name = normalize(p.name);
-      const desc = normalize(p.description ?? "");
-      return name.includes(term) || desc.includes(term);
+      const fields = [p.name, p.description, p.brand, p.color, p.size].map((v) => normalize(v ?? ""));
+      return fields.some((f) => f.includes(term));
     });
   }, [products, debouncedSearch]);
 

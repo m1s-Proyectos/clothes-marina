@@ -14,6 +14,9 @@ interface ProductForm {
   main_image_url: string;
   available: boolean;
   featured: boolean;
+  brand: string;
+  color: string;
+  size: string;
 }
 
 const initialForm: ProductForm = {
@@ -23,7 +26,10 @@ const initialForm: ProductForm = {
   category_id: "",
   main_image_url: "",
   available: true,
-  featured: false
+  featured: false,
+  brand: "",
+  color: "",
+  size: "",
 };
 
 function normalizeSearchText(value: string): string {
@@ -95,7 +101,10 @@ export default function AdminProductsPage() {
       category_id: form.category_id,
       main_image_url: form.main_image_url.trim(),
       available: form.available,
-      featured: form.featured
+      featured: form.featured,
+      brand: form.brand.trim(),
+      color: form.color.trim(),
+      size: form.size.trim(),
     };
 
     setSaving(true);
@@ -121,7 +130,10 @@ export default function AdminProductsPage() {
       category_id: product.category_id,
       main_image_url: product.main_image_url ?? "",
       available: product.available,
-      featured: product.featured
+      featured: product.featured,
+      brand: product.brand ?? "",
+      color: product.color ?? "",
+      size: product.size ?? "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -162,6 +174,9 @@ export default function AdminProductsPage() {
           placeholder="Reference price"
           className="rounded bg-neutral-800 px-3 py-2"
         />
+        <input value={form.brand} onChange={(event) => setForm((prev) => ({ ...prev, brand: event.target.value }))} placeholder="Marca (ej: Nike, Adidas)" className="rounded bg-neutral-800 px-3 py-2" />
+        <input value={form.color} onChange={(event) => setForm((prev) => ({ ...prev, color: event.target.value }))} placeholder="Color (ej: Rojo, Azul)" className="rounded bg-neutral-800 px-3 py-2" />
+        <input value={form.size} onChange={(event) => setForm((prev) => ({ ...prev, size: event.target.value }))} placeholder="Talla (ej: S, M, L, XL)" className="rounded bg-neutral-800 px-3 py-2" />
         <input required value={form.main_image_url} onChange={(event) => setForm((prev) => ({ ...prev, main_image_url: event.target.value }))} placeholder="Main image URL" className="rounded bg-neutral-800 px-3 py-2" />
         <div className="md:col-span-2">
           <input type="file" accept="image/*" onChange={handleUpload} />
@@ -223,6 +238,11 @@ export default function AdminProductsPage() {
                   <p className="font-semibold">{product.name}</p>
                   <p className="mt-1 line-clamp-2 text-xs text-neutral-300">{product.description}</p>
                   <p className="text-xs text-luxury-100">{formatCurrency(product.reference_price)}</p>
+                  {(product.brand || product.color || product.size) && (
+                    <p className="text-xs text-neutral-300">
+                      {[product.brand && `Marca: ${product.brand}`, product.color && `Color: ${product.color}`, product.size && `Talla: ${product.size}`].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
                   <p className="text-xs text-neutral-400">
                     {product.categories?.name ?? "No category"} · {product.available ? "Available" : "Unavailable"} · {product.featured ? "Featured" : "Standard"}
                   </p>

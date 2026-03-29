@@ -21,6 +21,9 @@ create table if not exists public.products (
   available boolean not null default true,
   category_id uuid not null references public.categories(id) on delete restrict,
   featured boolean not null default false,
+  brand text not null default '',
+  color text not null default '',
+  size text not null default '',
   created_at timestamptz not null default now(),
   search_vector tsvector generated always as (
     setweight(to_tsvector('english', coalesce(name, '')), 'A') ||

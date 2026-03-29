@@ -114,11 +114,39 @@ export default function ProductDetailPage() {
             Regresar
           </button>
           <h1 className="text-3xl font-semibold">{product.name}</h1>
-          <h2 className="mt-4 text-lg font-semibold text-luxury-100">Caracteristicas del producto</h2>
-          <p className="mt-2 text-neutral-300">{product.description}</p>
           <p className="mt-4 inline-flex rounded-lg bg-luxury-500/20 px-4 py-2 text-2xl font-extrabold tracking-wide text-luxury-100">
             {formatCurrency(product.reference_price)}
           </p>
+
+          {(product.brand || product.color || product.size) && (
+            <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2 rounded-lg border border-neutral-800 bg-neutral-900/60 p-4 text-sm sm:grid-cols-3">
+              {product.brand && (
+                <div>
+                  <span className="text-neutral-400">Marca</span>
+                  <p className="font-semibold text-neutral-100">{product.brand}</p>
+                </div>
+              )}
+              {product.color && (
+                <div>
+                  <span className="text-neutral-400">Color</span>
+                  <p className="font-semibold text-neutral-100">{product.color}</p>
+                </div>
+              )}
+              {product.size && (
+                <div>
+                  <span className="text-neutral-400">Talla</span>
+                  <p className="font-semibold text-neutral-100">{product.size}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {product.description && (
+            <>
+              <h2 className="mt-4 text-lg font-semibold text-luxury-100">Descripcion</h2>
+              <p className="mt-2 text-neutral-300">{product.description}</p>
+            </>
+          )}
           <div className="mt-6 flex flex-wrap gap-3">
             <button
               type="button"

@@ -21,6 +21,9 @@ export interface Product {
   available: boolean;
   category_id: string;
   featured: boolean;
+  brand: string;
+  color: string;
+  size: string;
   created_at: string;
   categories?: Pick<Category, "id" | "name" | "slug"> | null;
   product_images?: ProductImage[];

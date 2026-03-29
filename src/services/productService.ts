@@ -32,7 +32,7 @@ export const productService = {
     }
     if (options.search) {
       const pattern = `%${options.search}%`;
-      query = query.or(`name.ilike.${pattern},description.ilike.${pattern}`);
+      query = query.or(`name.ilike.${pattern},description.ilike.${pattern},brand.ilike.${pattern},color.ilike.${pattern},size.ilike.${pattern}`);
     }
 
     query = applySorting(query, options.sort);
