@@ -31,10 +31,8 @@ export const productService = {
       query = query.eq("featured", true);
     }
     if (options.search) {
-      query = query.textSearch("search_vector", options.search, {
-        type: "websearch",
-        config: "english"
-      });
+      const pattern = `%${options.search}%`;
+      query = query.or(`name.ilike.${pattern},description.ilike.${pattern}`);
     }
 
     query = applySorting(query, options.sort);

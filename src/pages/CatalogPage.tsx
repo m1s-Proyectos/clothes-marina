@@ -10,6 +10,14 @@ import type { Category, Product, ProductSort } from "@/types";
 import { categoryService } from "@/services/categoryService";
 import { productService } from "@/services/productService";
 
+function normalize(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
 export default function CatalogPage() {
   const params = useParams();
   const [products, setProducts] = useState<Product[]>([]);
@@ -35,7 +43,7 @@ export default function CatalogPage() {
         categorySlug: category || undefined,
         search: debouncedSearch || undefined,
         sort,
-        onlyAvailable: true
+        onlyAvailable: true,
       })
       .then(setProducts)
       .finally(() => setLoading(false));
@@ -43,8 +51,18 @@ export default function CatalogPage() {
 
   const filterCategories = useMemo(
     () => categories.map((item) => ({ slug: item.slug, name: item.name })),
-    [categories]
+    [categories],
   );
+
+  const visibleProducts = useMemo(() => {
+    if (!debouncedSearch) return products;
+    const term = normalize(debouncedSearch);
+    return products.filter((p) => {
+      const name = normalize(p.name);
+      const desc = normalize(p.description ?? "");
+      return name.includes(term) || desc.includes(term);
+    });
+  }, [products, debouncedSearch]);
 
   return (
     <div className="container-shell py-10">
@@ -62,10 +80,12 @@ export default function CatalogPage() {
 
       {loading ? (
         <LoadingSpinner />
+      ) : visibleProducts.length === 0 ? (
+        <p className="mt-10 text-center text-neutral-400">No se encontraron productos para tu busqueda.</p>
       ) : (
         <AnimatePresence>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((product) => (
+            {visibleProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
