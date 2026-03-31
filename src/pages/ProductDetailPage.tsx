@@ -115,7 +115,7 @@ export default function ProductDetailPage() {
           </button>
           <h1 className="text-3xl font-semibold">{product.name}</h1>
           <p className="mt-4 inline-flex rounded-lg bg-luxury-500/20 px-4 py-2 text-2xl font-extrabold tracking-wide text-luxury-100">
-            {formatCurrency(product.reference_price)}
+            {formatCurrency(product.reference_price)} <span className="ml-1 text-base font-normal text-luxury-200">x unidad</span>
           </p>
 
           {(product.brand || product.color || product.size) && (
