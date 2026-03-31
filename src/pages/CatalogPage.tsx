@@ -41,13 +41,12 @@ export default function CatalogPage() {
     productService
       .list({
         categorySlug: category || undefined,
-        search: debouncedSearch || undefined,
         sort,
         onlyAvailable: true,
       })
       .then(setProducts)
       .finally(() => setLoading(false));
-  }, [category, debouncedSearch, sort]);
+  }, [category, sort]);
 
   const filterCategories = useMemo(
     () => categories.map((item) => ({ slug: item.slug, name: item.name })),

@@ -30,10 +30,7 @@ export const productService = {
     if (options.categorySlug === "offers") {
       query = query.eq("offer_active", true);
     }
-    if (options.search) {
-      const pattern = `%${options.search}%`;
-      query = query.or(`name.ilike.${pattern},description.ilike.${pattern},brand.ilike.${pattern},color.ilike.${pattern},size.ilike.${pattern}`);
-    }
+    // Search filtering is handled client-side for accent-insensitive matching
 
     query = applySorting(query, options.sort);
 
