@@ -28,7 +28,7 @@ export const productService = {
       query = query.eq("categories.slug", options.categorySlug);
     }
     if (options.categorySlug === "offers") {
-      query = query.eq("featured", true);
+      query = query.eq("offer_active", true);
     }
     if (options.search) {
       const pattern = `%${options.search}%`;

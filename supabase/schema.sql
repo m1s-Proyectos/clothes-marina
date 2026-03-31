@@ -24,6 +24,9 @@ create table if not exists public.products (
   brand text not null default '',
   color text not null default '',
   size text not null default '',
+  offer_active boolean not null default false,
+  offer_quantity integer,
+  offer_price numeric(12,2),
   created_at timestamptz not null default now(),
   search_vector tsvector generated always as (
     setweight(to_tsvector('english', coalesce(name, '')), 'A') ||

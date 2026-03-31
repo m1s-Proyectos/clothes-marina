@@ -114,9 +114,18 @@ export default function ProductDetailPage() {
             Regresar
           </button>
           <h1 className="text-3xl font-semibold">{product.name}</h1>
-          <p className="mt-4 inline-flex rounded-lg bg-luxury-500/20 px-4 py-2 text-2xl font-extrabold tracking-wide text-luxury-100">
-            {formatCurrency(product.reference_price)} <span className="ml-1 text-base font-normal text-luxury-200">x unidad</span>
-          </p>
+          {product.offer_active && product.offer_quantity && product.offer_price != null ? (
+            <div className="mt-4">
+              <p className="text-sm text-neutral-400 line-through">{formatCurrency(product.reference_price)} x unidad</p>
+              <p className="inline-flex rounded-lg bg-red-600/20 px-4 py-2 text-2xl font-extrabold tracking-wide text-red-400">
+                {product.offer_quantity} x {formatCurrency(product.offer_price)}
+              </p>
+            </div>
+          ) : (
+            <p className="mt-4 inline-flex rounded-lg bg-luxury-500/20 px-4 py-2 text-2xl font-extrabold tracking-wide text-luxury-100">
+              {formatCurrency(product.reference_price)} <span className="ml-1 text-base font-normal text-luxury-200">x unidad</span>
+            </p>
+          )}
 
           {(product.brand || product.color || product.size) && (
             <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2 rounded-lg border border-neutral-800 bg-neutral-900/60 p-4 text-sm sm:grid-cols-3">

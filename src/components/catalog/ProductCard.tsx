@@ -61,9 +61,18 @@ export default function ProductCard({ product }: ProductCardProps) {
             {product.name}
           </Link>
         </h3>
-        <p className="inline-flex rounded-lg bg-luxury-500/20 px-3 py-2 text-xl font-extrabold tracking-wide text-luxury-100">
-          {formatCurrency(product.reference_price)} <span className="ml-1 text-sm font-normal text-luxury-200">x unidad</span>
-        </p>
+        {product.offer_active && product.offer_quantity && product.offer_price != null ? (
+          <div>
+            <p className="text-sm text-neutral-400 line-through">{formatCurrency(product.reference_price)} x unidad</p>
+            <p className="inline-flex rounded-lg bg-red-600/20 px-3 py-2 text-xl font-extrabold tracking-wide text-red-400">
+              {product.offer_quantity} x {formatCurrency(product.offer_price)}
+            </p>
+          </div>
+        ) : (
+          <p className="inline-flex rounded-lg bg-luxury-500/20 px-3 py-2 text-xl font-extrabold tracking-wide text-luxury-100">
+            {formatCurrency(product.reference_price)} <span className="ml-1 text-sm font-normal text-luxury-200">x unidad</span>
+          </p>
+        )}
         <div className="space-y-2">
           <Link
             to={productUrl}

@@ -24,6 +24,9 @@ export interface Product {
   brand: string;
   color: string;
   size: string;
+  offer_active: boolean;
+  offer_quantity: number | null;
+  offer_price: number | null;
   created_at: string;
   categories?: Pick<Category, "id" | "name" | "slug"> | null;
   product_images?: ProductImage[];

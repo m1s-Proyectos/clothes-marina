@@ -17,6 +17,9 @@ interface ProductForm {
   brand: string;
   color: string;
   size: string;
+  offer_active: boolean;
+  offer_quantity: string;
+  offer_price: string;
 }
 
 const initialForm: ProductForm = {
@@ -30,6 +33,9 @@ const initialForm: ProductForm = {
   brand: "",
   color: "",
   size: "",
+  offer_active: false,
+  offer_quantity: "",
+  offer_price: "",
 };
 
 function normalizeSearchText(value: string): string {
@@ -94,6 +100,9 @@ export default function AdminProductsPage() {
     const referencePrice = form.reference_price.trim() ? Number(form.reference_price) : null;
     if (referencePrice !== null && (Number.isNaN(referencePrice) || referencePrice < 0)) return;
 
+    const offerQty = form.offer_quantity.trim() ? Number(form.offer_quantity) : null;
+    const offerPrc = form.offer_price.trim() ? Number(form.offer_price) : null;
+
     const payload = {
       name: form.name.trim(),
       description: form.description.trim(),
@@ -105,6 +114,9 @@ export default function AdminProductsPage() {
       brand: form.brand.trim(),
       color: form.color.trim(),
       size: form.size.trim(),
+      offer_active: form.offer_active && offerQty !== null && offerPrc !== null,
+      offer_quantity: offerQty,
+      offer_price: offerPrc,
     };
 
     setSaving(true);
@@ -134,6 +146,9 @@ export default function AdminProductsPage() {
       brand: product.brand ?? "",
       color: product.color ?? "",
       size: product.size ?? "",
+      offer_active: product.offer_active ?? false,
+      offer_quantity: product.offer_quantity === null ? "" : String(product.offer_quantity),
+      offer_price: product.offer_price === null ? "" : String(product.offer_price),
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -192,6 +207,35 @@ export default function AdminProductsPage() {
           <input type="checkbox" checked={form.featured} onChange={(event) => setForm((prev) => ({ ...prev, featured: event.target.checked }))} />
           Featured
         </label>
+        <div className="rounded border border-neutral-700 bg-neutral-800/50 p-3 md:col-span-2">
+          <label className="flex items-center gap-2 text-sm font-semibold">
+            <input type="checkbox" checked={form.offer_active} onChange={(event) => setForm((prev) => ({ ...prev, offer_active: event.target.checked }))} />
+            Activar oferta
+          </label>
+          {form.offer_active && (
+            <div className="mt-2 flex gap-3">
+              <input
+                type="number"
+                min="2"
+                step="1"
+                value={form.offer_quantity}
+                onChange={(event) => setForm((prev) => ({ ...prev, offer_quantity: event.target.value }))}
+                placeholder="Cantidad (ej: 3)"
+                className="w-40 rounded bg-neutral-800 px-3 py-2 text-sm"
+              />
+              <span className="self-center text-sm text-neutral-400">x</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.offer_price}
+                onChange={(event) => setForm((prev) => ({ ...prev, offer_price: event.target.value }))}
+                placeholder="Precio oferta (ej: 5.00)"
+                className="w-48 rounded bg-neutral-800 px-3 py-2 text-sm"
+              />
+            </div>
+          )}
+        </div>
         <div className="flex gap-2 md:col-span-2">
           <button disabled={saving} className="rounded bg-luxury-500 px-3 py-2 font-semibold text-neutral-950 disabled:opacity-60">
             {saving ? "Saving..." : editingProductId ? "Guardar producto" : "Create Product"}
@@ -237,7 +281,14 @@ export default function AdminProductsPage() {
                 <div>
                   <p className="font-semibold">{product.name}</p>
                   <p className="mt-1 line-clamp-2 text-xs text-neutral-300">{product.description}</p>
-                  <p className="text-xs text-luxury-100">{formatCurrency(product.reference_price)}</p>
+                  <p className="text-xs text-luxury-100">
+                    {formatCurrency(product.reference_price)}
+                    {product.offer_active && product.offer_quantity && product.offer_price != null && (
+                      <span className="ml-2 rounded bg-red-600/20 px-1.5 py-0.5 text-red-400">
+                        Oferta: {product.offer_quantity} x {formatCurrency(product.offer_price)}
+                      </span>
+                    )}
+                  </p>
                   {(product.brand || product.color || product.size) && (
                     <p className="text-xs text-neutral-300">
                       {[product.brand && `Marca: ${product.brand}`, product.color && `Color: ${product.color}`, product.size && `Talla: ${product.size}`].filter(Boolean).join(" · ")}
