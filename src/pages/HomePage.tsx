@@ -74,7 +74,7 @@ export default function HomePage() {
               Ropa nueva y con estilo a buen precio para cada ocasión
             </motion.h1>
             <Link to="/catalog" className="mt-6 inline-block rounded bg-luxury-500 px-6 py-3 font-semibold text-neutral-950">
-              Ver catalogo
+              Ver Catalogo Completo
             </Link>
           </div>
         </div>
