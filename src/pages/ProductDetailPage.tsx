@@ -116,9 +116,12 @@ export default function ProductDetailPage() {
           <h1 className="text-3xl font-semibold">{product.name}</h1>
           {product.offer_active && product.offer_quantity && product.offer_price != null ? (
             <div className="mt-4">
-              <p className="text-sm text-neutral-400 line-through">{formatCurrency(product.reference_price)} x unidad</p>
-              <p className="inline-flex rounded-lg bg-red-600/20 px-4 py-2 text-2xl font-extrabold tracking-wide text-red-400">
+              <p className="inline-flex rounded-lg bg-luxury-500/20 px-4 py-2 text-2xl font-extrabold tracking-wide text-luxury-100">
+                {formatCurrency(product.reference_price)} <span className="ml-1 text-base font-normal text-luxury-200">x unidad</span>
+              </p>
+              <p className="mt-2 inline-flex items-center gap-3 rounded-lg bg-red-600/20 px-4 py-2 text-2xl font-extrabold tracking-wide text-red-400">
                 {product.offer_quantity} x {formatCurrency(product.offer_price)}
+                <span className="text-sm font-semibold uppercase tracking-wider text-red-300">¡Aprovecha nuestra oferta!</span>
               </p>
             </div>
           ) : (
