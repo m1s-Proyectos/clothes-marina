@@ -1,5 +1,5 @@
 const MAPS_EMBED_URL =
-  "https://maps.google.com/maps?q=13.8750103,-88.6267605&t=&z=16&ie=UTF8&iwloc=B&output=embed";
+  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1938!2d-88.6267605!3d13.8750103!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8f64bd73f2760a5d%3A0xd831d79262120471!2sMarina's%20clothes!5e0!3m2!1ses!2ssv";
 const MAPS_LINK = "https://maps.app.goo.gl/XoaFDLwfJ3PXWzvC9";
 
 export default function Footer() {
