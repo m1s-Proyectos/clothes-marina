@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type SyntheticEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Seo from "@/components/common/Seo";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
@@ -11,6 +11,8 @@ import { whatsAppLeadService } from "@/services/whatsAppLeadService";
 import OptimizedImage from "@/components/common/OptimizedImage";
 import ReturnToSiteBar from "@/components/common/ReturnToSiteBar";
 
+type ImageOrientation = "loading" | "portrait" | "landscape" | "square";
+
 export default function ProductDetailPage() {
   const navigate = useNavigate();
   const { productId } = useParams();
@@ -18,9 +20,20 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [showReturnButton, setShowReturnButton] = useState(false);
   const [shareNote, setShareNote] = useState("");
+  const [orientation, setOrientation] = useState<ImageOrientation>("loading");
+
+  function handleImageLoad(event: SyntheticEvent<HTMLImageElement>): void {
+    const { naturalWidth, naturalHeight } = event.currentTarget;
+    if (!naturalWidth || !naturalHeight) return;
+    const ratio = naturalWidth / naturalHeight;
+    if (ratio > 1.15) setOrientation("landscape");
+    else if (ratio < 0.85) setOrientation("portrait");
+    else setOrientation("square");
+  }
 
   useEffect(() => {
     if (!productId) return;
+    setOrientation("loading");
     productService
       .getById(productId)
       .then(setProduct)
@@ -88,18 +101,29 @@ export default function ProductDetailPage() {
         image={product.main_image_url}
         type="article"
       />
-      <div className="grid gap-8 lg:grid-cols-2">
-        <div className="flex min-h-[420px] items-center justify-center rounded-xl bg-white p-3">
+      <div className={`grid gap-8 ${orientation === "landscape" ? "lg:grid-cols-1" : "lg:grid-cols-2"}`}>
+        <div
+          className={`flex items-center justify-center rounded-xl bg-white p-3 ${
+            orientation === "landscape"
+              ? "min-h-0"
+              : "min-h-[420px]"
+          }`}
+        >
           <OptimizedImage
             src={product.main_image_url}
             alt={product.name}
             loading="eager"
             fetchPriority="high"
             decoding="async"
+            onLoad={handleImageLoad}
             transform={{ width: 1200, quality: 75, format: "webp", resize: "contain" }}
             responsiveWidths={[640, 960, 1200]}
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            className="max-h-[70vh] w-full rounded-xl object-contain"
+            sizes={orientation === "landscape" ? "100vw" : "(max-width: 1024px) 100vw, 50vw"}
+            className={`w-full rounded-xl object-contain ${
+              orientation === "landscape"
+                ? "max-h-[75vh]"
+                : "max-h-[70vh]"
+            }`}
           />
         </div>
         <div>
