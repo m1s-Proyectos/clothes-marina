@@ -23,22 +23,26 @@ export default function ContactPage() {
     }
   }
 
+  const fieldClass =
+    "w-full rounded-xl border border-luxury-500/15 bg-surface-card px-4 py-3 text-sm text-neutral-200 placeholder-neutral-500 outline-none transition focus:border-luxury-400/40 focus:ring-1 focus:ring-luxury-500/20";
+
   return (
     <div className="container-shell py-16">
       <Seo title="Contacto" description="Contacta a Marina's Clothes para informacion de productos." />
-      <h1 className="text-3xl font-semibold">Contacto</h1>
-      <form className="mt-6 max-w-xl space-y-3" onSubmit={onSubmit}>
-        <input required value={name} onChange={(event) => setName(event.target.value)} placeholder="Nombre" className="w-full rounded bg-neutral-900 px-3 py-2" />
-        <input required value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="Telefono" className="w-full rounded bg-neutral-900 px-3 py-2" />
-        <textarea required value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Mensaje" className="h-32 w-full rounded bg-neutral-900 px-3 py-2" />
-        <button className="rounded bg-luxury-500 px-5 py-2 font-semibold text-neutral-950">Enviar</button>
+      <h1 className="text-3xl font-semibold text-luxury-50">Contacto</h1>
+      <p className="mt-2 text-sm text-neutral-400">Completa el formulario y te responderemos lo antes posible.</p>
+      <form className="mt-8 max-w-xl space-y-4" onSubmit={onSubmit}>
+        <input required value={name} onChange={(event) => setName(event.target.value)} placeholder="Nombre" className={fieldClass} />
+        <input required value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="Telefono" className={fieldClass} />
+        <textarea required value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Mensaje" className={`${fieldClass} h-32 resize-none`} />
+        <button className="rounded-xl bg-luxury-400 px-6 py-2.5 text-sm font-semibold text-surface-base transition hover:bg-luxury-300">Enviar</button>
       </form>
-      <div className="mt-4">
-        <Link to="/" className="inline-block rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-900">
-          Regresar a inicio
+      <div className="mt-5">
+        <Link to="/" className="inline-block rounded-xl border border-luxury-500/15 bg-surface-card px-4 py-2 text-sm text-neutral-300 transition hover:border-luxury-400/30 hover:text-neutral-100">
+          &larr; Regresar a inicio
         </Link>
       </div>
-      {status && <p className="mt-4 text-sm text-neutral-300">{status}</p>}
+      {status && <p className="mt-4 text-sm text-neutral-400">{status}</p>}
     </div>
   );
 }

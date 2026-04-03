@@ -27,12 +27,12 @@ export default function AdminLoginPage() {
       await login(email, password);
       const adminAccess = await authService.isAdmin();
       if (!adminAccess) {
-        setError("This user does not have admin permissions. You can request access below.");
+        setError("Este usuario no tiene permisos de admin. Puedes solicitar acceso abajo.");
       } else {
         navigate("/admin");
       }
     } catch {
-      setError("Invalid admin credentials.");
+      setError("Credenciales invalidas.");
     }
   }
 
@@ -42,7 +42,7 @@ export default function AdminLoginPage() {
     try {
       await loginWithGitHub();
     } catch {
-      setError("Unable to start GitHub login.");
+      setError("No se pudo iniciar sesion con GitHub.");
       setLoadingGithub(false);
     }
   }
@@ -58,54 +58,62 @@ export default function AdminLoginPage() {
         email: session.user.email ?? "no-email",
         fullName: (session.user.user_metadata?.full_name as string | undefined) ?? (session.user.user_metadata?.name as string | undefined)
       });
-      setRequestMessage("Access request submitted. An existing admin will review it.");
+      setRequestMessage("Solicitud enviada. Un admin existente la revisara.");
     } catch {
-      setRequestMessage("Unable to submit request right now.");
+      setRequestMessage("No se pudo enviar la solicitud en este momento.");
     } finally {
       setRequestingAccess(false);
     }
   }
 
+  const fieldClass =
+    "w-full rounded-xl border border-luxury-500/15 bg-surface-card px-4 py-3 text-sm text-neutral-200 placeholder-neutral-500 outline-none transition focus:border-luxury-400/40 focus:ring-1 focus:ring-luxury-500/20";
+
   return (
-    <div className="container-shell py-20">
+    <div className="flex min-h-[80vh] items-center justify-center px-4">
       <Seo title="Admin Login" description="Admin login for Marina's Clothes." path="/admin/login" noindex />
-      <div className="mx-auto max-w-md rounded-xl border border-neutral-800 bg-neutral-900 p-6">
-        <Link to="/" className="inline-block rounded border border-neutral-700 px-3 py-1 text-xs text-neutral-200 hover:bg-neutral-800">
-          Regresar a inicio
+      <div className="mx-auto w-full max-w-md rounded-2xl border border-luxury-500/10 bg-surface-raised p-8">
+        <Link to="/" className="mb-6 inline-block rounded-lg border border-luxury-500/15 px-3 py-1.5 text-xs text-neutral-400 transition hover:text-neutral-200">
+          &larr; Regresar a inicio
         </Link>
-        <h1 className="text-2xl font-semibold">Admin Login</h1>
-        <form className="mt-4 space-y-3" onSubmit={onSubmit}>
-          <input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email" className="w-full rounded bg-neutral-800 px-3 py-2" />
-          <input type="password" required value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Password" className="w-full rounded bg-neutral-800 px-3 py-2" />
-          <button className="w-full rounded bg-luxury-500 px-5 py-2 font-semibold text-neutral-950">Sign in</button>
+        <h1 className="text-2xl font-semibold text-luxury-100">Admin Login</h1>
+        <p className="mt-1 text-sm text-neutral-500">Inicia sesion para gestionar tu catalogo.</p>
+        <form className="mt-6 space-y-4" onSubmit={onSubmit}>
+          <input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email" className={fieldClass} />
+          <input type="password" required value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Password" className={fieldClass} />
+          <button className="w-full rounded-xl bg-luxury-400 py-2.5 text-sm font-semibold text-surface-base transition hover:bg-luxury-300">Iniciar sesion</button>
         </form>
-        <div className="my-4 h-px bg-neutral-700" />
+        <div className="my-5 flex items-center gap-3">
+          <div className="h-px flex-1 bg-luxury-500/10" />
+          <span className="text-xs text-neutral-500">o</span>
+          <div className="h-px flex-1 bg-luxury-500/10" />
+        </div>
         <button
           type="button"
           onClick={() => void onGitHubLogin()}
           disabled={loadingGithub}
-          className="w-full rounded border border-neutral-700 bg-neutral-800 px-5 py-2 font-semibold transition hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded-xl border border-luxury-500/15 bg-surface-card py-2.5 text-sm font-medium text-neutral-300 transition hover:border-luxury-400/30 hover:text-neutral-100 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loadingGithub ? "Redirecting to GitHub..." : "Continue with GitHub"}
+          {loadingGithub ? "Redirigiendo a GitHub..." : "Continuar con GitHub"}
         </button>
         {session && !isAdmin && (
-          <div className="mt-4 rounded border border-neutral-700 p-3">
-            <p className="text-sm text-neutral-300">Authenticated but not admin yet.</p>
+          <div className="mt-5 rounded-xl border border-luxury-500/10 bg-surface-card p-4">
+            <p className="text-sm text-neutral-400">Autenticado pero sin permisos de admin.</p>
             <button
               type="button"
               onClick={() => void requestAdminAccess()}
               disabled={requestingAccess}
-              className="mt-3 rounded bg-neutral-800 px-4 py-2 text-sm disabled:opacity-60"
+              className="mt-3 rounded-lg bg-surface-hover px-4 py-2 text-sm text-neutral-300 transition hover:text-neutral-100 disabled:opacity-60"
             >
-              {requestingAccess ? "Submitting..." : "Request admin access"}
+              {requestingAccess ? "Enviando..." : "Solicitar acceso admin"}
             </button>
-            {requestMessage && <p className="mt-2 text-xs text-neutral-300">{requestMessage}</p>}
-            <button type="button" onClick={() => void logout()} className="mt-3 block text-xs text-neutral-400 underline">
-              Logout
+            {requestMessage && <p className="mt-2 text-xs text-neutral-400">{requestMessage}</p>}
+            <button type="button" onClick={() => void logout()} className="mt-3 block text-xs text-neutral-500 underline transition hover:text-neutral-300">
+              Cerrar sesion
             </button>
           </div>
         )}
-        {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+        {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
       </div>
     </div>
   );

@@ -22,14 +22,14 @@ export default function CollectionsPage() {
   return (
     <div className="container-shell py-16">
       <Seo title="Agregados Reciente" description="Explora los articulos mas recientes del catalogo." />
-      <h1 className="text-3xl font-semibold">Agregados Reciente</h1>
-      <p className="mt-4 text-neutral-300">Aqui puedes ver los ultimos 10 articulos agregados, sin importar la categoria.</p>
+      <h1 className="text-3xl font-semibold text-luxury-50">Agregados Reciente</h1>
+      <p className="mt-3 text-sm text-neutral-400">Aqui puedes ver los ultimos 10 articulos agregados, sin importar la categoria.</p>
 
       <div className="mt-8">
         {loading ? (
           <LoadingSpinner />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

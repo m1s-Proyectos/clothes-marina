@@ -90,7 +90,9 @@ export default function ProductDetailPage() {
   }
 
   if (loading) return <LoadingSpinner />;
-  if (!product || !shareParams) return <div className="container-shell py-20">Producto no encontrado.</div>;
+  if (!product || !shareParams) return <div className="container-shell py-20 text-neutral-400">Producto no encontrado.</div>;
+
+  const socialBtnBase = "inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-colors";
 
   return (
     <div className="container-shell py-10">
@@ -103,10 +105,8 @@ export default function ProductDetailPage() {
       />
       <div className={`grid gap-8 ${orientation === "landscape" ? "lg:grid-cols-1" : "lg:grid-cols-2"}`}>
         <div
-          className={`flex items-center justify-center rounded-xl bg-white p-3 ${
-            orientation === "landscape"
-              ? "min-h-0"
-              : "min-h-[420px]"
+          className={`flex items-center justify-center rounded-2xl bg-luxury-50 p-4 ${
+            orientation === "landscape" ? "min-h-0" : "min-h-[420px]"
           }`}
         >
           <OptimizedImage
@@ -119,11 +119,7 @@ export default function ProductDetailPage() {
             transform={{ width: 1200, quality: 75, format: "webp", resize: "contain" }}
             responsiveWidths={[640, 960, 1200]}
             sizes={orientation === "landscape" ? "100vw" : "(max-width: 1024px) 100vw, 50vw"}
-            className={`w-full rounded-xl object-contain ${
-              orientation === "landscape"
-                ? "max-h-[75vh]"
-                : "max-h-[70vh]"
-            }`}
+            className={`w-full rounded-xl object-contain ${orientation === "landscape" ? "max-h-[75vh]" : "max-h-[70vh]"}`}
           />
         </div>
         <div>
@@ -133,57 +129,59 @@ export default function ProductDetailPage() {
               if (window.history.length > 1) navigate(-1);
               else navigate("/catalog");
             }}
-            className="mb-4 rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-900"
+            className="mb-5 rounded-xl border border-luxury-500/15 bg-surface-card px-4 py-2 text-sm text-neutral-300 transition hover:border-luxury-400/30 hover:text-neutral-100"
           >
-            Regresar
+            &larr; Regresar
           </button>
-          <h1 className="text-3xl font-semibold">{product.name}</h1>
+          <h1 className="text-3xl font-semibold text-luxury-50">{product.name}</h1>
+
           {product.offer_active && product.offer_quantity && product.offer_price != null ? (
-            <div className="mt-4">
-              <p className="inline-flex rounded-lg bg-luxury-500/20 px-4 py-2 text-2xl font-extrabold tracking-wide text-luxury-100">
-                {formatCurrency(product.reference_price)} <span className="ml-1 text-base font-normal text-luxury-200">x unidad</span>
+            <div className="mt-5 space-y-2">
+              <p className="inline-flex items-baseline rounded-xl bg-luxury-500/15 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-luxury-200">
+                {formatCurrency(product.reference_price)} <span className="ml-1.5 text-base font-normal text-luxury-300">x unidad</span>
               </p>
-              <p className="mt-2 inline-flex items-center gap-3 rounded-lg bg-red-600/20 px-4 py-2 text-2xl font-extrabold tracking-wide text-red-400">
+              <p className="inline-flex items-center gap-3 rounded-xl bg-red-500/15 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-red-400">
                 {product.offer_quantity} x {formatCurrency(product.offer_price)}
                 <span className="text-sm font-semibold uppercase tracking-wider text-red-300">¡Aprovecha nuestra oferta!</span>
               </p>
             </div>
           ) : (
-            <p className="mt-4 inline-flex rounded-lg bg-luxury-500/20 px-4 py-2 text-2xl font-extrabold tracking-wide text-luxury-100">
-              {formatCurrency(product.reference_price)} <span className="ml-1 text-base font-normal text-luxury-200">x unidad</span>
+            <p className="mt-5 inline-flex items-baseline rounded-xl bg-luxury-500/15 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-luxury-200">
+              {formatCurrency(product.reference_price)} <span className="ml-1.5 text-base font-normal text-luxury-300">x unidad</span>
             </p>
           )}
 
           {(product.brand || product.color || product.size) && (
-            <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2 rounded-lg border border-neutral-800 bg-neutral-900/60 p-4 text-sm sm:grid-cols-3">
+            <div className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 rounded-xl border border-luxury-500/10 bg-surface-card p-4 text-sm sm:grid-cols-3">
               {product.brand && (
                 <div>
-                  <span className="text-neutral-400">Marca</span>
-                  <p className="font-semibold text-neutral-100">{product.brand}</p>
+                  <span className="text-xs uppercase tracking-wider text-neutral-500">Marca</span>
+                  <p className="mt-0.5 font-semibold text-neutral-100">{product.brand}</p>
                 </div>
               )}
               {product.color && (
                 <div>
-                  <span className="text-neutral-400">Color</span>
-                  <p className="font-semibold text-neutral-100">{product.color}</p>
+                  <span className="text-xs uppercase tracking-wider text-neutral-500">Color</span>
+                  <p className="mt-0.5 font-semibold text-neutral-100">{product.color}</p>
                 </div>
               )}
               {product.size && (
                 <div>
-                  <span className="text-neutral-400">Talla</span>
-                  <p className="font-semibold text-neutral-100">{product.size}</p>
+                  <span className="text-xs uppercase tracking-wider text-neutral-500">Talla</span>
+                  <p className="mt-0.5 font-semibold text-neutral-100">{product.size}</p>
                 </div>
               )}
             </div>
           )}
 
           {product.description && (
-            <>
-              <h2 className="mt-4 text-lg font-semibold text-luxury-100">Descripcion</h2>
-              <p className="mt-2 text-neutral-300">{product.description}</p>
-            </>
+            <div className="mt-5">
+              <h2 className="text-lg font-semibold text-luxury-200">Descripcion</h2>
+              <p className="mt-2 leading-relaxed text-neutral-400">{product.description}</p>
+            </div>
           )}
-          <div className="mt-6 flex flex-wrap gap-3">
+
+          <div className="mt-7 flex flex-wrap gap-3">
             <button
               type="button"
               onClick={() => {
@@ -191,62 +189,47 @@ export default function ProductDetailPage() {
                 window.open(getWhatsAppOrderUrl(shareParams), "_blank", "noopener,noreferrer");
                 setShowReturnButton(true);
               }}
-              className="inline-block rounded-lg bg-luxury-500 px-6 py-3 text-base font-extrabold text-neutral-950 shadow-lg shadow-luxury-900/30 transition hover:bg-luxury-400"
+              className="rounded-xl bg-luxury-400 px-7 py-3 text-base font-extrabold text-surface-base shadow-lg shadow-luxury-900/25 transition hover:bg-luxury-300 hover:shadow-xl"
             >
               Solicitar producto
             </button>
             <button
               type="button"
-              onClick={() => {
-                window.open(getFacebookShareUrl(shareParams), "_blank", "noopener,noreferrer");
-                setShowReturnButton(true);
-              }}
-              className="inline-block rounded bg-blue-600 px-5 py-3 text-white hover:bg-blue-700"
+              onClick={() => { window.open(getFacebookShareUrl(shareParams), "_blank", "noopener,noreferrer"); setShowReturnButton(true); }}
+              className={`${socialBtnBase} bg-blue-600/90 text-white hover:bg-blue-500`}
             >
               Compartir Facebook
             </button>
             <button
               type="button"
-              onClick={() => {
-                window.open(getMessengerShareUrl(shareParams), "_blank", "noopener,noreferrer");
-                setShowReturnButton(true);
-              }}
-              className="inline-block rounded bg-blue-500 px-5 py-3 text-white hover:bg-blue-600"
+              onClick={() => { window.open(getMessengerShareUrl(shareParams), "_blank", "noopener,noreferrer"); setShowReturnButton(true); }}
+              className={`${socialBtnBase} bg-blue-500/90 text-white hover:bg-blue-400`}
             >
               Compartir Messenger
             </button>
             <button
               type="button"
-              onClick={() => {
-                window.open(getTwitterShareUrl(shareParams), "_blank", "noopener,noreferrer");
-                setShowReturnButton(true);
-              }}
-              className="inline-block rounded bg-gray-600 px-5 py-3 text-white hover:bg-gray-700"
+              onClick={() => { window.open(getTwitterShareUrl(shareParams), "_blank", "noopener,noreferrer"); setShowReturnButton(true); }}
+              className={`${socialBtnBase} bg-neutral-600/90 text-white hover:bg-neutral-500`}
             >
               Compartir X
             </button>
             <button
               type="button"
-              onClick={() => {
-                void shareToInstagram();
-                setShowReturnButton(true);
-              }}
-              className="inline-block rounded bg-pink-600 px-5 py-3 text-white hover:bg-pink-700"
+              onClick={() => { void shareToInstagram(); setShowReturnButton(true); }}
+              className={`${socialBtnBase} bg-pink-600/90 text-white hover:bg-pink-500`}
             >
               Compartir Instagram
             </button>
             <button
               type="button"
-              onClick={() => {
-                window.open(getWhatsAppProductUrl(shareParams), "_blank", "noopener,noreferrer");
-                setShowReturnButton(true);
-              }}
-              className="inline-block rounded bg-green-600 px-5 py-3"
+              onClick={() => { window.open(getWhatsAppProductUrl(shareParams), "_blank", "noopener,noreferrer"); setShowReturnButton(true); }}
+              className={`${socialBtnBase} bg-emerald-600/90 text-white hover:bg-emerald-500`}
             >
               Compartir WhatsApp
             </button>
           </div>
-          {shareNote && <p className="mt-3 text-sm text-neutral-300">{shareNote}</p>}
+          {shareNote && <p className="mt-3 text-sm text-neutral-400">{shareNote}</p>}
           {showReturnButton && <ReturnToSiteBar onClose={() => setShowReturnButton(false)} />}
         </div>
       </div>

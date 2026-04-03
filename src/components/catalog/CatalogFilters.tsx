@@ -19,21 +19,24 @@ export default function CatalogFilters({
   categories,
   onCategoryChange
 }: CatalogFiltersProps) {
+  const fieldClass =
+    "w-full rounded-xl border border-luxury-500/15 bg-surface-card px-4 py-2.5 text-sm text-neutral-200 placeholder-neutral-500 outline-none transition focus:border-luxury-400/40 focus:ring-1 focus:ring-luxury-500/20";
+
   return (
-    <section className="mb-6 grid gap-3 rounded-xl border border-neutral-800 bg-neutral-900 p-4 md:grid-cols-3">
+    <section className="mb-8 grid gap-3 rounded-2xl border border-luxury-500/10 bg-surface-raised/80 p-5 md:grid-cols-3">
       <input
         value={search}
         onChange={(event) => onSearchChange(event.target.value)}
         placeholder="Buscar productos..."
-        className="rounded bg-neutral-800 px-3 py-2 text-sm"
+        className={fieldClass}
       />
-      <select value={sort} onChange={(event) => onSortChange(event.target.value as ProductSort)} className="rounded bg-neutral-800 px-3 py-2 text-sm">
+      <select value={sort} onChange={(event) => onSortChange(event.target.value as ProductSort)} className={fieldClass}>
         <option value="newest">Mas recientes</option>
         <option value="featured">Destacados</option>
         <option value="alphabetical">Alfabetico</option>
         <option value="availability">Disponibilidad</option>
       </select>
-      <select value={category} onChange={(event) => onCategoryChange(event.target.value)} className="rounded bg-neutral-800 px-3 py-2 text-sm">
+      <select value={category} onChange={(event) => onCategoryChange(event.target.value)} className={fieldClass}>
         <option value="">Todas las categorias</option>
         <option value="offers">Ofertas</option>
         {categories.map((item) => (
