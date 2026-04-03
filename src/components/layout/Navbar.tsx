@@ -15,22 +15,22 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const desktopLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `text-sm transition ${isActive ? "text-luxury-100" : "text-neutral-300 hover:text-white"}`;
+    `text-sm uppercase tracking-[0.1em] transition ${isActive ? "text-luxury-100" : "text-neutral-300 hover:text-white"}`;
   const mobileLinkClass = ({ isActive }: { isActive: boolean }) =>
     `block rounded px-3 py-2 text-sm transition ${isActive ? "bg-neutral-800 text-luxury-100" : "text-neutral-200 hover:bg-neutral-800"}`;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-neutral-800 bg-neutral-950/90 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-[#f4e7c533] bg-[#0e1626]/85 backdrop-blur-xl">
       <div className="container-shell flex h-16 items-center justify-between">
-        <NavLink to="/" className="text-lg font-semibold text-luxury-100">
-          Marina's clothes
+        <NavLink to="/" className="text-2xl text-luxury-100">
+          Marina&apos;s Clothes
         </NavLink>
         <button
           type="button"
           aria-label="Abrir menu"
           aria-expanded={mobileOpen}
           onClick={() => setMobileOpen((prev) => !prev)}
-          className="rounded border border-neutral-700 px-3 py-1 text-sm text-neutral-200 md:hidden"
+          className="rounded border border-[#f4e7c533] px-3 py-1 text-sm text-neutral-200 md:hidden"
         >
           Menu
         </button>
@@ -41,14 +41,17 @@ export default function Navbar() {
               {link.label}
             </NavLink>
           ))}
-          <NavLink to={isAdmin ? "/admin" : "/admin/login"} className="rounded border border-luxury-700 px-3 py-1 text-sm">
+          <NavLink
+            to={isAdmin ? "/admin" : "/admin/login"}
+            className="rounded-full border border-luxury-700 px-4 py-1 text-xs uppercase tracking-[0.12em] text-luxury-100 transition hover:border-luxury-100"
+          >
             Admin
           </NavLink>
         </nav>
       </div>
 
       {mobileOpen && (
-        <nav className="container-shell space-y-2 border-t border-neutral-800 py-3 md:hidden">
+        <nav className="container-shell space-y-2 border-t border-[#f4e7c533] py-3 md:hidden">
           {links.map((link) => (
             <NavLink key={link.to} to={link.to} onClick={() => setMobileOpen(false)} className={mobileLinkClass}>
               {link.label}
