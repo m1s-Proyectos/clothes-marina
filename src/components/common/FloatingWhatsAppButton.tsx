@@ -1,7 +1,7 @@
 import env from "@/config/env";
 
 export default function FloatingWhatsAppButton() {
-  const url = `https://wa.me/${env.whatsappPhone}?text=${encodeURIComponent("Hola, necesito informacion sobre su catalogo.")}`;
+  const url = `https://wa.me/${env.whatsappPhone}?text=${encodeURIComponent("Hola, necesito información sobre su catálogo.")}`;
   return (
     <a
       href={url}

@@ -28,7 +28,7 @@ export default function ContactPage() {
 
   return (
     <div className="container-shell py-16">
-      <Seo title="Contacto" description="Contacta a Marina's Clothes para informacion de productos." />
+      <Seo title="Contacto" description="Contacta a Marina's Clothes para información de productos." />
       <h1 className="text-3xl font-semibold text-luxury-50">Contacto</h1>
       <p className="mt-2 text-sm text-neutral-400">Completa el formulario y te responderemos lo antes posible.</p>
       <form className="mt-8 max-w-xl space-y-4" onSubmit={onSubmit}>
