@@ -21,22 +21,28 @@ function normalizeText(value: string): string {
 }
 
 function pickHomeCategories(categories: Category[]): HomeCategoryCard[] {
+  /** Orden importa: Niñas antes que Niños para no mezclar slugs (ninas vs ninos). Cada categoría solo se usa una vez. */
   const targets = [
     { title: "Mujer", keywords: ["women", "mujer"] },
     { title: "Hombre", keywords: ["men", "hombre"] },
-    { title: "Ninos", keywords: ["kids", "ninos", "ninas", "infantil"] },
+    { title: "Niñas", keywords: ["ninas", "girls", "girl"] },
+    { title: "Niños", keywords: ["ninos", "kids", "infantil", "boys", "boy"] },
     { title: "Prendas para el hogar", keywords: ["hogar", "home", "casa", "household"] }
   ];
+
+  const usedIds = new Set<string>();
 
   return targets
     .map((target) => {
       const match = categories.find((category) => {
+        if (usedIds.has(category.id)) return false;
         const slug = normalizeText(category.slug);
         const name = normalizeText(category.name);
         return target.keywords.some((keyword) => slug.includes(keyword) || name.includes(keyword));
       });
 
       if (!match) return null;
+      usedIds.add(match.id);
       return { title: target.title, slug: match.slug };
     })
     .filter((item): item is HomeCategoryCard => item !== null);
@@ -99,7 +105,7 @@ export default function HomePage() {
               transition={{ duration: 0.8 }}
               className="mt-4 max-w-lg text-sm leading-relaxed text-neutral-200 drop-shadow-sm sm:text-base"
             >
-              Colecciones para mujer, hombre, ninos y hogar con enfoque en calidad, combinacion y presencia.
+              Colecciones para mujer, hombre, niños, niñas y hogar con enfoque en calidad, combinación y presencia.
             </motion.p>
             <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.95 }}>
               <Link
@@ -140,8 +146,8 @@ export default function HomePage() {
 
       {/* ── Categories ── */}
       <section className="container-shell pb-20">
-        <h2 className="section-title text-luxury-50">Categorias</h2>
-        <div className="grid gap-5 md:grid-cols-3">
+        <h2 className="section-title text-luxury-50">Categorías</h2>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {homeCategories.map((item) => (
             <Link
               key={item.slug}
