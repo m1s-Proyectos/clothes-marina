@@ -68,10 +68,12 @@ export default function HomePage() {
           loading="eager"
           fetchPriority="high"
           decoding="async"
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover brightness-[1.06] saturate-[1.05]"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-surface-base/90 via-surface-base/65 to-surface-base/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-surface-base/60 via-transparent to-transparent" />
+        {/* Velos mas claros: la foto se ve mejor; texto sigue legible con sombra suave */}
+        <div className="absolute inset-0 bg-gradient-to-r from-surface-base/55 via-surface-base/28 to-surface-base/5" />
+        <div className="absolute inset-0 bg-gradient-to-t from-surface-base/35 via-transparent to-luxury-50/10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-luxury-100/15 via-transparent to-transparent" />
 
         <div className="absolute inset-0 flex items-center">
           <div className="container-shell">
@@ -87,7 +89,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.65 }}
-              className="max-w-2xl text-3xl leading-tight sm:text-4xl md:text-5xl lg:text-6xl"
+              className="max-w-2xl text-3xl leading-tight drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)] sm:text-4xl md:text-5xl lg:text-6xl"
             >
               Ropa nueva con estilo, al mejor precio para cada ocasión.
             </motion.h1>
@@ -95,7 +97,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              className="mt-4 max-w-lg text-sm leading-relaxed text-neutral-300 sm:text-base"
+              className="mt-4 max-w-lg text-sm leading-relaxed text-neutral-200 drop-shadow-sm sm:text-base"
             >
               Colecciones para mujer, hombre, ninos y hogar con enfoque en calidad, combinacion y presencia.
             </motion.p>
