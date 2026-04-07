@@ -14,48 +14,55 @@ interface CategoryMarqueePanelProps {
   items: CategoryMarqueeItem[];
 }
 
-const SCROLL_SPEED_PX_S = 26;
+/** Velocidad del carrusel (px/s). */
+const AUTO_SCROLL_PX_PER_SEC = 24;
 
 export default function CategoryMarqueePanel({ items }: CategoryMarqueePanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const measureLoopRef = useRef<() => void>(() => {});
-  const [loopHalfWidth, setLoopHalfWidth] = useState(0);
-  const [touchPause, setTouchPause] = useState(false);
-  const [wheelPause, setWheelPause] = useState(false);
-  const [focusWithinPause, setFocusWithinPause] = useState(false);
+  const measureRef = useRef<() => void>(() => {});
+  const [loopSegmentPx, setLoopSegmentPx] = useState(0);
+  const [interactionPause, setInteractionPause] = useState(false);
+  const wheelTimerRef = useRef<number>(0);
   const touchEndTimerRef = useRef<number>(0);
-  const wheelEndTimerRef = useRef<number>(0);
   const reducedMotion = useReducedMotion();
 
   const loopItems = items.length > 0 ? [...items, ...items] : [];
 
+  /** Mitad del scroll total = longitud de una copia del listado (bucle infinito). */
+  const measureLoopSegment = () => {
+    const el = scrollRef.current;
+    if (!el || items.length === 0) {
+      setLoopSegmentPx(0);
+      return;
+    }
+    const half = el.scrollWidth / 2;
+    if (half > 0) setLoopSegmentPx(half);
+  };
+
+  measureRef.current = measureLoopSegment;
+
   useLayoutEffect(() => {
     const el = scrollRef.current;
     if (!el || items.length === 0) {
-      setLoopHalfWidth(0);
+      setLoopSegmentPx(0);
       return;
     }
-    const measure = () => {
-      const w = el.scrollWidth / 2;
-      if (w > 0) setLoopHalfWidth(w);
-    };
-    measureLoopRef.current = measure;
 
-    const measureSoon = () => {
-      measure();
+    const runMeasure = () => {
+      measureLoopSegment();
       requestAnimationFrame(() => {
-        measure();
-        requestAnimationFrame(measure);
+        measureLoopSegment();
+        requestAnimationFrame(measureLoopSegment);
       });
     };
 
-    measureSoon();
-    const ro = new ResizeObserver(() => measureSoon());
+    runMeasure();
+    const ro = new ResizeObserver(() => runMeasure());
     ro.observe(el);
-    window.addEventListener("resize", measureSoon);
+    window.addEventListener("resize", runMeasure);
     return () => {
       ro.disconnect();
-      window.removeEventListener("resize", measureSoon);
+      window.removeEventListener("resize", runMeasure);
     };
   }, [items]);
 
@@ -66,7 +73,7 @@ export default function CategoryMarqueePanel({ items }: CategoryMarqueePanelProp
   }, [items]);
 
   useEffect(() => {
-    if (reducedMotion || touchPause || wheelPause || focusWithinPause || loopHalfWidth <= 0) return;
+    if (reducedMotion || interactionPause || loopSegmentPx <= 0) return;
 
     let cancelled = false;
     let rafId = 0;
@@ -75,12 +82,12 @@ export default function CategoryMarqueePanel({ items }: CategoryMarqueePanelProp
     const tick = (now: number) => {
       if (cancelled) return;
       const el = scrollRef.current;
-      if (el) {
-        const dt = Math.min((now - last) / 1000, 0.08);
+      if (el && loopSegmentPx > 0) {
+        const dt = Math.min((now - last) / 1000, 0.05);
         last = now;
-        el.scrollLeft += SCROLL_SPEED_PX_S * dt;
-        if (el.scrollLeft >= loopHalfWidth - 0.5) {
-          el.scrollLeft -= loopHalfWidth;
+        el.scrollLeft += AUTO_SCROLL_PX_PER_SEC * dt;
+        if (el.scrollLeft >= loopSegmentPx - 0.5) {
+          el.scrollLeft -= loopSegmentPx;
         }
       }
       rafId = requestAnimationFrame(tick);
@@ -91,47 +98,42 @@ export default function CategoryMarqueePanel({ items }: CategoryMarqueePanelProp
       cancelled = true;
       cancelAnimationFrame(rafId);
     };
-  }, [reducedMotion, touchPause, wheelPause, focusWithinPause, loopHalfWidth, items.length]);
+  }, [reducedMotion, interactionPause, loopSegmentPx, items.length]);
 
   useEffect(() => {
     return () => {
+      window.clearTimeout(wheelTimerRef.current);
       window.clearTimeout(touchEndTimerRef.current);
-      window.clearTimeout(wheelEndTimerRef.current);
     };
   }, []);
+
+  const pauseFromWheel = () => {
+    setInteractionPause(true);
+    window.clearTimeout(wheelTimerRef.current);
+    wheelTimerRef.current = window.setTimeout(() => setInteractionPause(false), 1000);
+  };
+
+  const pauseFromTouch = () => {
+    setInteractionPause(true);
+    window.clearTimeout(touchEndTimerRef.current);
+    touchEndTimerRef.current = window.setTimeout(() => setInteractionPause(false), 2200);
+  };
 
   if (items.length === 0) return null;
 
   return (
     <section className="relative" aria-labelledby="home-categories-heading">
-      <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h2 id="home-categories-heading" className="section-title mb-0 text-luxury-50">
-            Categorías
-          </h2>
-          <p className="mt-1 text-sm text-neutral-500">
-            Se desplaza solo; puedes arrastrar o usar la rueda para ir a una categoría. Se detiene un momento al tocar o
-            arrastrar.
-          </p>
-        </div>
-      </div>
+      <h2 id="home-categories-heading" className="section-title mb-3 text-luxury-50">
+        Categorías
+      </h2>
+      <p className="mb-6 max-w-3xl text-sm leading-relaxed text-neutral-400 sm:text-base">
+        Puedes arrastrar o usar la rueda para ir a una categoría. Selecciona una categoría si deseas una en específico.
+      </p>
 
       <div
         className="relative overflow-hidden rounded-2xl border border-luxury-500/20 bg-surface-card/60 shadow-[inset_0_1px_0_rgba(200,166,108,0.08)] ring-1 ring-luxury-500/10 backdrop-blur-sm"
-        onFocusCapture={() => setFocusWithinPause(true)}
-        onBlurCapture={(event) => {
-          const next = event.relatedTarget as Node | null;
-          if (next && event.currentTarget.contains(next)) return;
-          setFocusWithinPause(false);
-        }}
-        onTouchStart={() => {
-          window.clearTimeout(touchEndTimerRef.current);
-          setTouchPause(true);
-        }}
-        onTouchEnd={() => {
-          window.clearTimeout(touchEndTimerRef.current);
-          touchEndTimerRef.current = window.setTimeout(() => setTouchPause(false), 2200);
-        }}
+        onTouchStart={pauseFromTouch}
+        onTouchEnd={pauseFromTouch}
       >
         <div
           className="pointer-events-none absolute inset-y-0 left-0 z-[1] w-10 bg-gradient-to-r from-surface-card to-transparent sm:w-14"
@@ -145,45 +147,39 @@ export default function CategoryMarqueePanel({ items }: CategoryMarqueePanelProp
         <nav aria-label="Categorías del catálogo" className="relative">
           <div
             ref={scrollRef}
-            onWheel={() => {
-              setWheelPause(true);
-              window.clearTimeout(wheelEndTimerRef.current);
-              wheelEndTimerRef.current = window.setTimeout(() => setWheelPause(false), 900);
-            }}
-            className="cursor-grab overflow-x-auto px-4 py-4 [scrollbar-width:thin] [scrollbar-color:rgba(200,166,108,0.35)_transparent] active:cursor-grabbing sm:px-5 sm:py-5 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-luxury-500/35 [&::-webkit-scrollbar-track]:bg-transparent"
-            style={{ scrollSnapType: "x mandatory" }}
+            onWheel={pauseFromWheel}
+            className="cursor-grab overflow-x-auto px-4 py-5 [scrollbar-width:thin] [scrollbar-color:rgba(200,166,108,0.35)_transparent] active:cursor-grabbing sm:px-6 sm:py-6 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-luxury-500/35 [&::-webkit-scrollbar-track]:bg-transparent"
           >
-            {/* minWidth: si todas las tarjetas caben en pantalla, igual hay scroll horizontal (sin esto scrollLeft no avanza). */}
-            <div className="flex w-max min-w-[calc(100%+2.5rem)] gap-3 sm:gap-4">
-            {loopItems.map((item, index) => (
-              <Link
-                key={`${item.slug}-${index}`}
-                to={`/catalog/${item.slug}`}
-                style={{ scrollSnapAlign: "center" }}
-                className="group relative h-[88px] w-[148px] shrink-0 overflow-hidden rounded-xl border border-luxury-500/15 bg-surface-raised transition duration-300 hover:border-luxury-400/45 hover:shadow-lg hover:shadow-luxury-900/25 sm:h-[96px] sm:w-[168px]"
-              >
-                {item.imageUrl ? (
-                  <OptimizedImage
-                    src={item.imageUrl}
-                    alt=""
-                    draggable={false}
-                    loading="lazy"
-                    decoding="async"
-                    onLoad={() => measureLoopRef.current()}
-                    className="absolute inset-0 h-full w-full object-cover opacity-85 transition duration-500 group-hover:scale-105 group-hover:opacity-95"
-                  />
-                ) : (
-                  <div
-                    className="absolute inset-0 bg-gradient-to-br from-luxury-900/50 via-surface-raised to-surface-base"
-                    aria-hidden
-                  />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-surface-base via-surface-base/35 to-transparent" />
-                <span className="relative z-10 flex h-full flex-col justify-end p-3 font-serif text-lg leading-tight tracking-wide text-luxury-50 drop-shadow-md sm:text-xl">
-                  {item.title}
-                </span>
-              </Link>
-            ))}
+            {/* Sin esto, en pantallas anchas todo cabe y scrollLeft no puede moverse: el auto-scroll no se ve. */}
+            <div className="flex w-max min-w-[calc(100%+3rem)] gap-4 sm:gap-5">
+              {loopItems.map((item, index) => (
+                <Link
+                  key={`${item.slug}-${index}`}
+                  to={`/catalog/${item.slug}`}
+                  className="group relative h-[118px] w-[168px] shrink-0 overflow-hidden rounded-xl border border-luxury-500/15 bg-surface-raised transition duration-300 hover:border-luxury-400/45 hover:shadow-lg hover:shadow-luxury-900/25 sm:h-[140px] sm:w-[200px]"
+                >
+                  {item.imageUrl ? (
+                    <OptimizedImage
+                      src={item.imageUrl}
+                      alt=""
+                      draggable={false}
+                      loading="lazy"
+                      decoding="async"
+                      onLoad={() => measureRef.current()}
+                      className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-500 group-hover:scale-[1.04] group-hover:opacity-100"
+                    />
+                  ) : (
+                    <div
+                      className="absolute inset-0 bg-gradient-to-br from-luxury-900/50 via-surface-raised to-surface-base"
+                      aria-hidden
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-surface-base via-surface-base/40 to-transparent" />
+                  <span className="relative z-10 flex h-full flex-col justify-end p-3.5 font-serif text-xl leading-tight tracking-wide text-luxury-50 drop-shadow-md sm:p-4 sm:text-2xl">
+                    {item.title}
+                  </span>
+                </Link>
+              ))}
             </div>
           </div>
         </nav>
