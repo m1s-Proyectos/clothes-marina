@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency } from "@/utils/format";
+import { improveSpanishText } from "@/utils/spanishTextNormalize";
 import OptimizedImage from "@/components/common/OptimizedImage";
 import { categoryService } from "@/services/categoryService";
 import type { Category } from "@/types";
@@ -56,7 +57,8 @@ export default function AdminDashboardPage() {
     if (error) throw error;
 
     const rows = (data ?? []) as DashboardProduct[];
-    setProducts(rows.slice(0, PAGE_SIZE));
+    const withText = rows.map((p) => ({ ...p, name: improveSpanishText(p.name) }));
+    setProducts(withText.slice(0, PAGE_SIZE));
     setHasNextPage(rows.length > PAGE_SIZE);
   }, []);
 

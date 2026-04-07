@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Seo from "@/components/common/Seo";
 import ProductCard from "@/components/catalog/ProductCard";
+import CategoryMarqueePanel from "@/components/home/CategoryMarqueePanel";
 import type { Category, Product } from "@/types";
 import { productService } from "@/services/productService";
 import OptimizedImage from "@/components/common/OptimizedImage";
@@ -11,6 +12,7 @@ import { categoryService } from "@/services/categoryService";
 interface HomeCategoryCard {
   title: string;
   slug: string;
+  imageUrl: string;
 }
 
 function normalizeText(value: string): string {
@@ -43,7 +45,7 @@ function pickHomeCategories(categories: Category[]): HomeCategoryCard[] {
 
       if (!match) return null;
       usedIds.add(match.id);
-      return { title: target.title, slug: match.slug };
+      return { title: target.title, slug: match.slug, imageUrl: match.image_url ?? "" };
     })
     .filter((item): item is HomeCategoryCard => item !== null);
 }
@@ -119,11 +121,16 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Categorías (carrusel compacto) ── */}
+      <section className="container-shell pt-12 pb-6">
+        <CategoryMarqueePanel items={homeCategories} />
+      </section>
+
       {/* ── Featured ── */}
-      <section className="container-shell py-16">
+      <section className="container-shell pb-16 pt-2">
         <div className="mb-8 flex items-end justify-between gap-3">
           <div>
-            <h2 className="section-title text-luxury-50">Productos destacados</h2>
+            <h2 className="section-title text-luxury-50">Productos Destacados</h2>
             <p className="text-sm text-neutral-400">Selecciones pensadas para destacar tu estilo diario.</p>
           </div>
           <Link
@@ -134,7 +141,7 @@ export default function HomePage() {
           </Link>
         </div>
         {loading ? (
-          <p className="text-neutral-400">Cargando productos destacados...</p>
+          <p className="text-neutral-400">Cargando productos Destacados...</p>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {featured.map((product) => (
@@ -142,24 +149,6 @@ export default function HomePage() {
             ))}
           </div>
         )}
-      </section>
-
-      {/* ── Categories ── */}
-      <section className="container-shell pb-20">
-        <h2 className="section-title text-luxury-50">Categorías</h2>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {homeCategories.map((item) => (
-            <Link
-              key={item.slug}
-              to={`/catalog/${item.slug}`}
-              className="group rounded-2xl border border-luxury-500/15 bg-surface-card/80 p-8 transition-all duration-200 hover:-translate-y-1 hover:border-luxury-400/35 hover:bg-surface-hover hover:shadow-lg hover:shadow-luxury-900/10"
-            >
-              <div className="mb-2 text-[11px] uppercase tracking-[0.2em] text-luxury-400">Explorar</div>
-              <div className="text-3xl leading-tight text-neutral-100 transition group-hover:text-white">{item.title}</div>
-              <div className="mt-4 text-sm leading-relaxed text-neutral-400">Encuentra piezas recomendadas para esta categoria.</div>
-            </Link>
-          ))}
-        </div>
       </section>
     </>
   );

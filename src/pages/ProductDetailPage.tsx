@@ -2,11 +2,12 @@ import { useEffect, useState, type SyntheticEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Seo from "@/components/common/Seo";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import ProductShareModal from "@/components/product/ProductShareModal";
 import type { Product } from "@/types";
 import { productService } from "@/services/productService";
 import { formatCurrency } from "@/utils/format";
-import env from "@/config/env";
-import { getFacebookShareUrl, getInstagramShareUrl, getMessengerShareUrl, getTwitterShareUrl, getWhatsAppOrderUrl, getWhatsAppProductUrl, type ShareParams } from "@/utils/share";
+import { parseEmbeddedSpecsFromDescription, stripRedundantSpecsFromDescription } from "@/utils/productDescription";
+import { getWhatsAppOrderUrl, type ShareParams } from "@/utils/share";
 import { whatsAppLeadService } from "@/services/whatsAppLeadService";
 import OptimizedImage from "@/components/common/OptimizedImage";
 import ReturnToSiteBar from "@/components/common/ReturnToSiteBar";
@@ -20,6 +21,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [showReturnButton, setShowReturnButton] = useState(false);
   const [shareNote, setShareNote] = useState("");
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const [orientation, setOrientation] = useState<ImageOrientation>("loading");
 
   function handleImageLoad(event: SyntheticEvent<HTMLImageElement>): void {
@@ -44,55 +46,24 @@ export default function ProductDetailPage() {
     ? { productId: product.id, productName: product.name, productImageUrl: product.main_image_url, productDescription: product.description }
     : null;
 
-  async function shareToInstagram(): Promise<void> {
-    if (!shareParams || !product) return;
-
-    const shareUrl = getInstagramShareUrl(shareParams);
-
-    if (navigator.share) {
-      try {
-        const shareData: ShareData = {
-          title: product.name,
-          text: `Mira este producto: ${product.name}`,
-          url: shareUrl,
-        };
-
-        if (navigator.canShare) {
-          try {
-            const proxyUrl = `${env.appUrl}/api/share/image?id=${product.id}&img=${encodeURIComponent(product.main_image_url)}`;
-            const imgRes = await fetch(proxyUrl);
-            if (imgRes.ok) {
-              const blob = await imgRes.blob();
-              const file = new File([blob], `${product.name}.jpg`, { type: "image/jpeg" });
-              if (navigator.canShare({ files: [file] })) {
-                shareData.files = [file];
-              }
-            }
-          } catch {
-            /* share without image */
-          }
-        }
-
-        await navigator.share(shareData);
-        return;
-      } catch (err) {
-        if (err instanceof Error && err.name === "AbortError") return;
-      }
-    }
-
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setShareNote("Enlace copiado. Pegalo en tu historia de Instagram.");
-    } catch {
-      setShareNote("No se pudo copiar. Copia el enlace desde la barra del navegador.");
-    }
-    window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
-  }
-
   if (loading) return <LoadingSpinner />;
   if (!product || !shareParams) return <div className="container-shell py-20 text-neutral-400">Producto no encontrado.</div>;
 
-  const socialBtnBase = "inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-colors";
+  function detailLine(value: string | null | undefined): string {
+    const t = value != null ? String(value).trim() : "";
+    return t.length > 0 ? t : "—";
+  }
+
+  const embedded = parseEmbeddedSpecsFromDescription(product.description ?? "");
+  const displayBrand = (product.brand ?? "").trim() || embedded.brand;
+  const displayColor = (product.color ?? "").trim() || embedded.color;
+  const displaySize = (product.size ?? "").trim() || embedded.size;
+
+  const descriptionForDisplay = stripRedundantSpecsFromDescription(product.description ?? "", {
+    brand: displayBrand,
+    color: displayColor,
+    size: displaySize,
+  });
 
   return (
     <div className="container-shell py-10">
@@ -122,66 +93,87 @@ export default function ProductDetailPage() {
             className={`w-full rounded-xl object-contain ${orientation === "landscape" ? "max-h-[75vh]" : "max-h-[70vh]"}`}
           />
         </div>
-        <div>
+        <div className="flex min-w-0 flex-col gap-5">
           <button
             type="button"
             onClick={() => {
               if (window.history.length > 1) navigate(-1);
               else navigate("/catalog");
             }}
-            className="mb-5 rounded-xl border border-luxury-500/15 bg-surface-card px-4 py-2 text-sm text-neutral-300 transition hover:border-luxury-400/30 hover:text-neutral-100"
+            className="group inline-flex w-fit items-center gap-2 rounded-xl border-2 border-luxury-400/45 bg-luxury-500/15 px-5 py-2.5 text-sm font-semibold text-luxury-100 shadow-lg shadow-luxury-900/25 ring-1 ring-luxury-400/20 transition hover:border-luxury-300 hover:bg-luxury-500/25 hover:text-white"
           >
-            &larr; Regresar
+            <svg
+              className="h-4 w-4 transition group-hover:-translate-x-0.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.25"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+            Regresar al catálogo
           </button>
-          <h1 className="text-3xl font-semibold text-luxury-50">{product.name}</h1>
 
-          {product.offer_active && product.offer_quantity && product.offer_price != null ? (
-            <div className="mt-5 space-y-2">
-              <p className="inline-flex items-baseline rounded-xl bg-luxury-500/15 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-luxury-200">
-                {formatCurrency(product.reference_price)} <span className="ml-1.5 text-base font-normal text-luxury-300">x unidad</span>
-              </p>
-              <p className="inline-flex items-center gap-3 rounded-xl bg-red-500/15 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-red-400">
-                {product.offer_quantity} x {formatCurrency(product.offer_price)}
-                <span className="text-sm font-semibold uppercase tracking-wider text-red-300">¡Aprovecha nuestra oferta!</span>
-              </p>
+          <section
+            className="relative overflow-hidden rounded-2xl border-2 border-luxury-400/35 bg-gradient-to-b from-surface-card via-surface-card to-surface-raised/90 p-6 shadow-[0_12px_48px_rgba(0,0,0,0.45)] ring-1 ring-luxury-500/15 md:p-8"
+            aria-labelledby="product-detail-title"
+          >
+            <div
+              className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-luxury-400/50 to-transparent"
+              aria-hidden
+            />
+            <h1 id="product-detail-title" className="text-3xl font-semibold leading-tight text-luxury-50">
+              {product.name}
+            </h1>
+
+            <div className="mt-6 border-b border-luxury-500/15 pb-6">
+              {product.offer_active && product.offer_quantity && product.offer_price != null ? (
+                <div className="space-y-3">
+                  <p className="inline-flex items-baseline rounded-xl bg-luxury-500/20 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-luxury-100">
+                    {formatCurrency(product.reference_price)} <span className="ml-1.5 text-base font-normal text-luxury-300">x unidad</span>
+                  </p>
+                  <p className="inline-flex flex-wrap items-center gap-3 rounded-xl bg-red-500/15 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-red-300">
+                    {product.offer_quantity} x {formatCurrency(product.offer_price)}
+                    <span className="text-sm font-semibold uppercase tracking-wider text-red-200">¡Aprovecha nuestra oferta!</span>
+                  </p>
+                </div>
+              ) : (
+                <p className="inline-flex items-baseline rounded-xl bg-luxury-500/20 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-luxury-100">
+                  {formatCurrency(product.reference_price)} <span className="ml-1.5 text-base font-normal text-luxury-300">x unidad</span>
+                </p>
+              )}
             </div>
-          ) : (
-            <p className="mt-5 inline-flex items-baseline rounded-xl bg-luxury-500/15 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-luxury-200">
-              {formatCurrency(product.reference_price)} <span className="ml-1.5 text-base font-normal text-luxury-300">x unidad</span>
-            </p>
-          )}
 
-          {(product.brand || product.color || product.size) && (
-            <div className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 rounded-xl border border-luxury-500/10 bg-surface-card p-4 text-sm sm:grid-cols-3">
-              {product.brand && (
+            <div className="mt-6 rounded-xl border-2 border-luxury-400/25 bg-surface-base/70 p-4 shadow-inner shadow-black/20 sm:p-5">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-luxury-300">Detalles del producto</p>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
                 <div>
                   <span className="text-xs uppercase tracking-wider text-neutral-500">Marca</span>
-                  <p className="mt-0.5 font-semibold text-neutral-100">{product.brand}</p>
+                  <p className="mt-1 font-semibold text-neutral-100">{detailLine(displayBrand)}</p>
                 </div>
-              )}
-              {product.color && (
                 <div>
                   <span className="text-xs uppercase tracking-wider text-neutral-500">Color</span>
-                  <p className="mt-0.5 font-semibold text-neutral-100">{product.color}</p>
+                  <p className="mt-1 font-semibold text-neutral-100">{detailLine(displayColor)}</p>
                 </div>
-              )}
-              {product.size && (
                 <div>
                   <span className="text-xs uppercase tracking-wider text-neutral-500">Talla</span>
-                  <p className="mt-0.5 font-semibold text-neutral-100">{product.size}</p>
+                  <p className="mt-1 font-semibold text-neutral-100">{detailLine(displaySize)}</p>
                 </div>
-              )}
+              </div>
             </div>
-          )}
 
-          {product.description && (
-            <div className="mt-5">
-              <h2 className="text-lg font-semibold text-luxury-200">Descripcion</h2>
-              <p className="mt-2 leading-relaxed text-neutral-400">{product.description}</p>
-            </div>
-          )}
+            {descriptionForDisplay ? (
+              <div className="mt-6 border-t border-luxury-500/15 pt-6">
+                <h2 className="text-lg font-semibold text-luxury-200">Descripción</h2>
+                <p className="mt-3 leading-relaxed text-neutral-300">{descriptionForDisplay}</p>
+              </div>
+            ) : null}
+          </section>
 
-          <div className="mt-7 flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 pt-1">
             <button
               type="button"
               onClick={() => {
@@ -195,42 +187,38 @@ export default function ProductDetailPage() {
             </button>
             <button
               type="button"
-              onClick={() => { window.open(getFacebookShareUrl(shareParams), "_blank", "noopener,noreferrer"); setShowReturnButton(true); }}
-              className={`${socialBtnBase} bg-blue-600/90 text-white hover:bg-blue-500`}
+              onClick={() => {
+                setShareNote("");
+                setShareModalOpen(true);
+              }}
+              className="inline-flex items-center gap-2 rounded-xl border-2 border-luxury-400/50 bg-surface-card px-7 py-3 text-base font-semibold text-luxury-100 transition hover:border-luxury-300 hover:bg-surface-hover"
             >
-              Compartir Facebook
-            </button>
-            <button
-              type="button"
-              onClick={() => { window.open(getMessengerShareUrl(shareParams), "_blank", "noopener,noreferrer"); setShowReturnButton(true); }}
-              className={`${socialBtnBase} bg-blue-500/90 text-white hover:bg-blue-400`}
-            >
-              Compartir Messenger
-            </button>
-            <button
-              type="button"
-              onClick={() => { window.open(getTwitterShareUrl(shareParams), "_blank", "noopener,noreferrer"); setShowReturnButton(true); }}
-              className={`${socialBtnBase} bg-neutral-600/90 text-white hover:bg-neutral-500`}
-            >
-              Compartir X
-            </button>
-            <button
-              type="button"
-              onClick={() => { void shareToInstagram(); setShowReturnButton(true); }}
-              className={`${socialBtnBase} bg-pink-600/90 text-white hover:bg-pink-500`}
-            >
-              Compartir Instagram
-            </button>
-            <button
-              type="button"
-              onClick={() => { window.open(getWhatsAppProductUrl(shareParams), "_blank", "noopener,noreferrer"); setShowReturnButton(true); }}
-              className={`${socialBtnBase} bg-emerald-600/90 text-white hover:bg-emerald-500`}
-            >
-              Compartir WhatsApp
+              <svg
+                className="h-5 w-5 shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+              </svg>
+              Compartir con amigos
             </button>
           </div>
-          {shareNote && <p className="mt-3 text-sm text-neutral-400">{shareNote}</p>}
+
+          {shareNote ? <p className="text-sm text-neutral-400">{shareNote}</p> : null}
           {showReturnButton && <ReturnToSiteBar onClose={() => setShowReturnButton(false)} />}
+
+          <ProductShareModal
+            isOpen={shareModalOpen}
+            onClose={() => setShareModalOpen(false)}
+            shareParams={shareParams}
+            onAfterOpenShare={() => setShowReturnButton(true)}
+            onInstagramNote={(message) => setShareNote(message)}
+          />
         </div>
       </div>
     </div>

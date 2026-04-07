@@ -71,3 +71,50 @@ export function getWhatsAppOrderUrl(p: ShareParams): string {
   ].join("\n");
   return `https://wa.me/${getSafeWhatsAppPhone()}?text=${encodeURIComponent(text)}`;
 }
+
+/**
+ * Misma lógica que en la ficha de producto: Web Share API con imagen OG para historias, o copiar enlace + abrir Instagram.
+ */
+export async function runInstagramShareFlow(p: ShareParams): Promise<string> {
+  const shareUrl = getInstagramShareUrl(p);
+
+  if (typeof navigator !== "undefined" && navigator.share) {
+    try {
+      const shareData: ShareData = {
+        title: p.productName,
+        text: `Mira este producto: ${p.productName}`,
+        url: shareUrl,
+      };
+
+      if (navigator.canShare) {
+        try {
+          const proxyUrl = `${env.appUrl}/api/share/image?id=${p.productId}&img=${encodeURIComponent(p.productImageUrl ?? "")}`;
+          const imgRes = await fetch(proxyUrl);
+          if (imgRes.ok) {
+            const blob = await imgRes.blob();
+            const file = new File([blob], `${p.productName}.jpg`, { type: "image/jpeg" });
+            if (navigator.canShare({ files: [file] })) {
+              shareData.files = [file];
+            }
+          }
+        } catch {
+          /* compartir sin imagen */
+        }
+      }
+
+      await navigator.share(shareData);
+      return "";
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") return "";
+    }
+  }
+
+  try {
+    await navigator.clipboard.writeText(shareUrl);
+    window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+    return "Enlace copiado. Pegalo en tu historia de Instagram.";
+  } catch {
+    window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+    return "No se pudo copiar. Copia el enlace desde la barra del navegador.";
+  }
+}
