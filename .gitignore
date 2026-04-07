@@ -8,3 +8,8 @@ coverage
 *.tsbuildinfo
 vite.config.d.ts
 vite.config.js
+
+# Archivos locales que no deben subirse al repositorio
+Plan_Trabajo_Mototaxi_Runner.pdf
+propuesta-comercial.html
+scripts/
