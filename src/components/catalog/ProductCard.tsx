@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, type SyntheticEvent } from "react";
 import { Link } from "react-router-dom";
 import type { Product } from "@/types";
 import { formatCurrency } from "@/utils/format";
@@ -15,6 +15,15 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const productUrl = `/product/${product.id}`;
   const [showReturnButton, setShowReturnButton] = useState(false);
+  const [isLandscape, setIsLandscape] = useState(false);
+
+  function handleImageLoad(e: SyntheticEvent<HTMLImageElement>) {
+    const { naturalWidth, naturalHeight } = e.currentTarget;
+    if (naturalWidth && naturalHeight) {
+      setIsLandscape(naturalWidth > naturalHeight);
+    }
+  }
+
   const shareParams = { productId: product.id, productName: product.name, productImageUrl: product.main_image_url, productDescription: product.description };
 
   function openWhatsAppOrder(): void {
@@ -38,10 +47,18 @@ export default function ProductCard({ product }: ProductCardProps) {
             alt={product.name}
             loading="lazy"
             decoding="async"
+            onLoad={handleImageLoad}
             transform={{ width: 480, quality: 78, format: "webp", resize: "cover" }}
             responsiveWidths={[240, 360, 480]}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="h-full w-full object-cover object-[center_15%] transition-transform duration-500 group-hover:scale-[1.04]"
+            className={[
+              "h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]",
+              // Portrait: anchor 15% from top — preserves faces/necklines, crops feet first
+              // Landscape: center anchor + slight scale-down — prevents over-cropping wide shots
+              isLandscape
+                ? "object-center scale-[0.92]"
+                : "object-[center_15%]",
+            ].join(" ")}
           />
 
           {/* Persistent CTA bar — always visible, works on touch and pointer */}
