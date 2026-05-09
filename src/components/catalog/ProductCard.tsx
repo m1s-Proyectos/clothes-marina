@@ -41,7 +41,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             transform={{ width: 480, quality: 78, format: "webp", resize: "cover" }}
             responsiveWidths={[240, 360, 480]}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
           />
 
           {/* Persistent CTA bar — always visible, works on touch and pointer */}
