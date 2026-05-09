@@ -1,9 +1,8 @@
 import { useEffect, useState, type SyntheticEvent } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Seo from "@/components/common/Seo";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ProductShareModal from "@/components/product/ProductShareModal";
-import ProductCard from "@/components/catalog/ProductCard";
 import type { Product } from "@/types";
 import { productService } from "@/services/productService";
 import { formatCurrency } from "@/utils/format";
@@ -24,8 +23,6 @@ export default function ProductDetailPage() {
   const [shareNote, setShareNote] = useState("");
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [orientation, setOrientation] = useState<ImageOrientation>("loading");
-  const [activeImageUrl, setActiveImageUrl] = useState<string | null>(null);
-  const [related, setRelated] = useState<Product[]>([]);
 
   function handleImageLoad(event: SyntheticEvent<HTMLImageElement>): void {
     const { naturalWidth, naturalHeight } = event.currentTarget;
@@ -39,38 +36,18 @@ export default function ProductDetailPage() {
   useEffect(() => {
     if (!productId) return;
     setOrientation("loading");
-    setActiveImageUrl(null);
-    setRelated([]);
     productService
       .getById(productId)
-      .then((p) => {
-        setProduct(p);
-        if (p?.main_image_url) setActiveImageUrl(p.main_image_url);
-        // Fetch related products from the same category (exclude current)
-        if (p?.categories?.slug) {
-          productService
-            .list({ categorySlug: p.categories.slug, onlyAvailable: true, sort: "newest" })
-            .then((all) => {
-              setRelated(all.filter((r) => r.id !== p.id).slice(0, 3));
-            })
-            .catch(() => {});
-        }
-      })
+      .then(setProduct)
       .finally(() => setLoading(false));
   }, [productId]);
 
   const shareParams: ShareParams | null = product
-    ? {
-        productId: product.id,
-        productName: product.name,
-        productImageUrl: product.main_image_url,
-        productDescription: product.description,
-      }
+    ? { productId: product.id, productName: product.name, productImageUrl: product.main_image_url, productDescription: product.description }
     : null;
 
   if (loading) return <LoadingSpinner />;
-  if (!product || !shareParams)
-    return <div className="container-shell py-20 text-neutral-400">Producto no encontrado.</div>;
+  if (!product || !shareParams) return <div className="container-shell py-20 text-neutral-400">Producto no encontrado.</div>;
 
   function detailLine(value: string | null | undefined): string {
     const t = value != null ? String(value).trim() : "";
@@ -88,16 +65,6 @@ export default function ProductDetailPage() {
     size: displaySize,
   });
 
-  const extraImages = (product.product_images ?? []).filter(
-    (img) => img.image_url !== product.main_image_url,
-  );
-  const allImages = [
-    { id: "main", image_url: product.main_image_url, product_id: product.id },
-    ...extraImages,
-  ];
-
-  const displayImageUrl = activeImageUrl ?? product.main_image_url;
-
   return (
     <div className="container-shell py-10">
       <Seo
@@ -107,87 +74,49 @@ export default function ProductDetailPage() {
         image={product.main_image_url}
         type="article"
       />
-
-      {/* Lightweight back link */}
-      <button
-        type="button"
-        onClick={() => {
-          if (window.history.length > 1) navigate(-1);
-          else navigate("/catalog");
-        }}
-        className="group mb-6 inline-flex items-center gap-1.5 text-sm text-neutral-400 transition hover:text-luxury-300"
-      >
-        <svg
-          className="h-4 w-4 transition group-hover:-translate-x-0.5"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.25"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden
-        >
-          <path d="M15 18l-6-6 6-6" />
-        </svg>
-        Regresar al catálogo
-      </button>
-
       <div className={`grid gap-8 ${orientation === "landscape" ? "lg:grid-cols-1" : "lg:grid-cols-2"}`}>
-        {/* Image column */}
-        <div>
-          <div
-            className={`flex items-center justify-center rounded-2xl bg-luxury-50 p-4 ${
-              orientation === "landscape" ? "min-h-0" : "min-h-[420px]"
-            }`}
-          >
-            <OptimizedImage
-              src={displayImageUrl}
-              alt={product.name}
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              onLoad={handleImageLoad}
-              transform={{ width: 1200, quality: 75, format: "webp", resize: "contain" }}
-              responsiveWidths={[640, 960, 1200]}
-              sizes={orientation === "landscape" ? "100vw" : "(max-width: 1024px) 100vw, 50vw"}
-              className={`w-full rounded-xl object-contain ${orientation === "landscape" ? "max-h-[75vh]" : "max-h-[70vh]"}`}
-            />
-          </div>
-
-          {/* Thumbnail strip — only shown when multiple images exist */}
-          {allImages.length > 1 && (
-            <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-              {allImages.map((img) => {
-                const isActive = displayImageUrl === img.image_url;
-                return (
-                  <button
-                    key={img.id}
-                    type="button"
-                    onClick={() => setActiveImageUrl(img.image_url)}
-                    aria-label={`Ver imagen ${img.id}`}
-                    className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition ${
-                      isActive
-                        ? "border-luxury-400"
-                        : "border-luxury-500/20 opacity-60 hover:border-luxury-400/50 hover:opacity-100"
-                    }`}
-                  >
-                    <OptimizedImage
-                      src={img.image_url}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                      transform={{ width: 128, quality: 65, format: "webp", resize: "cover" }}
-                      className="h-full w-full object-cover"
-                    />
-                  </button>
-                );
-              })}
-            </div>
-          )}
+        <div
+          className={`flex items-center justify-center rounded-2xl bg-luxury-50 p-4 ${
+            orientation === "landscape" ? "min-h-0" : "min-h-[420px]"
+          }`}
+        >
+          <OptimizedImage
+            src={product.main_image_url}
+            alt={product.name}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            onLoad={handleImageLoad}
+            transform={{ width: 1200, quality: 75, format: "webp", resize: "contain" }}
+            responsiveWidths={[640, 960, 1200]}
+            sizes={orientation === "landscape" ? "100vw" : "(max-width: 1024px) 100vw, 50vw"}
+            className={`w-full rounded-xl object-contain ${orientation === "landscape" ? "max-h-[75vh]" : "max-h-[70vh]"}`}
+          />
         </div>
-
-        {/* Info column */}
         <div className="flex min-w-0 flex-col gap-5">
+          <button
+            type="button"
+            onClick={() => {
+              if (window.history.length > 1) navigate(-1);
+              else navigate("/catalog");
+            }}
+            className="group inline-flex w-fit items-center gap-2 rounded-xl border-2 border-luxury-400/45 bg-luxury-500/15 px-5 py-2.5 text-sm font-semibold text-luxury-100 shadow-lg shadow-luxury-900/25 ring-1 ring-luxury-400/20 transition hover:border-luxury-300 hover:bg-luxury-500/25 hover:text-white"
+          >
+            <svg
+              className="h-4 w-4 transition group-hover:-translate-x-0.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.25"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+            Regresar al catálogo
+          </button>
+
           <section
             className="relative overflow-hidden rounded-2xl border-2 border-luxury-400/35 bg-gradient-to-b from-surface-card via-surface-card to-surface-raised/90 p-6 shadow-[0_12px_48px_rgba(0,0,0,0.45)] ring-1 ring-luxury-500/15 md:p-8"
             aria-labelledby="product-detail-title"
@@ -204,28 +133,22 @@ export default function ProductDetailPage() {
               {product.offer_active && product.offer_quantity && product.offer_price != null ? (
                 <div className="space-y-3">
                   <p className="inline-flex items-baseline rounded-xl bg-luxury-500/20 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-luxury-100">
-                    {formatCurrency(product.reference_price)}{" "}
-                    <span className="ml-1.5 text-base font-normal text-luxury-300">x unidad</span>
+                    {formatCurrency(product.reference_price)} <span className="ml-1.5 text-base font-normal text-luxury-300">x unidad</span>
                   </p>
                   <p className="inline-flex flex-wrap items-center gap-3 rounded-xl bg-red-500/15 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-red-300">
                     {product.offer_quantity} x {formatCurrency(product.offer_price)}
-                    <span className="text-sm font-semibold uppercase tracking-wider text-red-200">
-                      ¡Aprovecha nuestra oferta!
-                    </span>
+                    <span className="text-sm font-semibold uppercase tracking-wider text-red-200">¡Aprovecha nuestra oferta!</span>
                   </p>
                 </div>
               ) : (
                 <p className="inline-flex items-baseline rounded-xl bg-luxury-500/20 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-luxury-100">
-                  {formatCurrency(product.reference_price)}{" "}
-                  <span className="ml-1.5 text-base font-normal text-luxury-300">x unidad</span>
+                  {formatCurrency(product.reference_price)} <span className="ml-1.5 text-base font-normal text-luxury-300">x unidad</span>
                 </p>
               )}
             </div>
 
             <div className="mt-6 rounded-xl border-2 border-luxury-400/25 bg-surface-base/70 p-4 shadow-inner shadow-black/20 sm:p-5">
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-luxury-300">
-                Detalles del producto
-              </p>
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-luxury-300">Detalles del producto</p>
               <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
                 <div>
                   <span className="text-xs uppercase tracking-wider text-neutral-500">Marca</span>
@@ -250,8 +173,7 @@ export default function ProductDetailPage() {
             ) : null}
           </section>
 
-          {/* CTAs — primary full-width, secondary ghost */}
-          <div className="space-y-2">
+          <div className="flex flex-wrap gap-3 pt-1">
             <button
               type="button"
               onClick={() => {
@@ -259,9 +181,9 @@ export default function ProductDetailPage() {
                 window.open(getWhatsAppOrderUrl(shareParams), "_blank", "noopener,noreferrer");
                 setShowReturnButton(true);
               }}
-              className="w-full rounded-xl bg-luxury-400 px-7 py-3.5 text-base font-extrabold text-surface-base shadow-lg shadow-luxury-900/25 transition hover:bg-luxury-300 hover:shadow-xl"
+              className="rounded-xl bg-luxury-400 px-7 py-3 text-base font-extrabold text-surface-base shadow-lg shadow-luxury-900/25 transition hover:bg-luxury-300 hover:shadow-xl"
             >
-              Solicitar por WhatsApp
+              Solicitar producto
             </button>
             <button
               type="button"
@@ -269,10 +191,10 @@ export default function ProductDetailPage() {
                 setShareNote("");
                 setShareModalOpen(true);
               }}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-luxury-500/30 bg-surface-card px-7 py-2.5 text-sm font-medium text-neutral-300 transition hover:border-luxury-400/50 hover:text-luxury-200"
+              className="inline-flex items-center gap-2 rounded-xl border-2 border-luxury-400/50 bg-surface-card px-7 py-3 text-base font-semibold text-luxury-100 transition hover:border-luxury-300 hover:bg-surface-hover"
             >
               <svg
-                className="h-4 w-4 shrink-0"
+                className="h-5 w-5 shrink-0"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -299,28 +221,6 @@ export default function ProductDetailPage() {
           />
         </div>
       </div>
-
-      {/* Related products */}
-      {related.length > 0 && (
-        <section className="mt-16 border-t border-luxury-500/10 pt-12">
-          <div className="mb-6 flex items-end justify-between gap-3">
-            <h2 className="text-2xl font-semibold text-luxury-50">También te puede gustar</h2>
-            {product.categories?.slug && (
-              <Link
-                to={`/catalog/${product.categories.slug}`}
-                className="hidden text-xs uppercase tracking-[0.1em] text-luxury-300 transition hover:text-luxury-200 md:inline-block"
-              >
-                Ver más
-              </Link>
-            )}
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {related.map((r) => (
-              <ProductCard key={r.id} product={r} />
-            ))}
-          </div>
-        </section>
-      )}
     </div>
   );
 }

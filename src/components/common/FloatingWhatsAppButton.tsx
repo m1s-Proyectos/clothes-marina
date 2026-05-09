@@ -7,11 +7,10 @@ export default function FloatingWhatsAppButton() {
       href={url}
       target="_blank"
       rel="noreferrer"
-      aria-label="Contactar por WhatsApp"
-      className="fixed bottom-6 right-5 z-50 flex flex-col items-end gap-1.5"
+      className="fixed bottom-5 right-5 z-50 flex flex-col items-center gap-1.5"
     >
-      <span className="max-w-[180px] rounded-full bg-surface-card/90 px-3 py-1.5 text-xs font-medium text-neutral-300 shadow-lg backdrop-blur-sm">
-        ¿No encuentras algo?
+      <span className="rounded-full bg-surface-card/90 px-3 py-1.5 text-xs font-medium text-neutral-300 shadow-lg backdrop-blur-sm">
+        No encuentras algo? preguntanos en WhatsApp
       </span>
       <span className="rounded-full bg-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-emerald-400 hover:shadow-xl">
         WhatsApp
