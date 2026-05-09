@@ -13,3 +13,6 @@ vite.config.js
 Plan_Trabajo_Mototaxi_Runner.pdf
 propuesta-comercial.html
 scripts/
+
+# Carpeta local de pruebas (no subir ni mezclar con main)
+v0-fast-repuestos-hub/
