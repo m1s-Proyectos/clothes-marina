@@ -37,10 +37,10 @@ export default function ProductCard({ product }: ProductCardProps) {
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="group relative"
+      className="group relative rounded-lg bg-surface-card shadow-sm shadow-black/6 ring-1 ring-black/5 transition-shadow duration-300 hover:shadow-md hover:shadow-black/10"
     >
       {/* ── Image block ── */}
-      <Link to={productUrl} aria-label={`Ver detalles de ${product.name}`} className="block overflow-hidden">
+      <Link to={productUrl} aria-label={`Ver detalles de ${product.name}`} className="block overflow-hidden rounded-t-lg">
         <div className="relative aspect-[3/4] w-full overflow-hidden bg-surface-hover">
           <OptimizedImage
             src={product.main_image_url}
@@ -74,7 +74,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       </Link>
 
       {/* ── Caption ── */}
-      <div className="pt-2">
+      <div className="px-3 pb-3 pt-2.5">
         {/* Name — sans-serif only (overrides global h3 serif rule), 2-line max */}
         <h3 className="line-clamp-2 font-sans text-[13.5px] font-normal leading-snug tracking-[0.005em] text-neutral-800 sm:text-[14.5px]">
           <Link to={productUrl} className="transition-colors hover:text-luxury-700">
