@@ -2,6 +2,18 @@ function getEnv(name: string, fallback = ""): string {
   return process.env[name] || fallback;
 }
 
+interface ApiRequest {
+  query?: Record<string, string | string[] | undefined>;
+  headers?: Record<string, string | string[] | undefined>;
+}
+
+interface ApiResponse {
+  setHeader(name: string, value: string): void;
+  writeHead(code: number, headers: Record<string, string>): void;
+  end(): void;
+  status(code: number): { send(body: string): void };
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")
@@ -112,7 +124,7 @@ function isSocialCrawler(userAgent: string): boolean {
   );
 }
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: ApiRequest, res: ApiResponse) {
   const productId = typeof req.query?.id === "string" ? req.query.id : "";
   const titleFromQuery = typeof req.query?.t === "string" ? req.query.t : "";
   const descriptionFromQuery = typeof req.query?.d === "string" ? req.query.d : "";

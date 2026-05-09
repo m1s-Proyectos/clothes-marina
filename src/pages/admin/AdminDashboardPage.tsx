@@ -120,7 +120,7 @@ export default function AdminDashboardPage() {
   return (
     <section className="space-y-10">
       <div>
-        <h1 className="text-2xl font-semibold text-luxury-50">Panel de administración</h1>
+        <h1 className="text-2xl font-semibold text-slate-950">Panel de administración</h1>
         <p className="mt-2 text-sm text-neutral-400">
           Resumen de categorías (con número de productos por categoría) y productos recientes (10 por página).
         </p>
@@ -129,7 +129,7 @@ export default function AdminDashboardPage() {
       <div>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold text-luxury-200">
+            <h2 className="text-lg font-semibold text-luxury-900">
               Todas las categorías
               {!categoriesLoading && categories.length > 0 ? (
                 <span className="ml-2 text-sm font-normal text-neutral-500">({categories.length})</span>
@@ -143,7 +143,7 @@ export default function AdminDashboardPage() {
           </div>
           <Link
             to="/admin/categories"
-            className="text-sm text-luxury-300 underline-offset-2 transition hover:text-luxury-200 hover:underline"
+            className="text-sm text-luxury-800 underline-offset-2 transition hover:text-luxury-900 hover:underline"
           >
             Gestionar categorías
           </Link>
@@ -158,7 +158,7 @@ export default function AdminDashboardPage() {
         ) : categories.length === 0 ? (
           <p className="mt-4 rounded-xl border border-luxury-500/10 bg-surface-card px-4 py-6 text-sm text-neutral-400">
             No hay categorías aún.{" "}
-            <Link to="/admin/categories" className="text-luxury-300 underline hover:text-luxury-200">
+            <Link to="/admin/categories" className="text-luxury-800 underline hover:text-luxury-900">
               Crear en Categorías
             </Link>
           </p>
@@ -193,7 +193,7 @@ export default function AdminDashboardPage() {
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold text-luxury-200">Productos recientes</h2>
+        <h2 className="text-lg font-semibold text-luxury-900">Productos recientes</h2>
 
         <div className="mt-4 flex items-center gap-2">
           <button
@@ -236,13 +236,13 @@ export default function AdminDashboardPage() {
                 />
                 <div className="space-y-1 p-3">
                   <h3 className="font-semibold text-neutral-100">{product.name}</h3>
-                  <p className="text-sm text-luxury-200">{formatCurrency(product.reference_price)}</p>
+                  <p className="text-sm text-luxury-800">{formatCurrency(product.reference_price)}</p>
                   <p className="text-xs text-neutral-500">{product.available ? "Disponible" : "No disponible"}</p>
                   <p className="text-xs text-neutral-500">{product.featured ? "Destacado" : "Estándar"}</p>
                   <Link
                     to="/admin/products"
                     state={{ editProductId: product.id }}
-                    className="mt-2 inline-block rounded-lg bg-luxury-400 px-3 py-1.5 text-xs font-semibold text-surface-base transition hover:bg-luxury-300"
+                    className="mt-2 inline-block rounded-lg bg-luxury-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-luxury-700"
                   >
                     Editar producto
                   </Link>

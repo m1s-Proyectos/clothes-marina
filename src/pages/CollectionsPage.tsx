@@ -22,8 +22,8 @@ export default function CollectionsPage() {
   return (
     <div className="container-shell py-16">
       <Seo title="Agregados Reciente" description="Explora los articulos mas recientes del catalogo." />
-      <h1 className="text-3xl font-semibold text-luxury-50">Agregados Reciente</h1>
-      <p className="mt-3 text-sm text-neutral-400">Aqui puedes ver los ultimos 10 articulos agregados, sin importar la categoria.</p>
+      <h1 className="text-3xl font-semibold text-slate-950">Agregados Reciente</h1>
+      <p className="mt-3 text-sm text-slate-600">Aqui puedes ver los ultimos 10 articulos agregados, sin importar la categoria.</p>
 
       <div className="mt-8">
         {loading ? (

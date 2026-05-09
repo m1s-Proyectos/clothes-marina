@@ -59,9 +59,9 @@ export function stripRedundantSpecsFromDescription(
   const keptLines = lines.filter((raw) => {
     const line = raw.trim();
     if (!line) return true;
-    if (hasBrand && /^(marca|brand)\s*[:：.\-]/i.test(line)) return false;
-    if (hasColor && /^color\s*[:：.\-]/i.test(line)) return false;
-    if (hasSize && /^(talla|tamaño|size)\s*[:：.\-]/i.test(line)) return false;
+    if (hasBrand && /^(marca|brand)\s*[:：.-]/i.test(line)) return false;
+    if (hasColor && /^color\s*[:：.-]/i.test(line)) return false;
+    if (hasSize && /^(talla|tamaño|size)\s*[:：.-]/i.test(line)) return false;
     return true;
   });
   text = keptLines.join("\n");

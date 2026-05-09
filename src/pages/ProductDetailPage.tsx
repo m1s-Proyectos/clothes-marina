@@ -39,6 +39,10 @@ export default function ProductDetailPage() {
     productService
       .getById(productId)
       .then(setProduct)
+      .catch((error) => {
+        console.warn("Unable to load product detail.", error);
+        setProduct(null);
+      })
       .finally(() => setLoading(false));
   }, [productId]);
 
@@ -47,7 +51,7 @@ export default function ProductDetailPage() {
     : null;
 
   if (loading) return <LoadingSpinner />;
-  if (!product || !shareParams) return <div className="container-shell py-20 text-neutral-400">Producto no encontrado.</div>;
+  if (!product || !shareParams) return <div className="container-shell py-20 text-slate-500">Producto no encontrado.</div>;
 
   function detailLine(value: string | null | undefined): string {
     const t = value != null ? String(value).trim() : "";
@@ -100,7 +104,7 @@ export default function ProductDetailPage() {
               if (window.history.length > 1) navigate(-1);
               else navigate("/catalog");
             }}
-            className="group inline-flex w-fit items-center gap-2 rounded-xl border-2 border-luxury-400/45 bg-luxury-500/15 px-5 py-2.5 text-sm font-semibold text-luxury-100 shadow-lg shadow-luxury-900/25 ring-1 ring-luxury-400/20 transition hover:border-luxury-300 hover:bg-luxury-500/25 hover:text-white"
+            className="group inline-flex w-fit items-center gap-2 rounded-xl border border-luxury-300/70 bg-white px-5 py-2.5 text-sm font-semibold text-luxury-800 shadow-sm shadow-luxury-900/5 ring-1 ring-luxury-100 transition hover:border-luxury-500 hover:bg-surface-hover hover:text-luxury-900"
           >
             <svg
               className="h-4 w-4 transition group-hover:-translate-x-0.5"
@@ -118,57 +122,75 @@ export default function ProductDetailPage() {
           </button>
 
           <section
-            className="relative overflow-hidden rounded-2xl border-2 border-luxury-400/35 bg-gradient-to-b from-surface-card via-surface-card to-surface-raised/90 p-6 shadow-[0_12px_48px_rgba(0,0,0,0.45)] ring-1 ring-luxury-500/15 md:p-8"
+            className="relative overflow-hidden rounded-2xl border border-luxury-200/70 bg-white p-6 shadow-xl shadow-luxury-900/10 ring-1 ring-luxury-100 md:p-8"
             aria-labelledby="product-detail-title"
           >
             <div
               className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-luxury-400/50 to-transparent"
               aria-hidden
             />
-            <h1 id="product-detail-title" className="text-3xl font-semibold leading-tight text-luxury-50">
+            <h1 id="product-detail-title" className="text-[2.0625rem] font-bold leading-tight tracking-tight text-slate-950 md:text-[2.1875rem]">
               {product.name}
             </h1>
 
             <div className="mt-6 border-b border-luxury-500/15 pb-6">
               {product.offer_active && product.offer_quantity && product.offer_price != null ? (
                 <div className="space-y-3">
-                  <p className="inline-flex items-baseline rounded-xl bg-luxury-500/20 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-luxury-100">
-                    {formatCurrency(product.reference_price)} <span className="ml-1.5 text-base font-normal text-luxury-300">x unidad</span>
+                  <p className="inline-flex items-baseline rounded-xl bg-luxury-100 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-luxury-900">
+                    {formatCurrency(product.reference_price)} <span className="ml-1.5 text-base font-normal text-luxury-700">x unidad</span>
                   </p>
-                  <p className="inline-flex flex-wrap items-center gap-3 rounded-xl bg-red-500/15 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-red-300">
+                  <p className="inline-flex flex-wrap items-center gap-3 rounded-xl bg-red-50 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-red-700">
                     {product.offer_quantity} x {formatCurrency(product.offer_price)}
-                    <span className="text-sm font-semibold uppercase tracking-wider text-red-200">¡Aprovecha nuestra oferta!</span>
+                    <span className="text-sm font-semibold uppercase tracking-wider text-red-600">¡Aprovecha nuestra oferta!</span>
                   </p>
                 </div>
               ) : (
-                <p className="inline-flex items-baseline rounded-xl bg-luxury-500/20 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-luxury-100">
-                  {formatCurrency(product.reference_price)} <span className="ml-1.5 text-base font-normal text-luxury-300">x unidad</span>
+                <p className="inline-flex items-baseline rounded-xl bg-luxury-100 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-luxury-900">
+                  {formatCurrency(product.reference_price)} <span className="ml-1.5 text-base font-normal text-luxury-700">x unidad</span>
                 </p>
               )}
             </div>
 
-            <div className="mt-6 rounded-xl border-2 border-luxury-400/25 bg-surface-base/70 p-4 shadow-inner shadow-black/20 sm:p-5">
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-luxury-300">Detalles del producto</p>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
-                <div>
-                  <span className="text-xs uppercase tracking-wider text-neutral-500">Marca</span>
-                  <p className="mt-1 font-semibold text-neutral-100">{detailLine(displayBrand)}</p>
-                </div>
-                <div>
-                  <span className="text-xs uppercase tracking-wider text-neutral-500">Color</span>
-                  <p className="mt-1 font-semibold text-neutral-100">{detailLine(displayColor)}</p>
-                </div>
-                <div>
-                  <span className="text-xs uppercase tracking-wider text-neutral-500">Talla</span>
-                  <p className="mt-1 font-semibold text-neutral-100">{detailLine(displaySize)}</p>
-                </div>
+            <div
+              className="relative mt-6 overflow-hidden rounded-2xl border border-sky-200/35 p-5 shadow-md shadow-sky-900/[0.05] sm:p-6 md:p-7"
+              style={{
+                background: "linear-gradient(180deg, #eef6ff 0%, #e4f0ff 45%, #dcecff 100%)"
+              }}
+              role="region"
+              aria-label="Detalles del producto"
+            >
+              <div
+                className="pointer-events-none absolute inset-0 opacity-100"
+                style={{
+                  background:
+                    "radial-gradient(ellipse 85% 55% at 50% -15%, rgba(120, 180, 255, 0.14), transparent 58%), radial-gradient(ellipse 70% 40% at 100% 100%, rgba(207, 231, 255, 0.35), transparent 55%)"
+                }}
+                aria-hidden
+              />
+              <div className="relative z-[1]">
+                <p className="mb-4 font-sans text-[13px] font-semibold tracking-wide text-slate-700">Detalles del producto</p>
+                <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  {[
+                    { label: "Marca", value: detailLine(displayBrand) },
+                    { label: "Color", value: detailLine(displayColor) },
+                    { label: "Talla", value: detailLine(displaySize) }
+                  ].map((item) => (
+                    <li
+                      key={item.label}
+                      className="rounded-xl border border-white/85 bg-white/75 px-4 py-3.5 shadow-sm shadow-sky-900/[0.04] backdrop-blur-[2px] transition duration-200 ease-out hover:border-sky-200/60 hover:bg-white/92 hover:shadow-md hover:shadow-sky-900/[0.06]"
+                    >
+                      <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-600">{item.label}</span>
+                      <span className="mt-2 block text-base font-semibold leading-snug tracking-tight text-slate-950 md:text-[1.0625rem]">{item.value}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
 
             {descriptionForDisplay ? (
               <div className="mt-6 border-t border-luxury-500/15 pt-6">
-                <h2 className="text-lg font-semibold text-luxury-200">Descripción</h2>
-                <p className="mt-3 leading-relaxed text-neutral-300">{descriptionForDisplay}</p>
+                <h2 className="text-lg font-semibold text-luxury-800">Descripción</h2>
+                <p className="mt-3 leading-relaxed text-slate-600">{descriptionForDisplay}</p>
               </div>
             ) : null}
           </section>
@@ -181,7 +203,7 @@ export default function ProductDetailPage() {
                 window.open(getWhatsAppOrderUrl(shareParams), "_blank", "noopener,noreferrer");
                 setShowReturnButton(true);
               }}
-              className="rounded-xl bg-luxury-400 px-7 py-3 text-base font-extrabold text-surface-base shadow-lg shadow-luxury-900/25 transition hover:bg-luxury-300 hover:shadow-xl"
+              className="rounded-xl bg-luxury-600 px-7 py-3 text-base font-extrabold text-white shadow-lg shadow-luxury-900/15 transition hover:bg-luxury-700 hover:shadow-xl"
             >
               Solicitar producto
             </button>
@@ -191,7 +213,7 @@ export default function ProductDetailPage() {
                 setShareNote("");
                 setShareModalOpen(true);
               }}
-              className="inline-flex items-center gap-2 rounded-xl border-2 border-luxury-400/50 bg-surface-card px-7 py-3 text-base font-semibold text-luxury-100 transition hover:border-luxury-300 hover:bg-surface-hover"
+              className="inline-flex items-center gap-2 rounded-xl border border-luxury-300/70 bg-white px-7 py-3 text-base font-semibold text-luxury-800 transition hover:border-luxury-500 hover:bg-surface-hover"
             >
               <svg
                 className="h-5 w-5 shrink-0"
@@ -209,7 +231,7 @@ export default function ProductDetailPage() {
             </button>
           </div>
 
-          {shareNote ? <p className="text-sm text-neutral-400">{shareNote}</p> : null}
+          {shareNote ? <p className="text-sm text-slate-500">{shareNote}</p> : null}
           {showReturnButton && <ReturnToSiteBar onClose={() => setShowReturnButton(false)} />}
 
           <ProductShareModal

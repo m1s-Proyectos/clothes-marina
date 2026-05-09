@@ -15,7 +15,6 @@ export const whatsAppLeadService = {
 
     if (error) {
       // Tracking should never block customer navigation.
-      // eslint-disable-next-line no-console
       console.warn("Unable to register WhatsApp lead.", error.message);
     }
   }

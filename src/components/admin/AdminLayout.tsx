@@ -15,10 +15,10 @@ export default function AdminLayout() {
     <div className="min-h-screen bg-surface-base">
       <header className="border-b border-luxury-500/10 bg-surface-raised/60 backdrop-blur-lg">
         <div className="container-shell flex h-14 items-center justify-between">
-          <Link to="/" className="text-sm text-luxury-300 transition hover:text-luxury-200">
+          <Link to="/" className="text-sm text-luxury-800 transition hover:text-luxury-900">
             &larr; Volver al sitio
           </Link>
-          <button onClick={() => void logout()} className="rounded-lg border border-luxury-500/15 bg-surface-card px-3 py-1.5 text-xs text-neutral-400 transition hover:text-neutral-200">
+          <button onClick={() => void logout()} className="rounded-lg border border-luxury-200/70 bg-surface-card px-3 py-1.5 text-xs text-slate-600 transition hover:text-slate-950">
             Cerrar sesion
           </button>
         </div>
@@ -31,7 +31,7 @@ export default function AdminLayout() {
               to={link.to}
               end={"end" in link}
               className={({ isActive }) =>
-                `rounded-lg px-3 py-1.5 transition-colors ${isActive ? "bg-luxury-500/15 text-luxury-200 font-medium" : "text-neutral-400 hover:bg-surface-card hover:text-neutral-200"}`
+                `rounded-lg px-3 py-1.5 transition-colors ${isActive ? "bg-luxury-100 text-luxury-900 font-medium" : "text-slate-600 hover:bg-surface-card hover:text-slate-950"}`
               }
             >
               {link.label}

@@ -1,3 +1,4 @@
+import env from "@/config/env";
 import { supabase } from "@/lib/supabase";
 import type { Product, ProductSort } from "@/types";
 import { improveSpanishText, normalizeProductText } from "@/utils/spanishTextNormalize";
@@ -21,7 +22,11 @@ interface ProductQueryOptions {
   onlyAvailable?: boolean;
 }
 
-function applySorting(query: any, sort: ProductSort = "newest") {
+type SortableProductQuery<T> = {
+  order(column: string, options: { ascending: boolean }): T;
+};
+
+function applySorting<T extends SortableProductQuery<T>>(query: T, sort: ProductSort = "newest"): T {
   if (sort === "alphabetical") return query.order("name", { ascending: true });
   if (sort === "availability") return query.order("available", { ascending: false });
   if (sort === "featured") return query.order("featured", { ascending: false }).order("created_at", { ascending: false });
@@ -30,6 +35,8 @@ function applySorting(query: any, sort: ProductSort = "newest") {
 
 export const productService = {
   async list(options: ProductQueryOptions = {}): Promise<Product[]> {
+    if (!env.isSupabaseConfigured) return [];
+
     let query = supabase.from("products").select(`
       *,
       categories:category_id!inner (id, name, slug),
@@ -53,6 +60,8 @@ export const productService = {
   },
 
   async getById(id: string): Promise<Product | null> {
+    if (!env.isSupabaseConfigured) return null;
+
     const { data, error } = await supabase
       .from("products")
       .select("*, categories:category_id (id, name, slug), product_images (*)")
@@ -63,6 +72,8 @@ export const productService = {
   },
 
   async getFeatured(limit = 6): Promise<Product[]> {
+    if (!env.isSupabaseConfigured) return [];
+
     const { data, error } = await supabase
       .from("products")
       .select("*, categories:category_id (id, name, slug)")

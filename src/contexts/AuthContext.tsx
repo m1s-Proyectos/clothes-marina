@@ -9,7 +9,6 @@ interface AuthContextValue {
   loading: boolean;
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
-  loginWithGitHub: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -45,7 +44,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
       loading,
       isAdmin,
       login: authService.login,
-      loginWithGitHub: authService.loginWithGitHub,
       logout: authService.logout
     }),
     [session, loading, isAdmin]

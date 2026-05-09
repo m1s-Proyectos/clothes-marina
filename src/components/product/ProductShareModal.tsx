@@ -35,7 +35,7 @@ const options: {
   { id: "whatsapp", label: "WhatsApp", Icon: IconWhatsApp, className: "bg-[#25D366] text-white hover:brightness-110" },
   { id: "facebook", label: "Facebook", Icon: IconFacebook, className: "bg-[#1877F2] text-white hover:brightness-110" },
   { id: "messenger", label: "Messenger", Icon: IconMessenger, className: "bg-[#0099FF] text-white hover:brightness-110" },
-  { id: "x", label: "X", Icon: IconX, className: "bg-neutral-900 text-white hover:bg-neutral-800" },
+  { id: "x", label: "X", Icon: IconX, className: "bg-slate-900 text-white hover:bg-slate-800" },
   {
     id: "instagram",
     label: "Instagram",
@@ -122,16 +122,16 @@ export default function ProductShareModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-luxury-500/15 bg-surface-card shadow-2xl shadow-black/40"
+        className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-luxury-200/70 bg-white shadow-2xl shadow-luxury-900/15"
       >
-        <div className="flex items-start justify-between gap-3 border-b border-luxury-500/10 px-5 py-4">
-          <h2 id={titleId} className="pr-2 text-lg font-semibold leading-snug text-luxury-50">
+        <div className="flex items-start justify-between gap-3 border-b border-luxury-200/70 px-5 py-4">
+          <h2 id={titleId} className="pr-2 text-lg font-semibold leading-snug text-slate-950">
             Compartir en tus redes favoritas
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-neutral-400 transition hover:bg-surface-hover hover:text-neutral-200"
+            className="rounded-lg p-1.5 text-slate-500 transition hover:bg-surface-hover hover:text-slate-800"
             aria-label="Cerrar ventana"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>

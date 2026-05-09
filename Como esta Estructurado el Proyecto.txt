@@ -9,7 +9,7 @@ En src/hooks/useDebounce.ts (usado en catálogo), se retrasa la búsqueda para n
 src/services/productService.ts maneja CRUD de productos: listar, buscar, filtrar, ordenar, actualizar y borrar.
 src/services/categoryService.ts hace CRUD de categorías.
 src/services/storageService.ts sube imágenes al bucket product-images en Supabase Storage.
-src/services/authService.ts maneja login por email/password y GitHub OAuth, logout y validación de rol admin.
+src/services/authService.ts maneja login por email/password, logout y validación de rol admin.
 src/services/contactService.ts usa axios para enviar formularios a un endpoint /contact (si está configurado).
 3) Clientes/base técnica
 src/lib/supabase.ts crea el cliente de Supabase (auth + DB + storage).
@@ -41,7 +41,7 @@ Animaciones: Framer Motion
 SEO meta tags: react-helmet-async
 Backend as a Service: Supabase
 Postgres (datos)
-Auth (email + GitHub OAuth)
+Auth (email/contraseña)
 Storage (imágenes)
 SQL/RLS en carpeta supabase/
 HTTP extra: Axios (para contacto/edge endpoint)

@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useReducedMotion } from "framer-motion";
 import OptimizedImage from "@/components/common/OptimizedImage";
@@ -29,7 +29,7 @@ export default function CategoryMarqueePanel({ items }: CategoryMarqueePanelProp
   const loopItems = items.length > 0 ? [...items, ...items] : [];
 
   /** Mitad del scroll total = longitud de una copia del listado (bucle infinito). */
-  const measureLoopSegment = () => {
+  const measureLoopSegment = useCallback(() => {
     const el = scrollRef.current;
     if (!el || items.length === 0) {
       setLoopSegmentPx(0);
@@ -37,7 +37,7 @@ export default function CategoryMarqueePanel({ items }: CategoryMarqueePanelProp
     }
     const half = el.scrollWidth / 2;
     if (half > 0) setLoopSegmentPx(half);
-  };
+  }, [items.length]);
 
   measureRef.current = measureLoopSegment;
 
@@ -64,7 +64,7 @@ export default function CategoryMarqueePanel({ items }: CategoryMarqueePanelProp
       ro.disconnect();
       window.removeEventListener("resize", runMeasure);
     };
-  }, [items]);
+  }, [items, measureLoopSegment]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -123,15 +123,15 @@ export default function CategoryMarqueePanel({ items }: CategoryMarqueePanelProp
 
   return (
     <section className="relative" aria-labelledby="home-categories-heading">
-      <h2 id="home-categories-heading" className="section-title mb-3 text-luxury-50">
+      <h2 id="home-categories-heading" className="section-title mb-3 text-slate-950">
         Categorías
       </h2>
-      <p className="mb-6 max-w-3xl text-sm leading-relaxed text-neutral-400 sm:text-base">
+      <p className="mb-6 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base">
         Puedes arrastrar o usar la rueda para ir a una categoría. Selecciona una categoría si deseas una en específico.
       </p>
 
       <div
-        className="relative overflow-hidden rounded-2xl border border-luxury-500/20 bg-surface-card/60 shadow-[inset_0_1px_0_rgba(200,166,108,0.08)] ring-1 ring-luxury-500/10 backdrop-blur-sm"
+        className="relative overflow-hidden rounded-2xl border border-luxury-200/70 bg-white/85 shadow-sm shadow-luxury-900/5 ring-1 ring-luxury-100"
         onTouchStart={pauseFromTouch}
         onTouchEnd={pauseFromTouch}
       >
@@ -148,7 +148,7 @@ export default function CategoryMarqueePanel({ items }: CategoryMarqueePanelProp
           <div
             ref={scrollRef}
             onWheel={pauseFromWheel}
-            className="cursor-grab overflow-x-auto px-4 py-5 [scrollbar-width:thin] [scrollbar-color:rgba(200,166,108,0.35)_transparent] active:cursor-grabbing sm:px-6 sm:py-6 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-luxury-500/35 [&::-webkit-scrollbar-track]:bg-transparent"
+          className="cursor-grab overflow-x-auto px-4 py-5 [scrollbar-width:thin] [scrollbar-color:rgba(100,157,183,0.35)_transparent] active:cursor-grabbing sm:px-6 sm:py-6 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-luxury-400/45 [&::-webkit-scrollbar-track]:bg-transparent"
           >
             {/* Sin esto, en pantallas anchas todo cabe y scrollLeft no puede moverse: el auto-scroll no se ve. */}
             <div className="flex w-max min-w-[calc(100%+3rem)] gap-4 sm:gap-5">
@@ -156,7 +156,7 @@ export default function CategoryMarqueePanel({ items }: CategoryMarqueePanelProp
                 <Link
                   key={`${item.slug}-${index}`}
                   to={`/catalog/${item.slug}`}
-                  className="group relative h-[118px] w-[168px] shrink-0 overflow-hidden rounded-xl border border-luxury-500/15 bg-surface-raised transition duration-300 hover:border-luxury-400/45 hover:shadow-lg hover:shadow-luxury-900/25 sm:h-[140px] sm:w-[200px]"
+                  className="group relative h-[118px] w-[168px] shrink-0 overflow-hidden rounded-xl border border-luxury-200/70 bg-white transition duration-300 hover:border-luxury-400/55 hover:shadow-lg hover:shadow-luxury-900/12 sm:h-[140px] sm:w-[200px]"
                 >
                   {item.imageUrl ? (
                     <OptimizedImage
@@ -170,12 +170,12 @@ export default function CategoryMarqueePanel({ items }: CategoryMarqueePanelProp
                     />
                   ) : (
                     <div
-                      className="absolute inset-0 bg-gradient-to-br from-luxury-900/50 via-surface-raised to-surface-base"
+                      className="absolute inset-0 bg-gradient-to-br from-luxury-100 via-white to-surface-base"
                       aria-hidden
                     />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-surface-base via-surface-base/40 to-transparent" />
-                  <span className="relative z-10 flex h-full flex-col justify-end p-3.5 font-serif text-xl leading-tight tracking-wide text-luxury-50 drop-shadow-md sm:p-4 sm:text-2xl">
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-slate-900/10 to-transparent" />
+                  <span className="relative z-10 flex h-full flex-col justify-end p-3.5 font-serif text-xl leading-tight tracking-wide text-white drop-shadow-md sm:p-4 sm:text-2xl">
                     {item.title}
                   </span>
                 </Link>

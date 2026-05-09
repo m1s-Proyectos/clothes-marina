@@ -16,7 +16,6 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
-    // eslint-disable-next-line no-console
     console.error("ErrorBoundary caught:", error, info);
   }
 
@@ -25,7 +24,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="container-shell py-24 text-center">
           <h2 className="text-2xl font-semibold">Something went wrong</h2>
-          <p className="mt-2 text-neutral-400">Please refresh the page.</p>
+          <p className="mt-2 text-slate-500">Please refresh the page.</p>
         </div>
       );
     }

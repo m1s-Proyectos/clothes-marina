@@ -7,11 +7,16 @@ interface OptimizedImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 
   responsiveWidths?: number[];
 }
 
+const FALLBACK_IMAGE =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Crect width='4' height='5' fill='%23f7f5f2'/%3E%3C/svg%3E";
+
 export default function OptimizedImage({ src, transform, responsiveWidths, ...imgProps }: OptimizedImageProps) {
-  // Some Supabase projects return 403 for image transformation endpoints.
-  // Keep direct public URLs enabled for maximum compatibility.
-  const canOptimize = false && isSupabasePublicImage(src);
-  const optimizedSrc = useMemo(() => (canOptimize ? getOptimizedImageUrl(src, transform) : src), [canOptimize, src, transform]);
+  const safeSrc = src || FALLBACK_IMAGE;
+  const canOptimize = Boolean(transform) && isSupabasePublicImage(safeSrc);
+  const optimizedSrc = useMemo(
+    () => (canOptimize ? getOptimizedImageUrl(safeSrc, transform) : safeSrc),
+    [canOptimize, safeSrc, transform],
+  );
 
   const [currentSrc, setCurrentSrc] = useState(optimizedSrc);
   const [useFallback, setUseFallback] = useState(false);
@@ -24,7 +29,7 @@ export default function OptimizedImage({ src, transform, responsiveWidths, ...im
   const srcSet =
     !useFallback && canOptimize && responsiveWidths && responsiveWidths.length > 0
       ? responsiveWidths
-          .map((width) => `${getOptimizedImageUrl(src, { ...transform, width })} ${width}w`)
+          .map((width) => `${getOptimizedImageUrl(safeSrc, { ...transform, width })} ${width}w`)
           .join(", ")
       : undefined;
 
@@ -34,13 +39,13 @@ export default function OptimizedImage({ src, transform, responsiveWidths, ...im
       src={currentSrc}
       srcSet={srcSet}
       onError={(event) => {
-        if (useFallback || currentSrc === src) {
+        if (useFallback || currentSrc === safeSrc) {
           imgProps.onError?.(event);
           return;
         }
 
         setUseFallback(true);
-        setCurrentSrc(src);
+        setCurrentSrc(safeSrc);
         imgProps.onError?.(event);
       }}
     />

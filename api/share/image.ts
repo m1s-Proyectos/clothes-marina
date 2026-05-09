@@ -4,6 +4,15 @@ const OG_WIDTH = 1200;
 const OG_HEIGHT = 630;
 const PADDING = 36;
 
+interface ApiRequest {
+  query?: Record<string, string | string[] | undefined>;
+}
+
+interface ApiResponse {
+  setHeader(name: string, value: string): void;
+  status(code: number): { send(body: string | Buffer): void };
+}
+
 function getEnv(name: string, fallback = ""): string {
   return process.env[name] || fallback;
 }
@@ -62,7 +71,7 @@ async function buildOgImage(sourceBuffer: Buffer): Promise<Buffer> {
     .toBuffer();
 }
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: ApiRequest, res: ApiResponse) {
   const productId = typeof req.query?.id === "string" ? req.query.id : "";
   const imageFromQuery = typeof req.query?.img === "string" ? req.query.img : "";
 

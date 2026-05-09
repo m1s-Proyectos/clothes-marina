@@ -1,3 +1,4 @@
+import env from "@/config/env";
 import { supabase } from "@/lib/supabase";
 import type { Category } from "@/types";
 import { improveSpanishText } from "@/utils/spanishTextNormalize";
@@ -8,6 +9,8 @@ function normalizeCategoryRow(category: Category): Category {
 
 export const categoryService = {
   async getAll(): Promise<Category[]> {
+    if (!env.isSupabaseConfigured) return [];
+
     const { data, error } = await supabase
       .from("categories")
       .select("*")

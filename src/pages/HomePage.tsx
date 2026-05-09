@@ -61,6 +61,11 @@ export default function HomePage() {
         setFeatured(featuredProducts);
         setHomeCategories(pickHomeCategories(categories));
       })
+      .catch((error) => {
+        console.warn("Unable to load home catalog data.", error);
+        setFeatured([]);
+        setHomeCategories([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -78,10 +83,8 @@ export default function HomePage() {
           decoding="async"
           className="h-full w-full object-cover brightness-[1.06] saturate-[1.05]"
         />
-        {/* Velos mas claros: la foto se ve mejor; texto sigue legible con sombra suave */}
-        <div className="absolute inset-0 bg-gradient-to-r from-surface-base/55 via-surface-base/28 to-surface-base/5" />
-        <div className="absolute inset-0 bg-gradient-to-t from-surface-base/35 via-transparent to-luxury-50/10" />
-        <div className="absolute inset-0 bg-gradient-to-br from-luxury-100/15 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-white/82 via-luxury-50/45 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-surface-base/55 via-transparent to-white/10" />
 
         <div className="absolute inset-0 flex items-center">
           <div className="container-shell">
@@ -89,7 +92,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="mb-4 inline-block rounded-full border border-luxury-400/40 bg-surface-raised/70 px-4 py-1.5 text-[11px] uppercase tracking-[0.22em] text-luxury-200 backdrop-blur-sm"
+              className="mb-4 inline-block rounded-full border border-luxury-300/70 bg-white/80 px-4 py-1.5 text-[11px] uppercase tracking-[0.22em] text-luxury-800 backdrop-blur-sm"
             >
               Marina&apos;s Clothes
             </motion.p>
@@ -97,7 +100,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.65 }}
-              className="max-w-2xl text-3xl leading-tight drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)] sm:text-4xl md:text-5xl lg:text-6xl"
+              className="max-w-2xl text-3xl leading-tight text-slate-950 drop-shadow-[0_2px_18px_rgba(255,255,255,0.65)] sm:text-4xl md:text-5xl lg:text-6xl"
             >
               Ropa nueva con estilo, al mejor precio para cada ocasión.
             </motion.h1>
@@ -105,14 +108,14 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              className="mt-4 max-w-lg text-sm leading-relaxed text-neutral-200 drop-shadow-sm sm:text-base"
+              className="mt-4 max-w-lg text-sm leading-relaxed text-slate-700 drop-shadow-sm sm:text-base"
             >
               Colecciones para mujer, hombre, niños, niñas y hogar con enfoque en calidad, combinación y presencia.
             </motion.p>
             <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.95 }}>
               <Link
                 to="/catalog"
-                className="mt-7 inline-block rounded-full bg-luxury-400 px-7 py-3 text-sm font-semibold uppercase tracking-wide text-surface-base shadow-lg shadow-luxury-900/30 transition hover:-translate-y-0.5 hover:bg-luxury-300 hover:shadow-xl hover:shadow-luxury-900/40"
+                className="mt-7 inline-block rounded-full bg-luxury-600 px-7 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-luxury-900/15 transition hover:-translate-y-0.5 hover:bg-luxury-700 hover:shadow-xl hover:shadow-luxury-900/20"
               >
                 Ver Catalogo Completo
               </Link>
@@ -130,18 +133,18 @@ export default function HomePage() {
       <section className="container-shell pb-16 pt-2">
         <div className="mb-8 flex items-end justify-between gap-3">
           <div>
-            <h2 className="section-title text-luxury-50">Productos Destacados</h2>
-            <p className="text-sm text-neutral-400">Selecciones pensadas para destacar tu estilo diario.</p>
+            <h2 className="section-title text-slate-950">Productos Destacados</h2>
+            <p className="text-sm text-slate-600">Selecciones pensadas para destacar tu estilo diario.</p>
           </div>
           <Link
             to="/catalog"
-            className="hidden rounded-full border border-luxury-500/50 px-5 py-2 text-xs uppercase tracking-[0.12em] text-luxury-200 transition hover:border-luxury-300 hover:text-luxury-100 md:inline-block"
+            className="hidden rounded-full border border-luxury-300/70 bg-white px-5 py-2 text-xs uppercase tracking-[0.12em] text-luxury-800 transition hover:border-luxury-500 hover:text-luxury-900 md:inline-block"
           >
             Ver todos
           </Link>
         </div>
         {loading ? (
-          <p className="text-neutral-400">Cargando productos Destacados...</p>
+          <p className="text-slate-500">Cargando productos Destacados...</p>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {featured.map((product) => (

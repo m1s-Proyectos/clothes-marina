@@ -5,21 +5,40 @@
 @tailwind utilities;
 
 :root {
-  --bg-base: #141720;
-  --bg-panel: #1a1e2e;
-  --bg-card: #1e2235;
-  --text-main: #f0eee8;
-  --text-soft: #a8adb8;
-  --accent-gold: #c8a66c;
-  --border-subtle: rgba(200, 166, 108, 0.12);
+  --bg-base: #f3f8fb;
+  --bg-panel: #ffffff;
+  --bg-card: #ffffff;
+  --text-main: #1d2d38;
+  --text-soft: #5f7280;
+  --accent-gold: #649db7;
+  --border-subtle: rgba(100, 157, 183, 0.18);
 }
 
 body {
   font-family: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: linear-gradient(172deg, #171b28 0%, #141720 50%, #12151f 100%);
+  background:
+    radial-gradient(ellipse 80% 55% at 8% -10%, rgba(189, 220, 233, 0.45), transparent 42%),
+    linear-gradient(180deg, #f8fbfd 0%, #f3f8fb 48%, #eef5f8 100%);
   color: var(--text-main);
   min-height: 100vh;
   letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Password fields: system font for mask glyphs; force dark glyphs/caret for contrast on light backgrounds. */
+input[type="password"] {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #0f172a;
+  caret-color: #0f172a;
+}
+
+/* Keep autofill readable (Chrome/Safari text fill vs background). */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #0f172a;
+  box-shadow: 0 0 0 1000px #ffffff inset;
+  transition: background-color 99999s ease-out 0s;
 }
 
 h1,
@@ -39,7 +58,7 @@ h4 {
 }
 
 .glass-panel {
-  background: linear-gradient(160deg, rgba(30, 34, 53, 0.85), rgba(26, 30, 46, 0.6));
+  background: rgba(255, 255, 255, 0.78);
   border: 1px solid var(--border-subtle);
   backdrop-filter: blur(10px);
 }

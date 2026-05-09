@@ -36,7 +36,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="group overflow-hidden rounded-2xl border border-luxury-500/10 bg-surface-card transition-all duration-200 hover:border-luxury-400/25 hover:shadow-xl hover:shadow-luxury-900/10"
+      className="group overflow-hidden rounded-2xl border border-luxury-200/70 bg-white transition-all duration-200 hover:border-luxury-400/45 hover:shadow-xl hover:shadow-luxury-900/10"
     >
       <Link to={productUrl} aria-label={`Ver detalles de ${product.name}`}>
         <div className="flex aspect-[4/5] items-center justify-center bg-luxury-50 p-3">
@@ -56,30 +56,30 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
       </Link>
       <div className="space-y-3 p-5">
-        <h3 className="text-lg font-semibold leading-snug text-neutral-100">
-          <Link to={productUrl} className="transition hover:text-luxury-200">
+        <h3 className="text-[1.3125rem] font-bold leading-snug text-slate-950">
+          <Link to={productUrl} className="transition hover:text-luxury-800">
             {product.name}
           </Link>
         </h3>
         {product.offer_active && product.offer_quantity && product.offer_price != null ? (
           <div className="space-y-1.5">
-            <p className="inline-flex items-baseline rounded-lg bg-luxury-500/15 px-3 py-2 text-xl font-extrabold tracking-wide text-luxury-200">
-              {formatCurrency(product.reference_price)} <span className="ml-1.5 text-sm font-normal text-luxury-300">x unidad</span>
+            <p className="inline-flex items-baseline rounded-lg bg-luxury-100 px-3 py-2 text-xl font-extrabold tracking-wide text-luxury-900">
+              {formatCurrency(product.reference_price)} <span className="ml-1.5 text-sm font-normal text-luxury-700">x unidad</span>
             </p>
-            <p className="inline-flex items-center gap-2 rounded-lg bg-red-500/15 px-3 py-2 text-xl font-extrabold tracking-wide text-red-400">
+            <p className="inline-flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-xl font-extrabold tracking-wide text-red-700">
               {product.offer_quantity} x {formatCurrency(product.offer_price)}
-              <span className="text-xs font-semibold uppercase tracking-wider text-red-300">¡Aprovecha nuestra oferta!</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-red-600">¡Aprovecha nuestra oferta!</span>
             </p>
           </div>
         ) : (
-          <p className="inline-flex items-baseline rounded-lg bg-luxury-500/15 px-3 py-2 text-xl font-extrabold tracking-wide text-luxury-200">
-            {formatCurrency(product.reference_price)} <span className="ml-1.5 text-sm font-normal text-luxury-300">x unidad</span>
+          <p className="inline-flex items-baseline rounded-lg bg-luxury-100 px-3 py-2 text-xl font-extrabold tracking-wide text-luxury-900">
+            {formatCurrency(product.reference_price)} <span className="ml-1.5 text-sm font-normal text-luxury-700">x unidad</span>
           </p>
         )}
         <div className="space-y-2 pt-1">
           <Link
             to={productUrl}
-            className="block w-full rounded-xl bg-luxury-400 px-4 py-2.5 text-center text-sm font-bold text-surface-base shadow-md shadow-luxury-900/15 transition hover:bg-luxury-300 hover:shadow-lg"
+            className="block w-full rounded-xl bg-luxury-600 px-4 py-2.5 text-center text-sm font-bold text-white shadow-md shadow-luxury-900/15 transition hover:bg-luxury-700 hover:shadow-lg"
           >
             Ver Detalles Producto
           </Link>

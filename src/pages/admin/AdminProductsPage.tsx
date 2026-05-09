@@ -281,7 +281,7 @@ export default function AdminProductsPage() {
                 <div>
                   <p className="font-semibold">{product.name}</p>
                   <p className="mt-1 line-clamp-2 text-xs text-neutral-300">{product.description}</p>
-                  <p className="text-xs text-luxury-100">
+                  <p className="text-xs text-luxury-800">
                     {formatCurrency(product.reference_price)}
                     {product.offer_active && product.offer_quantity && product.offer_price != null && (
                       <span className="ml-2 rounded bg-red-600/20 px-1.5 py-0.5 text-red-400">
