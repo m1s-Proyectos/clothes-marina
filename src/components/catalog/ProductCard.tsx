@@ -75,18 +75,18 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       {/* ── Caption ── */}
       <div className="px-3 pb-3 pt-2.5">
-        {/* Name — sans-serif only (overrides global h3 serif rule), 2-line max */}
-        <h3 className="line-clamp-2 font-sans text-[13.5px] font-normal leading-snug tracking-[0.005em] text-neutral-800 sm:text-[14.5px]">
+        {/* Name — sans-serif, always visible up to 2 lines, clearly readable */}
+        <h3 className="line-clamp-2 font-sans text-[14px] font-medium leading-normal tracking-[0.005em] text-neutral-900 sm:text-[15px]">
           <Link to={productUrl} className="transition-colors hover:text-luxury-700">
             {product.name}
           </Link>
         </h3>
 
-        {/* Price — one step heavier than name, luxury gold-brown */}
-        <div className="mt-1">
+        {/* Price — slightly larger than name, distinct gold-brown, clearly secondary to image */}
+        <div className="mt-2">
           {product.offer_active && product.offer_quantity && product.offer_price != null ? (
-            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
-              <span className="font-sans text-[13.5px] font-medium text-luxury-700">
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+              <span className="font-sans text-[15px] font-semibold text-luxury-700 sm:text-[16px]">
                 {product.offer_quantity} x {formatCurrency(product.offer_price)}
               </span>
               <span className="font-sans text-[12px] font-normal text-neutral-400 line-through">
@@ -94,7 +94,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               </span>
             </div>
           ) : (
-            <span className="font-sans text-[13.5px] font-medium text-luxury-700">
+            <span className="font-sans text-[15px] font-semibold text-luxury-700 sm:text-[16px]">
               {formatCurrency(product.reference_price)}
             </span>
           )}
