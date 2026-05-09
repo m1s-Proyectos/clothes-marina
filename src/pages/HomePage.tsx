@@ -23,13 +23,12 @@ function normalizeText(value: string): string {
 }
 
 function pickHomeCategories(categories: Category[]): HomeCategoryCard[] {
-  /** Orden importa: Niñas antes que Niños para no mezclar slugs (ninas vs ninos). Cada categoría solo se usa una vez. */
   const targets = [
     { title: "Mujer", keywords: ["women", "mujer"] },
     { title: "Hombre", keywords: ["men", "hombre"] },
     { title: "Niñas", keywords: ["ninas", "girls", "girl"] },
     { title: "Niños", keywords: ["ninos", "kids", "infantil", "boys", "boy"] },
-    { title: "Prendas para el hogar", keywords: ["hogar", "home", "casa", "household"] }
+    { title: "Prendas para el hogar", keywords: ["hogar", "home", "casa", "household"] },
   ];
 
   const usedIds = new Set<string>();
@@ -50,6 +49,13 @@ function pickHomeCategories(categories: Category[]): HomeCategoryCard[] {
     .filter((item): item is HomeCategoryCard => item !== null);
 }
 
+const TRUST_STATS = [
+  "500+ productos disponibles",
+  "Envío local",
+  "Atención personalizada",
+  "Nueva llegada cada semana",
+];
+
 export default function HomePage() {
   const [featured, setFeatured] = useState<Product[]>([]);
   const [homeCategories, setHomeCategories] = useState<HomeCategoryCard[]>([]);
@@ -69,7 +75,7 @@ export default function HomePage() {
       <Seo title="Inicio" description="Descubre colecciones de ropa premium en Marina's Clothes." />
 
       {/* ── Hero ── */}
-      <section className="relative h-[72vh] min-h-[420px] overflow-hidden">
+      <section className="relative h-[85vh] min-h-[480px] overflow-hidden">
         <OptimizedImage
           src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=1920&auto=format&fit=crop"
           alt="Ropa nueva y con estilo a buen precio para cada ocasión"
@@ -78,17 +84,16 @@ export default function HomePage() {
           decoding="async"
           className="h-full w-full object-cover brightness-[1.06] saturate-[1.05]"
         />
-        {/* Velos mas claros: la foto se ve mejor; texto sigue legible con sombra suave */}
-        <div className="absolute inset-0 bg-gradient-to-r from-surface-base/55 via-surface-base/28 to-surface-base/5" />
-        <div className="absolute inset-0 bg-gradient-to-t from-surface-base/35 via-transparent to-luxury-50/10" />
-        <div className="absolute inset-0 bg-gradient-to-br from-luxury-100/15 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-surface-base/65 via-surface-base/30 to-surface-base/5" />
+        <div className="absolute inset-0 bg-gradient-to-t from-surface-base/60 via-transparent to-transparent" />
 
-        <div className="absolute inset-0 flex items-center">
+        {/* Hero copy */}
+        <div className="absolute inset-0 flex items-center pb-20">
           <div className="container-shell">
             <motion.p
-              initial={{ opacity: 0, y: 14 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.4 }}
               className="mb-4 inline-block rounded-full border border-luxury-400/40 bg-surface-raised/70 px-4 py-1.5 text-[11px] uppercase tracking-[0.22em] text-luxury-200 backdrop-blur-sm"
             >
               Marina&apos;s Clothes
@@ -96,29 +101,64 @@ export default function HomePage() {
             <motion.h1
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.65 }}
-              className="max-w-2xl text-3xl leading-tight drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)] sm:text-4xl md:text-5xl lg:text-6xl"
+              transition={{ duration: 0.55, delay: 0.12 }}
+              className="max-w-2xl text-balance text-3xl leading-tight drop-shadow-[0_2px_24px_rgba(0,0,0,0.5)] sm:text-4xl md:text-5xl lg:text-6xl"
             >
               Ropa nueva con estilo, al mejor precio para cada ocasión.
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 0.55, delay: 0.26 }}
               className="mt-4 max-w-lg text-sm leading-relaxed text-neutral-200 drop-shadow-sm sm:text-base"
             >
               Colecciones para mujer, hombre, niños, niñas y hogar con enfoque en calidad, combinación y presencia.
             </motion.p>
-            <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.95 }}>
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.4 }}
+            >
               <Link
-                to="/catalog"
-                className="mt-7 inline-block rounded-full bg-luxury-400 px-7 py-3 text-sm font-semibold uppercase tracking-wide text-surface-base shadow-lg shadow-luxury-900/30 transition hover:-translate-y-0.5 hover:bg-luxury-300 hover:shadow-xl hover:shadow-luxury-900/40"
+                to="/collections"
+                className="mt-7 inline-flex items-center gap-2 rounded-full bg-luxury-400 px-7 py-3 text-sm font-semibold uppercase tracking-wide text-surface-base shadow-lg shadow-luxury-900/30 transition hover:-translate-y-0.5 hover:bg-luxury-300 hover:shadow-xl hover:shadow-luxury-900/40"
               >
-                Ver Catalogo Completo
+                Explorar Colecciones
+                <svg
+                  className="h-3.5 w-3.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
               </Link>
             </motion.div>
           </div>
         </div>
+
+        {/* Trust stat bar anchored to bottom of hero */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.55 }}
+          className="absolute inset-x-0 bottom-0"
+        >
+          <div className="border-t border-luxury-500/15 bg-surface-base/80 backdrop-blur-md">
+            <div className="container-shell flex flex-wrap items-center justify-center gap-x-8 gap-y-2 py-3 sm:justify-start">
+              {TRUST_STATS.map((label) => (
+                <span key={label} className="flex items-center gap-1.5 text-xs text-neutral-400">
+                  <span className="h-1 w-1 rounded-full bg-luxury-400" aria-hidden />
+                  {label}
+                </span>
+              ))}
+            </div>
+          </div>
+        </motion.div>
       </section>
 
       {/* ── Categorías (carrusel compacto) ── */}

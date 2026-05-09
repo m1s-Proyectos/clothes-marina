@@ -123,12 +123,9 @@ export default function CategoryMarqueePanel({ items }: CategoryMarqueePanelProp
 
   return (
     <section className="relative" aria-labelledby="home-categories-heading">
-      <h2 id="home-categories-heading" className="section-title mb-3 text-luxury-50">
+      <h2 id="home-categories-heading" className="section-title mb-6 text-luxury-50">
         Categorías
       </h2>
-      <p className="mb-6 max-w-3xl text-sm leading-relaxed text-neutral-400 sm:text-base">
-        Puedes arrastrar o usar la rueda para ir a una categoría. Selecciona una categoría si deseas una en específico.
-      </p>
 
       <div
         className="relative overflow-hidden rounded-2xl border border-luxury-500/20 bg-surface-card/60 shadow-[inset_0_1px_0_rgba(200,166,108,0.08)] ring-1 ring-luxury-500/10 backdrop-blur-sm"
@@ -155,6 +152,8 @@ export default function CategoryMarqueePanel({ items }: CategoryMarqueePanelProp
               {loopItems.map((item, index) => (
                 <Link
                   key={`${item.slug}-${index}`}
+                  aria-hidden={index >= items.length || undefined}
+                  tabIndex={index >= items.length ? -1 : undefined}
                   to={`/catalog/${item.slug}`}
                   className="group relative h-[118px] w-[168px] shrink-0 overflow-hidden rounded-xl border border-luxury-500/15 bg-surface-raised transition duration-300 hover:border-luxury-400/45 hover:shadow-lg hover:shadow-luxury-900/25 sm:h-[140px] sm:w-[200px]"
                 >

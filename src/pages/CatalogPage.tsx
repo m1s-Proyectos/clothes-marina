@@ -3,8 +3,8 @@ import { useParams } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import Seo from "@/components/common/Seo";
 import ProductCard from "@/components/catalog/ProductCard";
+import ProductCardSkeleton from "@/components/catalog/ProductCardSkeleton";
 import CatalogFilters from "@/components/catalog/CatalogFilters";
-import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { Category, Product, ProductSort } from "@/types";
 import { categoryService } from "@/services/categoryService";
@@ -62,6 +62,12 @@ export default function CatalogPage() {
     [categories],
   );
 
+  const activeCategoryName = useMemo(() => {
+    if (!category) return null;
+    if (category === "offers") return "Ofertas";
+    return categories.find((c) => c.slug === category)?.name ?? null;
+  }, [category, categories]);
+
   const visibleProducts = useMemo(() => {
     if (!debouncedSearch) return products;
     const term = normalize(debouncedSearch);
@@ -97,8 +103,20 @@ export default function CatalogPage() {
 
   return (
     <div className="container-shell py-10">
-      <Seo title="Catalogo" description="Explora productos de mujer, hombre, ninos y ofertas." />
-      <h1 className="mb-5 text-3xl font-semibold text-luxury-50">Catalogo</h1>
+      <Seo
+        title={activeCategoryName ? `${activeCategoryName} — Catalogo` : "Catalogo"}
+        description="Explora productos de mujer, hombre, ninos y ofertas."
+      />
+      <div className="mb-5 flex flex-wrap items-baseline gap-3">
+        <h1 className="text-3xl font-semibold text-luxury-50">
+          {activeCategoryName ?? "Catalogo"}
+        </h1>
+        {!loading && (
+          <span className="text-sm text-neutral-500">
+            {visibleProducts.length} producto{visibleProducts.length === 1 ? "" : "s"}
+          </span>
+        )}
+      </div>
       <CatalogFilters
         search={search}
         onSearchChange={setSearch}
@@ -110,7 +128,11 @@ export default function CatalogPage() {
       />
 
       {loading ? (
-        <LoadingSpinner />
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <ProductCardSkeleton key={i} />
+          ))}
+        </div>
       ) : visibleProducts.length === 0 ? (
         <p className="mt-10 text-center text-neutral-400">No se encontraron productos para tu busqueda.</p>
       ) : (
