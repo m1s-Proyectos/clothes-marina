@@ -70,7 +70,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       {/* ── Caption ── */}
       <div className="pt-2">
         {/* Name — 2 lines max, legible contrast */}
-        <h3 className="line-clamp-2 text-[12.5px] font-normal leading-snug tracking-[0.01em] text-neutral-100">
+        <h3 className="line-clamp-2 text-[13.5px] font-medium leading-snug tracking-[0.01em] text-neutral-50">
           <Link to={productUrl} className="transition-colors hover:text-luxury-200">
             {product.name}
           </Link>
