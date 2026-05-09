@@ -114,7 +114,7 @@ export default function HomePage() {
             </motion.p>
             <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.95 }}>
               <Link
-                to="/catalog"
+                to="/catalog?discover=1"
                 className="mt-7 inline-block rounded-full bg-luxury-600 px-7 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-luxury-900/15 transition hover:-translate-y-0.5 hover:bg-luxury-700 hover:shadow-xl hover:shadow-luxury-900/20"
               >
                 Ver Catalogo Completo
@@ -137,7 +137,7 @@ export default function HomePage() {
             <p className="text-sm text-slate-600">Selecciones pensadas para destacar tu estilo diario.</p>
           </div>
           <Link
-            to="/catalog"
+            to="/catalog?discover=1"
             className="hidden rounded-full border border-luxury-300/70 bg-white px-5 py-2 text-xs uppercase tracking-[0.12em] text-luxury-800 transition hover:border-luxury-500 hover:text-luxury-900 md:inline-block"
           >
             Ver todos
@@ -161,7 +161,7 @@ export default function HomePage() {
               transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
             >
               <Link
-                to="/catalog"
+                to="/catalog?discover=1"
                 aria-label="Ver catálogo completo — descubre toda la colección"
                 className="group relative flex min-h-[4.75rem] items-center gap-4 overflow-hidden rounded-2xl border border-sky-200/45 bg-gradient-to-br from-[#f4f4f2] via-[#eef4f8] to-[#dff2ff] px-5 py-5 shadow-[0_10px_36px_rgba(47,95,136,0.09)] ring-1 ring-white/70 transition-[transform,box-shadow,opacity] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] active:opacity-[0.96] sm:px-6 sm:py-6"
               >

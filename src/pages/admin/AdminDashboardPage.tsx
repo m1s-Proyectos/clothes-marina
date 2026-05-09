@@ -121,7 +121,7 @@ export default function AdminDashboardPage() {
     <section className="space-y-10">
       <div>
         <h1 className="text-2xl font-semibold text-slate-950">Panel de administración</h1>
-        <p className="mt-2 text-sm text-neutral-400">
+        <p className="mt-2 text-sm text-[#4f4f4b]">
           Resumen de categorías (con número de productos por categoría) y productos recientes (10 por página).
         </p>
       </div>
@@ -132,13 +132,13 @@ export default function AdminDashboardPage() {
             <h2 className="text-lg font-semibold text-luxury-900">
               Todas las categorías
               {!categoriesLoading && categories.length > 0 ? (
-                <span className="ml-2 text-sm font-normal text-neutral-500">({categories.length})</span>
+                <span className="ml-2 text-sm font-normal text-[#6a6a66]">({categories.length})</span>
               ) : null}
             </h2>
-            <p className="mt-1 max-w-2xl text-xs text-neutral-500">
-              Lista completa según la tabla <span className="text-neutral-400">categories</span> en Supabase. Si ves
+            <p className="mt-1 max-w-2xl text-xs leading-relaxed text-[#4f4f4b]">
+              Lista completa según la tabla <span className="font-mono text-[#6a6a66]">categories</span> en Supabase. Si ves
               &quot;Niños&quot; y &quot;Niñas&quot; con slugs distintos, ambas deben aparecer; el número indica cuántos
-              productos tienen asignado ese <span className="text-neutral-400">category_id</span>.
+              productos tienen asignado ese <span className="font-mono text-[#6a6a66]">category_id</span>.
             </p>
           </div>
           <Link
@@ -154,9 +154,9 @@ export default function AdminDashboardPage() {
         ) : null}
 
         {categoriesLoading ? (
-          <p className="mt-4 text-sm text-neutral-400">Cargando categorías...</p>
+          <p className="mt-4 text-sm text-[#6a6a66]">Cargando categorías...</p>
         ) : categories.length === 0 ? (
-          <p className="mt-4 rounded-xl border border-luxury-500/10 bg-surface-card px-4 py-6 text-sm text-neutral-400">
+          <p className="mt-4 rounded-xl border border-luxury-500/10 bg-surface-card px-4 py-6 text-sm text-[#4f4f4b]">
             No hay categorías aún.{" "}
             <Link to="/admin/categories" className="text-luxury-800 underline hover:text-luxury-900">
               Crear en Categorías
@@ -165,27 +165,29 @@ export default function AdminDashboardPage() {
         ) : (
           <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {categories.map((cat) => (
-              <li
-                key={cat.id}
-                className="flex gap-3 overflow-hidden rounded-xl border border-luxury-500/10 bg-surface-card p-3 transition hover:border-luxury-400/25"
-              >
-                {cat.image_url ? (
-                  <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-luxury-50">
-                    <img src={cat.image_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+              <li key={cat.id}>
+                <Link
+                  to={`/admin/products?category=${cat.id}`}
+                  className="flex gap-3 overflow-hidden rounded-xl border border-luxury-500/10 bg-surface-card p-3 transition hover:border-sky-300/50 hover:shadow-md hover:shadow-sky-900/5"
+                >
+                  {cat.image_url ? (
+                    <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-luxury-50">
+                      <img src={cat.image_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                    </div>
+                  ) : (
+                    <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg border border-dashed border-luxury-500/20 bg-surface-raised text-[10px] text-[#6a6a66]">
+                      Sin img
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium text-[#1f1f1d]">{cat.name}</p>
+                    <p className="truncate font-mono text-xs text-[#6a6a66]">{cat.slug}</p>
+                    <p className="mt-1 text-xs font-medium text-[#2f5f88]">
+                      {categoryProductCounts[cat.id] ?? 0} producto
+                      {(categoryProductCounts[cat.id] ?? 0) === 1 ? "" : "s"}
+                    </p>
                   </div>
-                ) : (
-                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg border border-dashed border-luxury-500/20 bg-surface-raised text-[10px] text-neutral-500">
-                    Sin img
-                  </div>
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-neutral-100">{cat.name}</p>
-                  <p className="truncate font-mono text-xs text-neutral-500">{cat.slug}</p>
-                  <p className="mt-1 text-xs text-luxury-300/90">
-                    {categoryProductCounts[cat.id] ?? 0} producto
-                    {(categoryProductCounts[cat.id] ?? 0) === 1 ? "" : "s"}
-                  </p>
-                </div>
+                </Link>
               </li>
             ))}
           </ul>
@@ -200,23 +202,23 @@ export default function AdminDashboardPage() {
             type="button"
             onClick={() => setPage((prev) => Math.max(1, prev - 1))}
             disabled={page === 1}
-            className="rounded-lg border border-luxury-500/15 bg-surface-card px-3 py-1.5 text-sm text-neutral-300 transition hover:border-luxury-400/30 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-lg border border-luxury-500/15 bg-surface-card px-3 py-1.5 text-sm font-medium text-[#1f1f1d] transition hover:border-luxury-400/30 disabled:cursor-not-allowed disabled:opacity-60"
           >
             Anterior
           </button>
-          <span className="text-sm text-neutral-400">Página {page}</span>
+          <span className="text-sm font-medium text-[#4f4f4b]">Página {page}</span>
           <button
             type="button"
             onClick={() => setPage((prev) => prev + 1)}
             disabled={!hasNextPage}
-            className="rounded-lg border border-luxury-500/15 bg-surface-card px-3 py-1.5 text-sm text-neutral-300 transition hover:border-luxury-400/30 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-lg border border-luxury-500/15 bg-surface-card px-3 py-1.5 text-sm font-medium text-[#1f1f1d] transition hover:border-luxury-400/30 disabled:cursor-not-allowed disabled:opacity-60"
           >
             Siguiente
           </button>
         </div>
 
         {loading ? (
-          <p className="mt-6 text-sm text-neutral-400">Cargando productos...</p>
+          <p className="mt-6 text-sm text-[#6a6a66]">Cargando productos...</p>
         ) : (
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {products.map((product) => (
@@ -235,10 +237,10 @@ export default function AdminDashboardPage() {
                   className="h-44 w-full object-cover"
                 />
                 <div className="space-y-1 p-3">
-                  <h3 className="font-semibold text-neutral-100">{product.name}</h3>
-                  <p className="text-sm text-luxury-800">{formatCurrency(product.reference_price)}</p>
-                  <p className="text-xs text-neutral-500">{product.available ? "Disponible" : "No disponible"}</p>
-                  <p className="text-xs text-neutral-500">{product.featured ? "Destacado" : "Estándar"}</p>
+                  <h3 className="font-semibold text-[#1f1f1d]">{product.name}</h3>
+                  <p className="text-sm font-semibold text-[#2f5f88]">{formatCurrency(product.reference_price)}</p>
+                  <p className="text-xs text-[#4f4f4b]">{product.available ? "Disponible" : "No disponible"}</p>
+                  <p className="text-xs text-[#4f4f4b]">{product.featured ? "Destacado" : "Estándar"}</p>
                   <Link
                     to="/admin/products"
                     state={{ editProductId: product.id }}

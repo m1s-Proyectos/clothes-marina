@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import Seo from "@/components/common/Seo";
 import ProductCard from "@/components/catalog/ProductCard";
@@ -22,6 +22,8 @@ function normalize(value: string): string {
 
 export default function CatalogPage() {
   const params = useParams();
+  const [searchParams] = useSearchParams();
+  const discoverMode = searchParams.get("discover") === "1";
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState("");
@@ -72,14 +74,22 @@ export default function CatalogPage() {
     [categories],
   );
 
+  /** Desde la home (?discover=1): con orden "Más recientes", mostrar primero no destacados para sensación de inventario nuevo. */
+  const reorderedProducts = useMemo(() => {
+    if (!discoverMode || sort !== "newest") return products;
+    const nonFeatured = products.filter((p) => !p.featured);
+    const featuredOnly = products.filter((p) => p.featured);
+    return [...nonFeatured, ...featuredOnly];
+  }, [products, discoverMode, sort]);
+
   const visibleProducts = useMemo(() => {
-    if (!debouncedSearch) return products;
+    if (!debouncedSearch) return reorderedProducts;
     const term = normalize(debouncedSearch);
-    return products.filter((p) => {
+    return reorderedProducts.filter((p) => {
       const fields = [p.name, p.description, p.brand, p.color, p.size].map((v) => normalize(v ?? ""));
       return fields.some((f) => f.includes(term));
     });
-  }, [products, debouncedSearch]);
+  }, [reorderedProducts, debouncedSearch]);
 
   const totalPages = Math.max(1, Math.ceil(visibleProducts.length / PRODUCTS_PER_PAGE));
 
@@ -117,6 +127,7 @@ export default function CatalogPage() {
         category={category}
         categories={filterCategories}
         onCategoryChange={setCategory}
+        discoverMode={discoverMode}
       />
 
       {loading ? (

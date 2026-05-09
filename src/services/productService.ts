@@ -17,6 +17,8 @@ function normalizeProductPayload(
 
 interface ProductQueryOptions {
   categorySlug?: string;
+  /** Filtrar por ID de categoría (p. ej. panel admin). */
+  categoryId?: string;
   search?: string;
   sort?: ProductSort;
   onlyAvailable?: boolean;
@@ -44,7 +46,9 @@ export const productService = {
     `);
 
     if (options.onlyAvailable) query = query.eq("available", true);
-    if (options.categorySlug && options.categorySlug !== "offers") {
+    if (options.categoryId) {
+      query = query.eq("category_id", options.categoryId);
+    } else if (options.categorySlug && options.categorySlug !== "offers") {
       query = query.eq("categories.slug", options.categorySlug);
     }
     if (options.categorySlug === "offers") {

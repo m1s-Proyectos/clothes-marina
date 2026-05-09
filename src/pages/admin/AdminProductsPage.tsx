@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import type { Category, Product } from "@/types";
 import { categoryService } from "@/services/categoryService";
 import { productService } from "@/services/productService";
@@ -46,8 +46,25 @@ function normalizeSearchText(value: string): string {
     .trim();
 }
 
+const txt = {
+  primary: "text-[#1f1f1d]",
+  secondary: "text-[#4f4f4b]",
+  muted: "text-[#6a6a66]"
+} as const;
+
+const inputClass =
+  "w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-[#1f1f1d] placeholder:text-[#6a6a66] outline-none transition focus:border-sky-400/60 focus:ring-2 focus:ring-sky-200/50";
+const cardClass = "rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm shadow-slate-900/[0.04] md:p-5";
+const btnSecondary =
+  "inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-[#1f1f1d] transition hover:border-slate-300 hover:bg-slate-50";
+const btnPrimary =
+  "inline-flex items-center justify-center rounded-lg bg-luxury-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-luxury-700 disabled:opacity-60";
+
 export default function AdminProductsPage() {
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categoryFilterId = searchParams.get("category") ?? "";
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [form, setForm] = useState<ProductForm>(initialForm);
@@ -55,25 +72,59 @@ export default function AdminProductsPage() {
   const [uploadInfo, setUploadInfo] = useState("");
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const load = () => productService.list({ sort: "newest" }).then(setProducts);
+  const setCategoryFilterId = useCallback(
+    (id: string) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (id) next.set("category", id);
+          else next.delete("category");
+          return next;
+        },
+        { replace: true }
+      );
+    },
+    [setSearchParams]
+  );
+
+  const load = useCallback(
+    () =>
+      productService
+        .list({ sort: "newest", ...(categoryFilterId ? { categoryId: categoryFilterId } : {}) })
+        .then(setProducts),
+    [categoryFilterId]
+  );
 
   useEffect(() => {
     categoryService.getAll().then(setCategories);
-    void load();
   }, []);
 
   useEffect(() => {
+    void load();
+  }, [load]);
+
+  useEffect(() => {
     const editId = (location.state as { editProductId?: string } | null)?.editProductId;
-    if (!editId || products.length === 0) return;
+    if (!editId) return;
     const target = products.find((p) => p.id === editId);
     if (target) {
       startEditingProduct(target);
       window.history.replaceState({}, "");
+      return;
     }
-  }, [location.state, products]);
+    let cancelled = false;
+    void productService.getById(editId).then((p) => {
+      if (cancelled || !p) return;
+      setCategoryFilterId(p.category_id);
+      startEditingProduct(p);
+      window.history.replaceState({}, "");
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [location.state, products, setCategoryFilterId]);
 
   async function handleUpload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -155,65 +206,95 @@ export default function AdminProductsPage() {
 
   const filteredProducts = useMemo(() => {
     const normalizedSearch = normalizeSearchText(searchTerm);
-
     return products.filter((product) => {
       const normalizedName = normalizeSearchText(product.name);
-      const byName = !normalizedSearch || normalizedName.includes(normalizedSearch);
-      const byCategory = !categoryFilter || product.category_id === categoryFilter;
-      return byName && byCategory;
+      return !normalizedSearch || normalizedName.includes(normalizedSearch);
     });
-  }, [products, searchTerm, categoryFilter]);
+  }, [products, searchTerm]);
+
+  const activeCategoryName = useMemo(
+    () => (categoryFilterId ? categories.find((c) => c.id === categoryFilterId)?.name : null),
+    [categories, categoryFilterId]
+  );
 
   return (
-    <section>
-      <h1 className="text-2xl font-semibold">Manage Products</h1>
-      <p className="mt-1 text-sm text-neutral-400">
-        {editingProductId ? "Editing selected product in this same form." : "Create a new product."}
-      </p>
-      <form onSubmit={onSubmit} className="mt-4 grid gap-3 rounded border border-neutral-800 bg-neutral-900 p-4 md:grid-cols-2">
-        <input required value={form.name} onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))} placeholder="Name" className="rounded bg-neutral-800 px-3 py-2" />
-        <select required value={form.category_id} onChange={(event) => setForm((prev) => ({ ...prev, category_id: event.target.value }))} className="rounded bg-neutral-800 px-3 py-2">
-          <option value="">Select category</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
-        <input
-          type="number"
-          min="0"
-          step="0.01"
-          value={form.reference_price}
-          onChange={(event) => setForm((prev) => ({ ...prev, reference_price: event.target.value }))}
-          placeholder="Reference price"
-          className="rounded bg-neutral-800 px-3 py-2"
-        />
-        <input value={form.brand} onChange={(event) => setForm((prev) => ({ ...prev, brand: event.target.value }))} placeholder="Marca (ej: Nike, Adidas)" className="rounded bg-neutral-800 px-3 py-2" />
-        <input value={form.color} onChange={(event) => setForm((prev) => ({ ...prev, color: event.target.value }))} placeholder="Color (ej: Rojo, Azul)" className="rounded bg-neutral-800 px-3 py-2" />
-        <input value={form.size} onChange={(event) => setForm((prev) => ({ ...prev, size: event.target.value }))} placeholder="Talla (ej: S, M, L, XL)" className="rounded bg-neutral-800 px-3 py-2" />
-        <input required value={form.main_image_url} onChange={(event) => setForm((prev) => ({ ...prev, main_image_url: event.target.value }))} placeholder="Main image URL" className="rounded bg-neutral-800 px-3 py-2" />
+    <section className="space-y-6">
+      <div>
+        <h1 className={`text-2xl font-semibold ${txt.primary}`}>Gestionar productos</h1>
+        <p className={`mt-1.5 text-sm ${txt.secondary}`}>
+          {editingProductId ? "Editando el producto seleccionado en este formulario." : "Crear o editar productos del catálogo."}
+        </p>
+      </div>
+
+      <form onSubmit={onSubmit} className={`grid gap-4 md:grid-cols-2 ${cardClass}`}>
         <div className="md:col-span-2">
-          <input type="file" accept="image/*" onChange={handleUpload} />
-          {uploading && <p className="text-xs text-neutral-300">Optimizando y subiendo imagen...</p>}
-          {uploadInfo && <p className="text-xs text-green-400">{uploadInfo}</p>}
+          <label className={`mb-1 block text-xs font-semibold uppercase tracking-wide ${txt.muted}`}>Nombre</label>
+          <input required value={form.name} onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))} placeholder="Nombre del producto" className={inputClass} />
         </div>
-        <textarea required value={form.description} onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))} placeholder="Description" className="h-24 rounded bg-neutral-800 px-3 py-2 md:col-span-2" />
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={form.available} onChange={(event) => setForm((prev) => ({ ...prev, available: event.target.checked }))} />
-          Available
+        <div>
+          <label className={`mb-1 block text-xs font-semibold uppercase tracking-wide ${txt.muted}`}>Categoría</label>
+          <select required value={form.category_id} onChange={(event) => setForm((prev) => ({ ...prev, category_id: event.target.value }))} className={inputClass}>
+            <option value="">Seleccionar categoría</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className={`mb-1 block text-xs font-semibold uppercase tracking-wide ${txt.muted}`}>Precio de referencia</label>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={form.reference_price}
+            onChange={(event) => setForm((prev) => ({ ...prev, reference_price: event.target.value }))}
+            placeholder="0.00"
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label className={`mb-1 block text-xs font-semibold uppercase tracking-wide ${txt.muted}`}>Marca</label>
+          <input value={form.brand} onChange={(event) => setForm((prev) => ({ ...prev, brand: event.target.value }))} placeholder="Ej: Nike, Adidas" className={inputClass} />
+        </div>
+        <div>
+          <label className={`mb-1 block text-xs font-semibold uppercase tracking-wide ${txt.muted}`}>Color</label>
+          <input value={form.color} onChange={(event) => setForm((prev) => ({ ...prev, color: event.target.value }))} placeholder="Ej: Rojo, Azul" className={inputClass} />
+        </div>
+        <div>
+          <label className={`mb-1 block text-xs font-semibold uppercase tracking-wide ${txt.muted}`}>Talla</label>
+          <input value={form.size} onChange={(event) => setForm((prev) => ({ ...prev, size: event.target.value }))} placeholder="Ej: S, M, L, XL" className={inputClass} />
+        </div>
+        <div className="md:col-span-2">
+          <label className={`mb-1 block text-xs font-semibold uppercase tracking-wide ${txt.muted}`}>URL imagen principal</label>
+          <input required value={form.main_image_url} onChange={(event) => setForm((prev) => ({ ...prev, main_image_url: event.target.value }))} placeholder="https://..." className={inputClass} />
+        </div>
+        <div className="md:col-span-2">
+          <label className={`mb-1 block text-xs font-semibold uppercase tracking-wide ${txt.muted}`}>Subir imagen</label>
+          <input type="file" accept="image/*" onChange={handleUpload} className={`mt-1 text-sm ${txt.secondary}`} />
+          {uploading && <p className={`mt-2 text-xs ${txt.muted}`}>Optimizando y subiendo imagen...</p>}
+          {uploadInfo && <p className="mt-2 text-xs font-medium text-emerald-700">{uploadInfo}</p>}
+        </div>
+        <div className="md:col-span-2">
+          <label className={`mb-1 block text-xs font-semibold uppercase tracking-wide ${txt.muted}`}>Descripción</label>
+          <textarea required value={form.description} onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))} placeholder="Descripción" className={`h-28 ${inputClass}`} />
+        </div>
+        <label className={`flex items-center gap-2 text-sm ${txt.primary}`}>
+          <input type="checkbox" checked={form.available} onChange={(event) => setForm((prev) => ({ ...prev, available: event.target.checked }))} className="rounded border-slate-300 text-luxury-600 focus:ring-sky-300" />
+          Disponible
         </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={form.featured} onChange={(event) => setForm((prev) => ({ ...prev, featured: event.target.checked }))} />
-          Featured
+        <label className={`flex items-center gap-2 text-sm ${txt.primary}`}>
+          <input type="checkbox" checked={form.featured} onChange={(event) => setForm((prev) => ({ ...prev, featured: event.target.checked }))} className="rounded border-slate-300 text-luxury-600 focus:ring-sky-300" />
+          Destacado
         </label>
-        <div className="rounded border border-neutral-700 bg-neutral-800/50 p-3 md:col-span-2">
-          <label className="flex items-center gap-2 text-sm font-semibold">
-            <input type="checkbox" checked={form.offer_active} onChange={(event) => setForm((prev) => ({ ...prev, offer_active: event.target.checked }))} />
+        <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 md:col-span-2">
+          <label className={`flex items-center gap-2 text-sm font-semibold ${txt.primary}`}>
+            <input type="checkbox" checked={form.offer_active} onChange={(event) => setForm((prev) => ({ ...prev, offer_active: event.target.checked }))} className="rounded border-slate-300 text-luxury-600 focus:ring-sky-300" />
             Activar oferta
           </label>
           {form.offer_active && (
-            <div className="mt-2 flex gap-3">
+            <div className="mt-3 flex flex-wrap items-center gap-3">
               <input
                 type="number"
                 min="2"
@@ -221,98 +302,130 @@ export default function AdminProductsPage() {
                 value={form.offer_quantity}
                 onChange={(event) => setForm((prev) => ({ ...prev, offer_quantity: event.target.value }))}
                 placeholder="Cantidad (ej: 3)"
-                className="w-40 rounded bg-neutral-800 px-3 py-2 text-sm"
+                className={`w-40 ${inputClass}`}
               />
-              <span className="self-center text-sm text-neutral-400">x</span>
+              <span className={`text-sm ${txt.secondary}`}>×</span>
               <input
                 type="number"
                 min="0"
                 step="0.01"
                 value={form.offer_price}
                 onChange={(event) => setForm((prev) => ({ ...prev, offer_price: event.target.value }))}
-                placeholder="Precio oferta (ej: 5.00)"
-                className="w-48 rounded bg-neutral-800 px-3 py-2 text-sm"
+                placeholder="Precio oferta"
+                className={`w-48 ${inputClass}`}
               />
             </div>
           )}
         </div>
-        <div className="flex gap-2 md:col-span-2">
-          <button disabled={saving} className="rounded bg-luxury-500 px-3 py-2 font-semibold text-neutral-950 disabled:opacity-60">
-            {saving ? "Saving..." : editingProductId ? "Guardar producto" : "Create Product"}
+        <div className="flex flex-wrap gap-2 md:col-span-2">
+          <button disabled={saving} type="submit" className={btnPrimary}>
+            {saving ? "Guardando..." : editingProductId ? "Guardar producto" : "Crear producto"}
           </button>
           {editingProductId && (
-            <button type="button" onClick={resetForm} disabled={saving} className="rounded bg-neutral-800 px-3 py-2">
-              Cancel edit
+            <button type="button" onClick={resetForm} disabled={saving} className={btnSecondary}>
+              Cancelar edición
             </button>
           )}
         </div>
       </form>
 
-      <div className="mt-6 grid gap-3 rounded border border-neutral-800 bg-neutral-900 p-4 md:grid-cols-2">
-        <input
-          value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
-          placeholder="Search by product name..."
-          className="rounded bg-neutral-800 px-3 py-2"
-        />
-        <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)} className="rounded bg-neutral-800 px-3 py-2">
-          <option value="">All categories</option>
+      <div className={cardClass}>
+        <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className={`text-sm font-semibold ${txt.primary}`}>Filtrar por categoría</h2>
+          {activeCategoryName ? (
+            <p className={`text-sm ${txt.secondary}`}>
+              Activa: <span className="font-semibold text-[#2f5f88]">{activeCategoryName}</span>
+            </p>
+          ) : (
+            <p className={`text-sm ${txt.muted}`}>Mostrando todas las categorías</p>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setCategoryFilterId("")}
+            className={
+              !categoryFilterId
+                ? "rounded-full border border-sky-300/55 bg-gradient-to-b from-[#dff2ff] to-[#cfe9ff] px-3.5 py-1.5 text-sm font-semibold text-[#2f5f88] shadow-sm shadow-sky-900/10 ring-1 ring-sky-200/45"
+                : "rounded-full border border-slate-200 bg-slate-50/90 px-3.5 py-1.5 text-sm font-medium text-[#4f4f4b] transition hover:border-sky-200/70 hover:bg-white"
+            }
+          >
+            Todas
+          </button>
           {categories.map((category) => (
-            <option key={category.id} value={category.id}>
+            <button
+              key={category.id}
+              type="button"
+              onClick={() => setCategoryFilterId(category.id)}
+              className={
+                categoryFilterId === category.id
+                  ? "rounded-full border border-sky-300/55 bg-gradient-to-b from-[#dff2ff] to-[#cfe9ff] px-3.5 py-1.5 text-sm font-semibold text-[#2f5f88] shadow-sm shadow-sky-900/10 ring-1 ring-sky-200/45"
+                  : "rounded-full border border-slate-200 bg-slate-50/90 px-3.5 py-1.5 text-sm font-medium text-[#4f4f4b] transition hover:border-sky-200/70 hover:bg-white"
+              }
+            >
               {category.name}
-            </option>
+            </button>
           ))}
-        </select>
+        </div>
+        <div className="mt-4">
+          <label className={`mb-1 block text-xs font-semibold uppercase tracking-wide ${txt.muted}`}>Buscar por nombre</label>
+          <input
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Nombre del producto..."
+            className={inputClass}
+          />
+        </div>
       </div>
 
-      <div className="mt-4 space-y-2">
+      <div className="space-y-3">
         {filteredProducts.map((product) => (
-          <div key={product.id} className="rounded border border-neutral-800 bg-neutral-900 px-4 py-3 text-sm">
-            <div className="flex items-center gap-3">
+          <div key={product.id} className={`${cardClass} !py-4`}>
+            <div className="flex items-start gap-3">
               {product.main_image_url && (
                 <img
                   src={product.main_image_url}
                   alt={product.name}
                   loading="lazy"
-                  className="h-16 w-16 flex-shrink-0 rounded-lg border border-neutral-700 object-cover"
+                  className="h-16 w-16 flex-shrink-0 rounded-lg border border-slate-200 object-cover"
                 />
               )}
-              <div className="flex flex-1 flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="font-semibold">{product.name}</p>
-                  <p className="mt-1 line-clamp-2 text-xs text-neutral-300">{product.description}</p>
-                  <p className="text-xs text-luxury-800">
+              <div className="flex min-w-0 flex-1 flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className={`font-semibold ${txt.primary}`}>{product.name}</p>
+                  <p className={`mt-1 line-clamp-2 text-xs leading-relaxed ${txt.secondary}`}>{product.description}</p>
+                  <p className="mt-1 text-sm font-semibold text-[#2f5f88]">
                     {formatCurrency(product.reference_price)}
                     {product.offer_active && product.offer_quantity && product.offer_price != null && (
-                      <span className="ml-2 rounded bg-red-600/20 px-1.5 py-0.5 text-red-400">
-                        Oferta: {product.offer_quantity} x {formatCurrency(product.offer_price)}
+                      <span className="ml-2 rounded-md bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-700 ring-1 ring-red-200/60">
+                        Oferta: {product.offer_quantity} × {formatCurrency(product.offer_price)}
                       </span>
                     )}
                   </p>
                   {(product.brand || product.color || product.size) && (
-                    <p className="text-xs text-neutral-300">
+                    <p className={`mt-1 text-xs ${txt.secondary}`}>
                       {[product.brand && `Marca: ${product.brand}`, product.color && `Color: ${product.color}`, product.size && `Talla: ${product.size}`].filter(Boolean).join(" · ")}
                     </p>
                   )}
-                  <p className="text-xs text-neutral-400">
-                    {product.categories?.name ?? "No category"} · {product.available ? "Available" : "Unavailable"} · {product.featured ? "Featured" : "Standard"}
+                  <p className={`mt-1 text-xs ${txt.muted}`}>
+                    {product.categories?.name ?? "Sin categoría"} · {product.available ? "Disponible" : "No disponible"} · {product.featured ? "Destacado" : "Estándar"}
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <Link target="_blank" to={`/product/${product.id}`} className="rounded bg-neutral-800 px-2 py-1">
-                    Preview
+                <div className="flex flex-shrink-0 flex-wrap gap-2">
+                  <Link target="_blank" to={`/product/${product.id}`} className={btnSecondary}>
+                    Vista previa
                   </Link>
-                  <button onClick={() => startEditingProduct(product)} className="rounded bg-luxury-500 px-2 py-1 font-semibold text-neutral-950">
-                    Edit product
+                  <button type="button" onClick={() => startEditingProduct(product)} className={btnPrimary}>
+                    Editar
                   </button>
-                  <button onClick={() => void productService.update(product.id, { available: !product.available }).then(load)} className="rounded bg-neutral-800 px-2 py-1">
-                    Toggle availability
+                  <button type="button" onClick={() => void productService.update(product.id, { available: !product.available }).then(load)} className={btnSecondary}>
+                    Alternar stock
                   </button>
-                  <button onClick={() => void productService.update(product.id, { featured: !product.featured }).then(load)} className="rounded bg-neutral-800 px-2 py-1">
-                    Feature
+                  <button type="button" onClick={() => void productService.update(product.id, { featured: !product.featured }).then(load)} className={btnSecondary}>
+                    Destacar
                   </button>
-                  <button onClick={() => void productService.remove(product.id).then(load)} className="rounded bg-red-700 px-2 py-1">
-                    Delete
+                  <button type="button" onClick={() => void productService.remove(product.id).then(load)} className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-red-700">
+                    Eliminar
                   </button>
                 </div>
               </div>
@@ -320,8 +433,8 @@ export default function AdminProductsPage() {
           </div>
         ))}
         {filteredProducts.length === 0 && (
-          <p className="rounded border border-neutral-800 bg-neutral-900 px-4 py-6 text-sm text-neutral-400">
-            No products match this search/filter.
+          <p className={`rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm ${txt.secondary}`}>
+            No hay productos con este criterio. Prueba otra categoría o limpia el buscador.
           </p>
         )}
       </div>
