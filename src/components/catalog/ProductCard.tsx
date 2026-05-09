@@ -36,9 +36,9 @@ export default function ProductCard({ product }: ProductCardProps) {
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="group overflow-hidden rounded-xl border border-luxury-500/10 bg-surface-card transition-all duration-200 hover:border-luxury-400/25 hover:shadow-lg hover:shadow-luxury-900/15"
+      className="group relative"
     >
-      {/* ── Image — edge-to-edge, no inner padding ── */}
+      {/* ── Image block — fills entire card width, no border, no background container ── */}
       <Link to={productUrl} aria-label={`Ver detalles de ${product.name}`} className="block overflow-hidden">
         <div className="aspect-[3/4] w-full overflow-hidden bg-surface-hover">
           <OptimizedImage
@@ -50,61 +50,56 @@ export default function ProductCard({ product }: ProductCardProps) {
             transform={{ width: 480, quality: 78, format: "webp", resize: "contain" }}
             responsiveWidths={[240, 360, 480]}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className={`h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.04] ${
+            className={`h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.04] ${
               isLandscapeImage ? "scale-[1.15]" : ""
             }`}
           />
         </div>
+
+        {/* Hover overlay — "Ver Detalles" appears over image on desktop */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-[4.5rem] flex items-end justify-center pb-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100 sm:bottom-[4rem]">
+          <span className="rounded-full bg-surface-base/80 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-luxury-300 backdrop-blur-sm">
+            Ver Detalles
+          </span>
+        </div>
       </Link>
 
-      {/* ── Meta + actions ── */}
-      <div className="px-2.5 pb-2.5 pt-2">
-        {/* Name */}
-        <h3 className="line-clamp-2 text-[12.5px] font-medium leading-snug tracking-[0.01em] text-neutral-200">
-          <Link to={productUrl} className="transition hover:text-luxury-200">
+      {/* ── Caption — name, price, single WhatsApp action ── */}
+      <div className="pt-2">
+        <h3 className="line-clamp-1 text-[12px] font-normal leading-snug tracking-[0.01em] text-neutral-300">
+          <Link to={productUrl} className="transition-colors hover:text-neutral-100">
             {product.name}
           </Link>
         </h3>
 
-        {/* Price — typographic, no background badge */}
-        <div className="mt-1">
+        <div className="mt-0.5 flex items-baseline justify-between gap-2">
+          {/* Price */}
           {product.offer_active && product.offer_quantity && product.offer_price != null ? (
-            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-              <span className="text-[13px] font-semibold text-luxury-300">
-                {formatCurrency(product.reference_price)}
-              </span>
-              <span className="text-[11px] text-neutral-500">/ ud.</span>
-              <span className="w-full text-[12px] font-semibold text-red-400">
+            <div className="flex items-baseline gap-2">
+              <span className="text-[13px] font-medium text-luxury-300">
                 {product.offer_quantity} x {formatCurrency(product.offer_price)}
-                <span className="ml-1.5 rounded bg-red-500/15 px-1 py-px text-[10px] font-semibold uppercase tracking-wider text-red-300">
-                  Oferta
-                </span>
+              </span>
+              <span className="text-[11px] text-red-400 line-through opacity-70">
+                {formatCurrency(product.reference_price)}
               </span>
             </div>
           ) : (
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-[13px] font-semibold text-luxury-300">
-                {formatCurrency(product.reference_price)}
-              </span>
-              <span className="text-[11px] text-neutral-500">/ ud.</span>
-            </div>
+            <span className="text-[13px] font-medium text-luxury-300">
+              {formatCurrency(product.reference_price)}
+            </span>
           )}
-        </div>
 
-        {/* Actions */}
-        <div className="mt-2 space-y-1.5">
-          <Link
-            to={productUrl}
-            className="block w-full rounded-lg bg-luxury-400 px-3 py-1.5 text-center text-[11.5px] font-semibold tracking-wide text-surface-base transition hover:bg-luxury-300"
-          >
-            Ver Detalles
-          </Link>
+          {/* WhatsApp — icon-only, discreet */}
           <button
             type="button"
             onClick={openWhatsAppOrder}
-            className="w-full rounded-lg border border-luxury-500/35 bg-transparent px-3 py-1.5 text-[11.5px] font-medium tracking-wide text-luxury-300 transition hover:border-luxury-400/60 hover:text-luxury-200"
+            aria-label="Solicitar por WhatsApp"
+            className="shrink-0 rounded-full p-1 text-neutral-500 transition hover:text-luxury-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-luxury-400/60"
           >
-            Solicitar por WhatsApp
+            {/* WhatsApp icon */}
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+            </svg>
           </button>
         </div>
       </div>
