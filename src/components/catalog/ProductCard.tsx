@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useState, type SyntheticEvent } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { Product } from "@/types";
 import { formatCurrency } from "@/utils/format";
@@ -15,14 +15,6 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const productUrl = `/product/${product.id}`;
   const [showReturnButton, setShowReturnButton] = useState(false);
-  const [isLandscapeImage, setIsLandscapeImage] = useState(false);
-
-  function handleImageLoad(event: SyntheticEvent<HTMLImageElement>): void {
-    const { naturalWidth, naturalHeight } = event.currentTarget;
-    if (!naturalWidth || !naturalHeight) return;
-    setIsLandscapeImage(naturalWidth > naturalHeight);
-  }
-
   const shareParams = { productId: product.id, productName: product.name, productImageUrl: product.main_image_url, productDescription: product.description };
 
   function openWhatsAppOrder(): void {
@@ -46,13 +38,10 @@ export default function ProductCard({ product }: ProductCardProps) {
             alt={product.name}
             loading="lazy"
             decoding="async"
-            onLoad={handleImageLoad}
-            transform={{ width: 480, quality: 78, format: "webp", resize: "contain" }}
+            transform={{ width: 480, quality: 78, format: "webp", resize: "cover" }}
             responsiveWidths={[240, 360, 480]}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className={`h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.04] ${
-              isLandscapeImage ? "scale-[1.15]" : ""
-            }`}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
           />
 
           {/* Persistent CTA bar — always visible, works on touch and pointer */}
