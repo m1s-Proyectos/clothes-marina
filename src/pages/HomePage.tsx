@@ -146,11 +146,69 @@ export default function HomePage() {
         {loading ? (
           <p className="text-slate-500">Cargando productos Destacados...</p>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {featured.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+
+            <motion.div
+              className="mt-10 sm:mt-12 lg:hidden"
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.35, margin: "-24px" }}
+              transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              <Link
+                to="/catalog"
+                aria-label="Ver catálogo completo — descubre toda la colección"
+                className="group relative flex min-h-[4.75rem] items-center gap-4 overflow-hidden rounded-2xl border border-sky-200/45 bg-gradient-to-br from-[#f4f4f2] via-[#eef4f8] to-[#dff2ff] px-5 py-5 shadow-[0_10px_36px_rgba(47,95,136,0.09)] ring-1 ring-white/70 transition-[transform,box-shadow,opacity] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] active:opacity-[0.96] sm:px-6 sm:py-6"
+              >
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-70"
+                  style={{
+                    background:
+                      "radial-gradient(ellipse 70% 80% at 0% 100%, rgba(120, 180, 255, 0.12), transparent 60%), radial-gradient(ellipse 55% 70% at 100% 0%, rgba(232, 232, 228, 0.55), transparent 50%)"
+                  }}
+                  aria-hidden
+                />
+                <div
+                  className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-sky-200/35 bg-white/75 text-[#2f5f88] shadow-sm shadow-sky-900/5 transition duration-300 group-hover:border-sky-300/50 group-hover:bg-white group-hover:shadow-md"
+                  aria-hidden
+                >
+                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 7h16M6 7l1-3h10l1 3M6 7v12a1 1 0 001 1h10a1 1 0 001-1V7" />
+                    <path d="M10 11v4M14 11v4" />
+                  </svg>
+                </div>
+                <div className="relative min-w-0 flex-1 text-left">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#2f5f88]">Catálogo completo</p>
+                  <h3 className="mt-1.5 text-xl font-semibold leading-snug tracking-tight text-slate-900">
+                    Descubre la colección entera
+                  </h3>
+                  <p className="mt-1 max-w-[20rem] text-sm leading-relaxed text-slate-600">
+                    Sigue explorando todas nuestras piezas en un solo lugar.
+                  </p>
+                </div>
+                <div className="relative flex shrink-0 flex-col items-center gap-0.5 text-[#2f5f88]">
+                  <span className="text-xs font-semibold uppercase tracking-wider">Ver</span>
+                  <svg
+                    className="h-5 w-5 transition duration-300 group-hover:translate-x-0.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden
+                  >
+                    <path d="M5 12h14M13 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </Link>
+            </motion.div>
+          </>
         )}
       </section>
     </>
