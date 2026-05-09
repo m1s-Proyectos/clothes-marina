@@ -48,3 +48,17 @@ h4 {
   border: 1px solid var(--border-subtle);
   backdrop-filter: blur(10px);
 }
+
+/* ── Semantic text color helpers ── */
+/* Primary: product names, page titles — near-black, WCAG AA on #f7f5f2 */
+.text-primary   { color: #111111; }
+/* Secondary: descriptions, metadata — dark gray */
+.text-secondary { color: #4b5563; }
+/* Muted: labels, helper text — medium gray, still readable */
+.text-muted     { color: #9ca3af; }
+
+/* Focus ring — luxury gold, works on both light and dark surfaces */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(180, 130, 70, 0.6);
+}

@@ -47,7 +47,7 @@ export default function ProductDetailPage() {
     : null;
 
   if (loading) return <LoadingSpinner />;
-  if (!product || !shareParams) return <div className="container-shell py-20 text-neutral-400">Producto no encontrado.</div>;
+  if (!product || !shareParams) return <div className="container-shell py-20 text-neutral-500">Producto no encontrado.</div>;
 
   function detailLine(value: string | null | undefined): string {
     const t = value != null ? String(value).trim() : "";
@@ -76,7 +76,7 @@ export default function ProductDetailPage() {
       />
       <div className={`grid gap-8 ${orientation === "landscape" ? "lg:grid-cols-1" : "lg:grid-cols-2"}`}>
         <div
-          className={`flex items-center justify-center rounded-2xl bg-luxury-50 p-4 ${
+          className={`flex items-center justify-center rounded-2xl bg-surface-hover p-4 ${
             orientation === "landscape" ? "min-h-0" : "min-h-[420px]"
           }`}
         >
@@ -100,7 +100,7 @@ export default function ProductDetailPage() {
               if (window.history.length > 1) navigate(-1);
               else navigate("/catalog");
             }}
-            className="group inline-flex w-fit items-center gap-2 rounded-xl border-2 border-luxury-400/45 bg-luxury-500/15 px-5 py-2.5 text-sm font-semibold text-luxury-100 shadow-lg shadow-luxury-900/25 ring-1 ring-luxury-400/20 transition hover:border-luxury-300 hover:bg-luxury-500/25 hover:text-white"
+            className="group inline-flex w-fit items-center gap-2 rounded-lg border border-black/12 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm transition hover:border-black/20 hover:bg-surface-hover hover:text-neutral-900"
           >
             <svg
               className="h-4 w-4 transition group-hover:-translate-x-0.5"
@@ -118,61 +118,65 @@ export default function ProductDetailPage() {
           </button>
 
           <section
-            className="relative overflow-hidden rounded-2xl border-2 border-luxury-400/35 bg-gradient-to-b from-surface-card via-surface-card to-surface-raised/90 p-6 shadow-[0_12px_48px_rgba(0,0,0,0.45)] ring-1 ring-luxury-500/15 md:p-8"
+            className="overflow-hidden rounded-2xl border border-black/8 bg-white p-6 shadow-sm shadow-black/5 md:p-8"
             aria-labelledby="product-detail-title"
           >
-            <div
-              className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-luxury-400/50 to-transparent"
-              aria-hidden
-            />
-            <h1 id="product-detail-title" className="text-3xl font-semibold leading-tight text-luxury-50">
+            {/* Product name — primary, high contrast */}
+            <h1 id="product-detail-title" className="text-3xl font-semibold leading-tight text-neutral-900">
               {product.name}
             </h1>
 
-            <div className="mt-6 border-b border-luxury-500/15 pb-6">
+            {/* Price — clearly readable, distinct from name */}
+            <div className="mt-5 border-b border-black/8 pb-5">
               {product.offer_active && product.offer_quantity && product.offer_price != null ? (
-                <div className="space-y-3">
-                  <p className="inline-flex items-baseline rounded-xl bg-luxury-500/20 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-luxury-100">
-                    {formatCurrency(product.reference_price)} <span className="ml-1.5 text-base font-normal text-luxury-300">x unidad</span>
-                  </p>
-                  <p className="inline-flex flex-wrap items-center gap-3 rounded-xl bg-red-500/15 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-red-300">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span className="text-2xl font-semibold text-luxury-700">
                     {product.offer_quantity} x {formatCurrency(product.offer_price)}
-                    <span className="text-sm font-semibold uppercase tracking-wider text-red-200">¡Aprovecha nuestra oferta!</span>
-                  </p>
+                  </span>
+                  <span className="text-base font-normal text-neutral-400 line-through">
+                    {formatCurrency(product.reference_price)}
+                  </span>
+                  <span className="rounded bg-red-50 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-red-600">
+                    Oferta
+                  </span>
                 </div>
               ) : (
-                <p className="inline-flex items-baseline rounded-xl bg-luxury-500/20 px-4 py-2.5 text-2xl font-extrabold tracking-wide text-luxury-100">
-                  {formatCurrency(product.reference_price)} <span className="ml-1.5 text-base font-normal text-luxury-300">x unidad</span>
-                </p>
+                <span className="text-2xl font-semibold text-luxury-700">
+                  {formatCurrency(product.reference_price)}
+                  <span className="ml-2 text-sm font-normal text-neutral-400">por unidad</span>
+                </span>
               )}
             </div>
 
-            <div className="mt-6 rounded-xl border-2 border-luxury-400/25 bg-surface-base/70 p-4 shadow-inner shadow-black/20 sm:p-5">
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-luxury-300">Detalles del producto</p>
+            {/* Product details — secondary text on neutral surface */}
+            <div className="mt-5 rounded-xl border border-black/6 bg-surface-base p-4 sm:p-5">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">Detalles del producto</p>
               <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
                 <div>
-                  <span className="text-xs uppercase tracking-wider text-neutral-500">Marca</span>
-                  <p className="mt-1 font-semibold text-neutral-100">{detailLine(displayBrand)}</p>
+                  <span className="text-xs uppercase tracking-wider text-neutral-400">Marca</span>
+                  <p className="mt-1 font-medium text-neutral-800">{detailLine(displayBrand)}</p>
                 </div>
                 <div>
-                  <span className="text-xs uppercase tracking-wider text-neutral-500">Color</span>
-                  <p className="mt-1 font-semibold text-neutral-100">{detailLine(displayColor)}</p>
+                  <span className="text-xs uppercase tracking-wider text-neutral-400">Color</span>
+                  <p className="mt-1 font-medium text-neutral-800">{detailLine(displayColor)}</p>
                 </div>
                 <div>
-                  <span className="text-xs uppercase tracking-wider text-neutral-500">Talla</span>
-                  <p className="mt-1 font-semibold text-neutral-100">{detailLine(displaySize)}</p>
+                  <span className="text-xs uppercase tracking-wider text-neutral-400">Talla</span>
+                  <p className="mt-1 font-medium text-neutral-800">{detailLine(displaySize)}</p>
                 </div>
               </div>
             </div>
 
+            {/* Description — secondary text, good line-height */}
             {descriptionForDisplay ? (
-              <div className="mt-6 border-t border-luxury-500/15 pt-6">
-                <h2 className="text-lg font-semibold text-luxury-200">Descripción</h2>
-                <p className="mt-3 leading-relaxed text-neutral-300">{descriptionForDisplay}</p>
+              <div className="mt-5 border-t border-black/6 pt-5">
+                <h2 className="text-base font-semibold text-neutral-800">Descripción</h2>
+                <p className="mt-2 leading-relaxed text-neutral-500">{descriptionForDisplay}</p>
               </div>
             ) : null}
           </section>
 
+          {/* CTAs */}
           <div className="flex flex-wrap gap-3 pt-1">
             <button
               type="button"
@@ -181,7 +185,7 @@ export default function ProductDetailPage() {
                 window.open(getWhatsAppOrderUrl(shareParams), "_blank", "noopener,noreferrer");
                 setShowReturnButton(true);
               }}
-              className="rounded-xl bg-luxury-400 px-7 py-3 text-base font-extrabold text-surface-base shadow-lg shadow-luxury-900/25 transition hover:bg-luxury-300 hover:shadow-xl"
+              className="flex min-h-[44px] items-center rounded-lg bg-neutral-900 px-7 text-sm font-semibold uppercase tracking-[0.1em] text-white shadow-sm transition hover:bg-neutral-700 active:scale-[0.98]"
             >
               Solicitar producto
             </button>
@@ -191,7 +195,7 @@ export default function ProductDetailPage() {
                 setShareNote("");
                 setShareModalOpen(true);
               }}
-              className="inline-flex items-center gap-2 rounded-xl border-2 border-luxury-400/50 bg-surface-card px-7 py-3 text-base font-semibold text-luxury-100 transition hover:border-luxury-300 hover:bg-surface-hover"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-black/12 bg-white px-7 text-sm font-medium text-neutral-700 transition hover:border-black/20 hover:bg-surface-hover"
             >
               <svg
                 className="h-5 w-5 shrink-0"
@@ -209,7 +213,7 @@ export default function ProductDetailPage() {
             </button>
           </div>
 
-          {shareNote ? <p className="text-sm text-neutral-400">{shareNote}</p> : null}
+          {shareNote ? <p className="text-sm text-neutral-500">{shareNote}</p> : null}
           {showReturnButton && <ReturnToSiteBar onClose={() => setShowReturnButton(false)} />}
 
           <ProductShareModal
