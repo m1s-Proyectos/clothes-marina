@@ -3,8 +3,8 @@ import { useParams } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import Seo from "@/components/common/Seo";
 import ProductCard from "@/components/catalog/ProductCard";
+import ProductCardSkeleton from "@/components/catalog/ProductCardSkeleton";
 import CatalogFilters from "@/components/catalog/CatalogFilters";
-import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { Category, Product, ProductSort } from "@/types";
 import { categoryService } from "@/services/categoryService";
@@ -96,9 +96,9 @@ export default function CatalogPage() {
   const rangeEnd = Math.min(safePage * PRODUCTS_PER_PAGE, visibleProducts.length);
 
   return (
-    <div className="container-shell py-10">
+    <div className="container-shell py-6">
       <Seo title="Catalogo" description="Explora productos de mujer, hombre, ninos y ofertas." />
-      <h1 className="mb-5 text-3xl font-semibold text-luxury-50">Catalogo</h1>
+      <h1 className="mb-4 text-2xl font-semibold text-luxury-50">Catalogo</h1>
       <CatalogFilters
         search={search}
         onSearchChange={setSearch}
@@ -110,14 +110,18 @@ export default function CatalogPage() {
       />
 
       {loading ? (
-        <LoadingSpinner />
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <ProductCardSkeleton key={i} />
+          ))}
+        </div>
       ) : visibleProducts.length === 0 ? (
         <p className="mt-10 text-center text-neutral-400">No se encontraron productos para tu busqueda.</p>
       ) : (
         <>
           <div ref={gridAnchorRef} className="scroll-mt-24" />
           <AnimatePresence>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
               {paginatedProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
