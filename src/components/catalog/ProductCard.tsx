@@ -36,59 +36,75 @@ export default function ProductCard({ product }: ProductCardProps) {
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="group overflow-hidden rounded-2xl border border-luxury-500/10 bg-surface-card transition-all duration-200 hover:border-luxury-400/25 hover:shadow-xl hover:shadow-luxury-900/10"
+      className="group overflow-hidden rounded-xl border border-luxury-500/10 bg-surface-card transition-all duration-200 hover:border-luxury-400/25 hover:shadow-lg hover:shadow-luxury-900/15"
     >
-      <Link to={productUrl} aria-label={`Ver detalles de ${product.name}`}>
-        <div className="flex aspect-[4/5] items-center justify-center bg-luxury-50 p-3">
+      {/* ── Image — edge-to-edge, no inner padding ── */}
+      <Link to={productUrl} aria-label={`Ver detalles de ${product.name}`} className="block overflow-hidden">
+        <div className="aspect-[3/4] w-full overflow-hidden bg-surface-hover">
           <OptimizedImage
             src={product.main_image_url}
             alt={product.name}
             loading="lazy"
             decoding="async"
             onLoad={handleImageLoad}
-            transform={{ width: 640, quality: 70, format: "webp", resize: "contain" }}
-            responsiveWidths={[320, 480, 640]}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className={`h-full w-full rounded-xl object-contain transition-transform duration-300 group-hover:scale-[1.03] ${
-              isLandscapeImage ? "scale-[1.22]" : ""
+            transform={{ width: 480, quality: 78, format: "webp", resize: "contain" }}
+            responsiveWidths={[240, 360, 480]}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className={`h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.04] ${
+              isLandscapeImage ? "scale-[1.15]" : ""
             }`}
           />
         </div>
       </Link>
-      <div className="space-y-3 p-5">
-        <h3 className="text-lg font-semibold leading-snug text-neutral-100">
+
+      {/* ── Meta + actions ── */}
+      <div className="px-2.5 pb-2.5 pt-2">
+        {/* Name */}
+        <h3 className="line-clamp-2 text-[12.5px] font-medium leading-snug tracking-[0.01em] text-neutral-200">
           <Link to={productUrl} className="transition hover:text-luxury-200">
             {product.name}
           </Link>
         </h3>
-        {product.offer_active && product.offer_quantity && product.offer_price != null ? (
-          <div className="space-y-1.5">
-            <p className="inline-flex items-baseline rounded-lg bg-luxury-500/15 px-3 py-2 text-xl font-extrabold tracking-wide text-luxury-200">
-              {formatCurrency(product.reference_price)} <span className="ml-1.5 text-sm font-normal text-luxury-300">x unidad</span>
-            </p>
-            <p className="inline-flex items-center gap-2 rounded-lg bg-red-500/15 px-3 py-2 text-xl font-extrabold tracking-wide text-red-400">
-              {product.offer_quantity} x {formatCurrency(product.offer_price)}
-              <span className="text-xs font-semibold uppercase tracking-wider text-red-300">¡Aprovecha nuestra oferta!</span>
-            </p>
-          </div>
-        ) : (
-          <p className="inline-flex items-baseline rounded-lg bg-luxury-500/15 px-3 py-2 text-xl font-extrabold tracking-wide text-luxury-200">
-            {formatCurrency(product.reference_price)} <span className="ml-1.5 text-sm font-normal text-luxury-300">x unidad</span>
-          </p>
-        )}
-        <div className="space-y-2 pt-1">
+
+        {/* Price — typographic, no background badge */}
+        <div className="mt-1">
+          {product.offer_active && product.offer_quantity && product.offer_price != null ? (
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+              <span className="text-[13px] font-semibold text-luxury-300">
+                {formatCurrency(product.reference_price)}
+              </span>
+              <span className="text-[11px] text-neutral-500">/ ud.</span>
+              <span className="w-full text-[12px] font-semibold text-red-400">
+                {product.offer_quantity} x {formatCurrency(product.offer_price)}
+                <span className="ml-1.5 rounded bg-red-500/15 px-1 py-px text-[10px] font-semibold uppercase tracking-wider text-red-300">
+                  Oferta
+                </span>
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[13px] font-semibold text-luxury-300">
+                {formatCurrency(product.reference_price)}
+              </span>
+              <span className="text-[11px] text-neutral-500">/ ud.</span>
+            </div>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="mt-2 space-y-1.5">
           <Link
             to={productUrl}
-            className="block w-full rounded-xl bg-luxury-400 px-4 py-2.5 text-center text-sm font-bold text-surface-base shadow-md shadow-luxury-900/15 transition hover:bg-luxury-300 hover:shadow-lg"
+            className="block w-full rounded-lg bg-luxury-400 px-3 py-1.5 text-center text-[11.5px] font-semibold tracking-wide text-surface-base transition hover:bg-luxury-300"
           >
-            Ver Detalles Producto
+            Ver Detalles
           </Link>
           <button
             type="button"
-            className="w-full rounded-xl bg-emerald-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-500"
             onClick={openWhatsAppOrder}
+            className="w-full rounded-lg border border-luxury-500/35 bg-transparent px-3 py-1.5 text-[11.5px] font-medium tracking-wide text-luxury-300 transition hover:border-luxury-400/60 hover:text-luxury-200"
           >
-            Solicitar producto
+            Solicitar por WhatsApp
           </button>
         </div>
       </div>
