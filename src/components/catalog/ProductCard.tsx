@@ -76,25 +76,25 @@ export default function ProductCard({ product }: ProductCardProps) {
       {/* ── Caption ── */}
       <div className="pt-2">
         {/* Name — 2 lines max, legible contrast */}
-        <h3 className="line-clamp-2 text-[13.5px] font-medium leading-snug tracking-[0.01em] text-neutral-50">
+        <h3 className="line-clamp-2 text-[14px] font-medium leading-snug tracking-[0.01em] text-white sm:text-[15px]">
           <Link to={productUrl} className="transition-colors hover:text-luxury-200">
             {product.name}
           </Link>
         </h3>
 
         {/* Price */}
-        <div className="mt-1">
+        <div className="mt-1.5">
           {product.offer_active && product.offer_quantity && product.offer_price != null ? (
-            <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
-              <span className="text-[13px] font-semibold text-luxury-300">
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
+              <span className="text-[14px] font-semibold text-luxury-200">
                 {product.offer_quantity} x {formatCurrency(product.offer_price)}
               </span>
-              <span className="text-[11px] text-neutral-500 line-through">
+              <span className="text-[12px] text-neutral-400 line-through">
                 {formatCurrency(product.reference_price)}
               </span>
             </div>
           ) : (
-            <span className="text-[13px] font-semibold text-luxury-300">
+            <span className="text-[14px] font-semibold text-luxury-200">
               {formatCurrency(product.reference_price)}
             </span>
           )}
