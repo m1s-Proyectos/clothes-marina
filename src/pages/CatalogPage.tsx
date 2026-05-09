@@ -98,7 +98,7 @@ export default function CatalogPage() {
   return (
     <div className="container-shell py-6">
       <Seo title="Catalogo" description="Explora productos de mujer, hombre, ninos y ofertas." />
-      <h1 className="mb-4 text-2xl font-semibold text-luxury-50">Catalogo</h1>
+      <h1 className="mb-4 text-2xl font-semibold text-neutral-900">Catalogo</h1>
       <CatalogFilters
         search={search}
         onSearchChange={setSearch}
@@ -116,7 +116,7 @@ export default function CatalogPage() {
           ))}
         </div>
       ) : visibleProducts.length === 0 ? (
-        <p className="mt-10 text-center text-neutral-400">No se encontraron productos para tu busqueda.</p>
+        <p className="mt-10 text-center text-neutral-500">No se encontraron productos para tu busqueda.</p>
       ) : (
         <>
           <div ref={gridAnchorRef} className="scroll-mt-24" />
@@ -129,8 +129,8 @@ export default function CatalogPage() {
           </AnimatePresence>
 
           {totalPages > 1 ? (
-            <div className="mt-10 flex flex-col items-center gap-4 border-t border-luxury-500/15 pt-8">
-              <p className="text-center text-sm text-neutral-400">
+            <div className="mt-10 flex flex-col items-center gap-4 border-t border-black/8 pt-8">
+              <p className="text-center text-sm text-neutral-500">
                 Mostrando {rangeStart}–{rangeEnd} de {visibleProducts.length} productos · Página {safePage} de{" "}
                 {totalPages}
               </p>
@@ -139,7 +139,7 @@ export default function CatalogPage() {
                   <button
                     type="button"
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    className="rounded-xl border border-luxury-500/25 bg-surface-card px-5 py-2.5 text-sm font-medium text-luxury-100 transition hover:border-luxury-400/40 hover:bg-surface-hover"
+                    className="rounded-xl border border-black/12 bg-white px-5 py-2.5 text-sm font-medium text-neutral-700 transition hover:border-black/20 hover:bg-surface-hover"
                   >
                     Ver página anterior
                   </button>
@@ -148,7 +148,7 @@ export default function CatalogPage() {
                   <button
                     type="button"
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    className="rounded-xl bg-luxury-400 px-6 py-2.5 text-sm font-semibold text-surface-base shadow-lg shadow-luxury-900/20 transition hover:bg-luxury-300"
+                    className="rounded-xl bg-neutral-900 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-black/10 transition hover:bg-neutral-700"
                   >
                     {safePage === 1
                       ? "Seguir viendo página 2"
@@ -158,7 +158,7 @@ export default function CatalogPage() {
               </div>
             </div>
           ) : (
-            <p className="mt-8 text-center text-sm text-neutral-500">
+            <p className="mt-8 text-center text-sm text-neutral-400">
               {visibleProducts.length} producto{visibleProducts.length === 1 ? "" : "s"} en esta vista
             </p>
           )}

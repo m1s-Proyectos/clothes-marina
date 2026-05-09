@@ -130,18 +130,18 @@ export default function HomePage() {
       <section className="container-shell pb-16 pt-2">
         <div className="mb-8 flex items-end justify-between gap-3">
           <div>
-            <h2 className="section-title text-luxury-50">Productos Destacados</h2>
-            <p className="text-sm text-neutral-400">Selecciones pensadas para destacar tu estilo diario.</p>
+            <h2 className="section-title text-neutral-900">Productos Destacados</h2>
+            <p className="text-sm text-neutral-500">Selecciones pensadas para destacar tu estilo diario.</p>
           </div>
           <Link
             to="/catalog"
-            className="hidden rounded-full border border-luxury-500/50 px-5 py-2 text-xs uppercase tracking-[0.12em] text-luxury-200 transition hover:border-luxury-300 hover:text-luxury-100 md:inline-block"
+            className="hidden rounded-full border border-black/15 px-5 py-2 text-xs uppercase tracking-[0.12em] text-neutral-600 transition hover:border-black/25 hover:text-neutral-900 md:inline-block"
           >
             Ver todos
           </Link>
         </div>
         {loading ? (
-          <p className="text-neutral-400">Cargando productos Destacados...</p>
+          <p className="text-neutral-500">Cargando productos Destacados...</p>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {featured.map((product) => (

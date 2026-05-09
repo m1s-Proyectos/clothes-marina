@@ -15,14 +15,14 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const desktopLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `text-[13px] uppercase tracking-[0.1em] transition-colors duration-200 ${isActive ? "text-luxury-200 font-semibold" : "text-neutral-400 hover:text-neutral-100"}`;
+    `text-[13px] uppercase tracking-[0.1em] transition-colors duration-200 ${isActive ? "text-luxury-600 font-semibold" : "text-neutral-500 hover:text-neutral-900"}`;
   const mobileLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `block rounded-lg px-4 py-2.5 text-sm transition-colors ${isActive ? "bg-surface-hover text-luxury-200 font-medium" : "text-neutral-300 hover:bg-surface-hover hover:text-neutral-100"}`;
+    `block rounded-lg px-4 py-2.5 text-sm transition-colors ${isActive ? "bg-surface-hover text-luxury-600 font-medium" : "text-neutral-600 hover:bg-surface-hover hover:text-neutral-900"}`;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-luxury-500/10 bg-surface-base/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-black/8 bg-surface-base/90 backdrop-blur-xl">
       <div className="container-shell flex h-16 items-center justify-between">
-        <NavLink to="/" className="text-2xl text-luxury-200 transition hover:text-luxury-100">
+        <NavLink to="/" className="font-serif text-2xl text-luxury-700 transition hover:text-luxury-600">
           Marina&apos;s Clothes
         </NavLink>
         <button
@@ -30,7 +30,7 @@ export default function Navbar() {
           aria-label="Abrir menu"
           aria-expanded={mobileOpen}
           onClick={() => setMobileOpen((prev) => !prev)}
-          className="rounded-lg border border-luxury-500/20 px-3 py-1.5 text-sm text-neutral-300 transition hover:border-luxury-400/40 hover:text-neutral-100 md:hidden"
+          className="rounded-lg border border-black/10 px-3 py-1.5 text-sm text-neutral-600 transition hover:border-black/20 hover:text-neutral-900 md:hidden"
         >
           {mobileOpen ? "Cerrar" : "Menu"}
         </button>
@@ -43,7 +43,7 @@ export default function Navbar() {
           ))}
           <NavLink
             to={isAdmin ? "/admin" : "/admin/login"}
-            className="rounded-full border border-luxury-600/50 px-4 py-1.5 text-xs uppercase tracking-[0.12em] text-luxury-300 transition hover:border-luxury-400 hover:text-luxury-200"
+            className="rounded-full border border-luxury-500/40 px-4 py-1.5 text-xs uppercase tracking-[0.12em] text-luxury-600 transition hover:border-luxury-500 hover:text-luxury-700"
           >
             Admin
           </NavLink>
@@ -51,7 +51,7 @@ export default function Navbar() {
       </div>
 
       {mobileOpen && (
-        <nav className="container-shell space-y-1 border-t border-luxury-500/10 py-3 md:hidden">
+        <nav className="container-shell space-y-1 border-t border-black/8 py-3 md:hidden">
           {links.map((link) => (
             <NavLink key={link.to} to={link.to} onClick={() => setMobileOpen(false)} className={mobileLinkClass}>
               {link.label}
@@ -60,7 +60,7 @@ export default function Navbar() {
           <NavLink
             to={isAdmin ? "/admin" : "/admin/login"}
             onClick={() => setMobileOpen(false)}
-            className="block rounded-lg border border-luxury-600/40 px-4 py-2 text-sm text-neutral-300 transition hover:border-luxury-400"
+            className="block rounded-lg border border-luxury-500/30 px-4 py-2 text-sm text-luxury-600 transition hover:border-luxury-400 hover:text-luxury-700"
           >
             Admin
           </NavLink>

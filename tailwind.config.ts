@@ -18,10 +18,10 @@ export default {
           900: "#4e3f24"
         },
         surface: {
-          base: "#141720",
-          raised: "#1a1e2e",
-          card: "#1e2235",
-          hover: "#252a3e"
+          base: "#f7f5f2",
+          raised: "#ffffff",
+          card: "#ffffff",
+          hover: "#f0ede9"
         }
       }
     }
