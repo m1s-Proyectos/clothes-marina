@@ -13,14 +13,14 @@ interface CatalogFiltersProps {
 }
 
 const chipActive =
-  "border-sky-300/55 bg-gradient-to-b from-[#dff2ff] to-[#cfe9ff] font-semibold text-[#2f5f88] shadow-sm shadow-sky-900/10 ring-1 ring-sky-200/45";
+  "border-amber-400/70 bg-gradient-to-b from-amber-100 to-amber-200/90 font-semibold text-amber-950 shadow-sm shadow-amber-900/12 ring-1 ring-amber-300/55";
 const chipInactive =
-  "border-slate-200/90 bg-white font-medium text-slate-700 hover:border-sky-200/70 hover:bg-[#f8fbff]";
+  "border-amber-300/55 bg-gradient-to-b from-amber-50/95 to-white font-medium text-amber-900 hover:border-amber-400/65 hover:bg-amber-50";
 
 const offersChipInactive =
-  "border-sky-300/50 bg-gradient-to-b from-[#eef6ff] to-[#e2f2ff] font-semibold text-[#2f5f88] shadow-sm shadow-sky-900/[0.07] ring-1 ring-sky-200/50 hover:border-sky-400/50 hover:from-[#e5f2ff] hover:to-[#dff2ff]";
+  "border-amber-500/50 bg-gradient-to-b from-amber-100 to-amber-50 font-semibold text-amber-950 shadow-sm shadow-amber-900/10 ring-1 ring-amber-400/45 hover:border-amber-500/65 hover:from-amber-200/60 hover:to-amber-50";
 const offersChipActive =
-  "border-sky-400/60 bg-gradient-to-b from-[#cfe9ff] to-[#b8dfff] font-semibold text-[#1e4a6e] shadow-md shadow-sky-900/12 ring-2 ring-sky-300/45";
+  "border-amber-600/55 bg-gradient-to-b from-amber-200 to-amber-300/85 font-semibold text-amber-950 shadow-md shadow-amber-900/15 ring-2 ring-amber-500/50";
 
 export default function CatalogFilters({
   search,
@@ -95,10 +95,13 @@ export default function CatalogFilters({
           </div>
         </div>
 
-        <div>
-          <span className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">
+        <div className="rounded-xl border border-amber-200/60 bg-gradient-to-b from-amber-50/40 to-amber-50/10 px-3 py-3 sm:px-4">
+          <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.12em] text-amber-800">
             Categoría y promociones
           </span>
+          <p className="mb-3 text-xs font-medium text-amber-900 sm:text-sm">
+            (Mueve la barra selecciona y filtra a tu elección)
+          </p>
           <div className="-mx-1 flex gap-2 overflow-x-auto pb-1 pt-0.5 md:flex-wrap md:overflow-visible">
             <button
               type="button"
@@ -115,7 +118,7 @@ export default function CatalogFilters({
               aria-pressed={category === "offers"}
             >
               <span
-                className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-md bg-white/70 px-1 text-[10px] font-bold uppercase tracking-wide text-[#2f5f88] ring-1 ring-sky-200/60"
+                className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-md bg-amber-100 px-1 text-[10px] font-bold uppercase tracking-wide text-amber-950 ring-1 ring-amber-400/60"
                 aria-hidden
               >
                 %
