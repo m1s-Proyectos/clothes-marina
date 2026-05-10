@@ -45,7 +45,13 @@ function pickHomeCategories(categories: Category[]): HomeCategoryCard[] {
 
       if (!match) return null;
       usedIds.add(match.id);
-      return { title: target.title, slug: match.slug, imageUrl: match.image_url ?? "" };
+      const imageUrl =
+        target.title === "Niñas"
+          ? "/imagen-ninas.jpg"
+          : target.title === "Niños"
+            ? "/imagen-ninos.jpg"
+            : (match.image_url ?? "");
+      return { title: target.title, slug: match.slug, imageUrl };
     })
     .filter((item): item is HomeCategoryCard => item !== null);
 }
