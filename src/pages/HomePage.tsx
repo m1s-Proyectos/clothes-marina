@@ -106,7 +106,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.65 }}
-              className="max-w-2xl text-3xl leading-tight text-slate-950 drop-shadow-[0_2px_18px_rgba(255,255,255,0.65)] sm:text-4xl md:text-5xl lg:text-6xl"
+              className="max-w-2xl text-3xl leading-tight text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.45),0_1px_3px_rgba(0,0,0,0.35)] sm:text-4xl md:text-5xl lg:text-6xl"
             >
               Ropa nueva con estilo, al mejor precio para cada ocasión.
             </motion.h1>
@@ -114,7 +114,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              className="mt-4 max-w-lg text-sm leading-relaxed text-slate-700 drop-shadow-sm sm:text-base"
+              className="mt-4 max-w-lg text-sm leading-relaxed text-white [text-shadow:0_1px_14px_rgba(0,0,0,0.4),0_1px_2px_rgba(0,0,0,0.35)] sm:text-base"
             >
               Colecciones para mujer, hombre, niños, niñas y hogar con enfoque en calidad, combinación y presencia.
             </motion.p>

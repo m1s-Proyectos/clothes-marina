@@ -123,7 +123,10 @@ export default function CategoryMarqueePanel({ items }: CategoryMarqueePanelProp
 
   return (
     <section className="relative" aria-labelledby="home-categories-heading">
-      <h2 id="home-categories-heading" className="section-title mb-3 text-slate-950">
+      <h2
+        id="home-categories-heading"
+        className="section-title mb-3 font-semibold text-slate-950"
+      >
         Categorías
       </h2>
       <p className="mb-6 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base">
