@@ -89,6 +89,41 @@ export const productService = {
     return (data ?? []).map((row) => normalizeProductText(row as Product));
   },
 
+  async getLatestAvailable(limit = 4): Promise<Product[]> {
+    if (!env.isSupabaseConfigured) return [];
+
+    const { data, error } = await supabase
+      .from("products")
+      .select(`
+        *,
+        categories:category_id (id, name, slug),
+        product_images (id, product_id, image_url)
+      `)
+      .eq("available", true)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return (data ?? []).map((row) => normalizeProductText(row as Product));
+  },
+
+  async getLatestActiveOffers(limit = 8): Promise<Product[]> {
+    if (!env.isSupabaseConfigured) return [];
+
+    const { data, error } = await supabase
+      .from("products")
+      .select(`
+        *,
+        categories:category_id (id, name, slug),
+        product_images (id, product_id, image_url)
+      `)
+      .eq("available", true)
+      .eq("offer_active", true)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return (data ?? []).map((row) => normalizeProductText(row as Product));
+  },
+
   async create(payload: Omit<Product, "id" | "created_at" | "categories" | "product_images">): Promise<void> {
     const { error } = await supabase.from("products").insert(normalizeProductPayload(payload) as typeof payload);
     if (error) throw error;

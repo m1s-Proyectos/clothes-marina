@@ -16,3 +16,6 @@ scripts/
 
 # Carpeta local de pruebas (no subir ni mezclar con main)
 v0-fast-repuestos-hub/
+
+# Documentación local (no subir al repositorio)
+docs/

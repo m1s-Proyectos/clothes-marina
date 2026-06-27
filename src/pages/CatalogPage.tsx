@@ -4,11 +4,21 @@ import { AnimatePresence } from "framer-motion";
 import Seo from "@/components/common/Seo";
 import ProductCard from "@/components/catalog/ProductCard";
 import CatalogFilters from "@/components/catalog/CatalogFilters";
+import CatalogPromoCarousel from "@/components/catalog/CatalogPromoCarousel";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import { useCarouselInsertInterval } from "@/hooks/useCarouselInsertInterval";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { Category, Product, ProductSort } from "@/types";
+import type { CatalogCarouselBlock } from "@/types/catalogCarousel";
 import { categoryService } from "@/services/categoryService";
+import { catalogCarouselService } from "@/services/catalogCarouselService";
 import { productService } from "@/services/productService";
+import { productRatingService } from "@/services/productRatingService";
+import { whatsAppLeadService } from "@/services/whatsAppLeadService";
+import { buildCatalogGridItems } from "@/utils/catalogGrid";
+import { hydrateCarouselBlocks } from "@/utils/catalogCarouselProducts";
+import type { SeasonFavoriteCarouselRow } from "@/types/productRating";
+import type { CustomerLovedCarouselRow } from "@/types/whatsappLead";
 
 const PRODUCTS_PER_PAGE = 26;
 
@@ -18,6 +28,22 @@ function normalize(value: string): string {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .trim();
+}
+
+function categoryDisplayImage(category: Category): string {
+  const slug = normalize(category.slug);
+  const name = normalize(category.name);
+  if (slug.includes("nina") || name.includes("nina")) return "/imagen-ninas.jpg";
+  if (slug.includes("nino") || name.includes("nino")) return "/imagen-ninos.jpg";
+  if (slug.includes("unisex") || name.includes("unisex")) return "/unisex.jpg";
+  if (
+    slug.includes("hombre") ||
+    name.includes("hombre") ||
+    (slug.includes("men") && !slug.includes("women") && !slug.includes("mujer"))
+  ) {
+    return "/hombre.jpg";
+  }
+  return category.image_url ?? "";
 }
 
 export default function CatalogPage() {
@@ -31,7 +57,13 @@ export default function CatalogPage() {
   const [category, setCategory] = useState(params.categorySlug ?? "");
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [carouselBlocks, setCarouselBlocks] = useState<CatalogCarouselBlock[]>([]);
+  const [latestCatalogProducts, setLatestCatalogProducts] = useState<Product[]>([]);
+  const [recommendedOfferProducts, setRecommendedOfferProducts] = useState<Product[]>([]);
+  const [seasonFavoriteProducts, setSeasonFavoriteProducts] = useState<SeasonFavoriteCarouselRow[]>([]);
+  const [customerLovedProducts, setCustomerLovedProducts] = useState<CustomerLovedCarouselRow[]>([]);
   const debouncedSearch = useDebounce(search);
+  const carouselInterval = useCarouselInsertInterval();
   const gridAnchorRef = useRef<HTMLDivElement>(null);
   const skipScrollRef = useRef(true);
 
@@ -46,6 +78,56 @@ export default function CatalogPage() {
       .catch((error) => {
         console.warn("Unable to load catalog categories.", error);
         setCategories([]);
+      });
+  }, []);
+
+  useEffect(() => {
+    catalogCarouselService
+      .listActiveBlocks()
+      .then(setCarouselBlocks)
+      .catch((error) => {
+        console.warn("Unable to load catalog carousels.", error);
+        setCarouselBlocks([]);
+      });
+  }, []);
+
+  useEffect(() => {
+    productService
+      .getLatestAvailable(4)
+      .then(setLatestCatalogProducts)
+      .catch((error) => {
+        console.warn("Unable to load latest catalog products for carousel.", error);
+        setLatestCatalogProducts([]);
+      });
+  }, []);
+
+  useEffect(() => {
+    productService
+      .getLatestActiveOffers(8)
+      .then(setRecommendedOfferProducts)
+      .catch((error) => {
+        console.warn("Unable to load recommended offer products for carousel.", error);
+        setRecommendedOfferProducts([]);
+      });
+  }, []);
+
+  useEffect(() => {
+    productRatingService
+      .getSeasonFavorites(5)
+      .then(setSeasonFavoriteProducts)
+      .catch((error) => {
+        console.warn("Unable to load season favorite products for carousel.", error);
+        setSeasonFavoriteProducts([]);
+      });
+  }, []);
+
+  useEffect(() => {
+    whatsAppLeadService
+      .getCustomerLovedProducts(5)
+      .then(setCustomerLovedProducts)
+      .catch((error) => {
+        console.warn("Unable to load customer loved products for carousel.", error);
+        setCustomerLovedProducts([]);
       });
   }, []);
 
@@ -70,7 +152,12 @@ export default function CatalogPage() {
   }, [category, sort, debouncedSearch]);
 
   const filterCategories = useMemo(
-    () => categories.map((item) => ({ slug: item.slug, name: item.name })),
+    () =>
+      categories.map((item) => ({
+        slug: item.slug,
+        name: item.name,
+        imageUrl: categoryDisplayImage(item),
+      })),
     [categories],
   );
 
@@ -112,13 +199,30 @@ export default function CatalogPage() {
     return visibleProducts.slice(start, start + PRODUCTS_PER_PAGE);
   }, [visibleProducts, safePage]);
 
+  const hydratedCarouselBlocks = useMemo(
+    () =>
+      hydrateCarouselBlocks(
+        carouselBlocks,
+        latestCatalogProducts,
+        recommendedOfferProducts,
+        seasonFavoriteProducts,
+        customerLovedProducts,
+      ),
+    [carouselBlocks, latestCatalogProducts, recommendedOfferProducts, seasonFavoriteProducts, customerLovedProducts],
+  );
+
+  const catalogGridItems = useMemo(
+    () => buildCatalogGridItems(paginatedProducts, carouselInterval),
+    [paginatedProducts, carouselInterval],
+  );
+
   const rangeStart = visibleProducts.length === 0 ? 0 : (safePage - 1) * PRODUCTS_PER_PAGE + 1;
   const rangeEnd = Math.min(safePage * PRODUCTS_PER_PAGE, visibleProducts.length);
 
   return (
-    <div className="container-shell py-10">
+    <div className="container-shell py-4 md:py-10">
       <Seo title="Catalogo" description="Explora productos de mujer, hombre, ninos y ofertas." />
-      <h1 className="mb-5 text-3xl font-semibold text-slate-950">Catalogo</h1>
+      <h1 className="mb-2 text-2xl font-semibold text-slate-950 md:mb-5 md:text-3xl">Catalogo</h1>
       <CatalogFilters
         search={search}
         onSearchChange={setSearch}
@@ -127,7 +231,6 @@ export default function CatalogPage() {
         category={category}
         categories={filterCategories}
         onCategoryChange={setCategory}
-        discoverMode={discoverMode}
       />
 
       {loading ? (
@@ -138,10 +241,23 @@ export default function CatalogPage() {
         <>
           <div ref={gridAnchorRef} className="scroll-mt-24" />
           <AnimatePresence>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {paginatedProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+            <div className="catalog-product-grid grid min-w-0 grid-cols-2 gap-2 md:gap-5 lg:grid-cols-3">
+              {catalogGridItems.map((item) => {
+                if (item.kind === "promo-carousel") {
+                  const block = catalogCarouselService.resolveBlockForSlot(hydratedCarouselBlocks, item.slotIndex);
+                  if (!block || block.slides.length === 0) return null;
+
+                  return (
+                    <div key={item.key} className="catalog-promo-carousel-slot col-span-full min-w-0">
+                      <CatalogPromoCarousel key={block.id} block={block} />
+                    </div>
+                  );
+                }
+
+                return (
+                  <ProductCard key={item.product.id} product={item.product} variant="catalog" />
+                );
+              })}
             </div>
           </AnimatePresence>
 

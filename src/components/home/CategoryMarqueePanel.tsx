@@ -151,7 +151,7 @@ export default function CategoryMarqueePanel({ items }: CategoryMarqueePanelProp
           <div
             ref={scrollRef}
             onWheel={pauseFromWheel}
-          className="cursor-grab overflow-x-auto px-4 py-5 [scrollbar-width:thin] [scrollbar-color:rgba(100,157,183,0.35)_transparent] active:cursor-grabbing sm:px-6 sm:py-6 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-luxury-400/45 [&::-webkit-scrollbar-track]:bg-transparent"
+          className="cursor-grab overflow-x-auto px-4 py-5 [scrollbar-width:none] active:cursor-grabbing sm:px-6 sm:py-6 [&::-webkit-scrollbar]:hidden"
           >
             {/* Sin esto, en pantallas anchas todo cabe y scrollLeft no puede moverse: el auto-scroll no se ve. */}
             <div className="flex w-max min-w-[calc(100%+3rem)] gap-4 sm:gap-5">

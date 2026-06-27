@@ -50,7 +50,9 @@ function pickHomeCategories(categories: Category[]): HomeCategoryCard[] {
           ? "/imagen-ninas.jpg"
           : target.title === "Niños"
             ? "/imagen-ninos.jpg"
-            : (match.image_url ?? "");
+            : target.title === "Hombre"
+              ? "/hombre.jpg"
+              : (match.image_url ?? "");
       return { title: target.title, slug: match.slug, imageUrl };
     })
     .filter((item): item is HomeCategoryCard => item !== null);

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Seo from "@/components/common/Seo";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ProductShareModal from "@/components/product/ProductShareModal";
+import ProductRatingSection from "@/components/product/ProductRatingSection";
 import type { Product } from "@/types";
 import { productService } from "@/services/productService";
 import { formatCurrency } from "@/utils/format";
@@ -188,11 +189,37 @@ export default function ProductDetailPage() {
             </div>
 
             {descriptionForDisplay ? (
-              <div className="mt-6 border-t border-luxury-500/15 pt-6">
-                <h2 className="text-lg font-semibold text-luxury-800">Descripción</h2>
-                <p className="mt-3 leading-relaxed text-slate-600">{descriptionForDisplay}</p>
+              <div
+                className="relative mt-6 overflow-hidden rounded-2xl border border-luxury-200/45 p-5 shadow-md shadow-luxury-900/[0.05] sm:p-6 md:p-7"
+                style={{
+                  background: "linear-gradient(180deg, #faf8f5 0%, #f5f2ed 45%, #f0ebe4 100%)",
+                }}
+                role="region"
+                aria-labelledby="product-description-heading"
+              >
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-100"
+                  style={{
+                    background:
+                      "radial-gradient(ellipse 85% 55% at 50% -15%, rgba(180, 150, 120, 0.12), transparent 58%), radial-gradient(ellipse 70% 40% at 100% 100%, rgba(230, 220, 210, 0.45), transparent 55%)",
+                  }}
+                  aria-hidden
+                />
+                <div className="relative z-[1]">
+                  <h2
+                    id="product-description-heading"
+                    className="font-sans text-[13px] font-semibold tracking-wide text-slate-700"
+                  >
+                    Descripción
+                  </h2>
+                  <p className="mt-4 rounded-xl border border-white/85 bg-white/75 px-4 py-4 text-base leading-relaxed text-slate-600 shadow-sm shadow-luxury-900/[0.04] backdrop-blur-[2px] md:px-5 md:py-5">
+                    {descriptionForDisplay}
+                  </p>
+                </div>
               </div>
             ) : null}
+
+            <ProductRatingSection productId={product.id} />
           </section>
 
           <div className="flex flex-wrap gap-3 pt-1">
