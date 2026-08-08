@@ -31,5 +31,9 @@ export default async function middleware(request: Request) {
   const apiUrl = new URL("/api/share/product", url.origin);
   apiUrl.searchParams.set("id", productId);
 
-  return fetch(apiUrl.toString());
+  return fetch(apiUrl.toString(), {
+    headers: {
+      "User-Agent": userAgent,
+    },
+  });
 }

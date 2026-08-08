@@ -1,18 +1,26 @@
 import env from "@/config/env";
 import { supabase } from "@/lib/supabase";
 import type { CustomerLovedCarouselRow } from "@/types/whatsappLead";
+import { sanitizePlainText, validateWhatsAppLeadPayload } from "@/utils/inputValidation";
 
 interface WhatsAppLeadPayload {
   productId: string;
   productName: string;
+  honeypot?: string;
 }
 
 export const whatsAppLeadService = {
   async trackProductInquiry(payload: WhatsAppLeadPayload): Promise<void> {
-    const { error } = await supabase.from("whatsapp_leads").insert({
-      product_id: payload.productId,
-      product_name: payload.productName,
-      source: "product",
+    const validation = validateWhatsAppLeadPayload(payload);
+    if (!validation.ok) {
+      console.warn("Invalid WhatsApp lead payload.", validation.message);
+      return;
+    }
+
+    const { error } = await supabase.rpc("track_whatsapp_lead", {
+      p_product_id: payload.productId,
+      p_product_name: sanitizePlainText(payload.productName, 200),
+      p_honeypot: payload.honeypot ?? "",
     });
 
     if (error) {

@@ -1,6 +1,8 @@
 node_modules
 dist
 .env
+.env.*
+!.env.example
 .env.local
 env
 .DS_Store
@@ -8,6 +10,35 @@ coverage
 *.tsbuildinfo
 vite.config.d.ts
 vite.config.js
+
+# Secrets and credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+id_rsa
+id_ed25519
+credentials.json
+service-account*.json
+
+# Local tooling and caches
+.vercel
+.turbo
+.cache
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+*.swo
+Thumbs.db
 
 # Archivos locales que no deben subirse al repositorio
 Plan_Trabajo_Mototaxi_Runner.pdf
@@ -19,3 +50,6 @@ v0-fast-repuestos-hub/
 
 # Documentación local (no subir al repositorio)
 docs/
+
+# SBOM artifacts are generated in CI; keep optional local copies untracked
+sbom*.json

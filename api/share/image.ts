@@ -1,4 +1,5 @@
 import sharp from "sharp";
+import { isAllowedProductImageUrl, resolveTrustedProductImageUrl } from "../_lib/urlSafety";
 
 const OG_WIDTH = 1200;
 const OG_HEIGHT = 630;
@@ -80,16 +81,37 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return;
   }
 
+  const supabaseUrl = getEnv("SUPABASE_URL", getEnv("VITE_SUPABASE_URL"));
+  if (!supabaseUrl) {
+    res.status(500).send("Server misconfigured");
+    return;
+  }
+
   try {
-    const imageUrl = imageFromQuery || (await fetchProductImage(productId));
-    if (!imageUrl) {
+    const productImageUrl = await fetchProductImage(productId);
+    const imageUrl = resolveTrustedProductImageUrl(productImageUrl, imageFromQuery, supabaseUrl);
+
+    if (!imageUrl || !isAllowedProductImageUrl(imageUrl, supabaseUrl)) {
       res.status(404).send("Image not found");
       return;
     }
 
-    const imageResponse = await fetch(imageUrl, { headers: { Accept: "image/*" } });
+    const imageResponse = await fetch(imageUrl, {
+      headers: { Accept: "image/*" },
+      redirect: "manual",
+    });
+    if (imageResponse.status >= 300 && imageResponse.status < 400) {
+      res.status(404).send("Image redirect blocked");
+      return;
+    }
     if (!imageResponse.ok) {
       res.status(404).send("Image not available");
+      return;
+    }
+
+    const contentType = imageResponse.headers.get("content-type") ?? "";
+    if (!contentType.startsWith("image/")) {
+      res.status(415).send("Unsupported media type");
       return;
     }
 
