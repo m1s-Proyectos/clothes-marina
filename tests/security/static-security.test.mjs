@@ -30,6 +30,7 @@ test("CSP does not load Google Fonts externally", () => {
 test("CSP img-src uses explicit hosts", () => {
   assert.match(csp, /img-src[^;]*https:\/\/\*\.supabase\.co/);
   assert.match(csp, /img-src[^;]*https:\/\/images\.unsplash\.com/);
+  assert.match(csp, /img-src[^;]*https:\/\/img\.freepik\.com/);
 });
 
 test("Report-Only CSP exists for future tightening", () => {
