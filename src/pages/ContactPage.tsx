@@ -7,13 +7,14 @@ export default function ContactPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
+  const [honeypot, setHoneypot] = useState("");
   const [status, setStatus] = useState("");
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setStatus("Enviando...");
     try {
-      await sendContact({ name, phone, message });
+      await sendContact({ name, phone, message, honeypot });
       setName("");
       setPhone("");
       setMessage("");
@@ -32,6 +33,15 @@ export default function ContactPage() {
       <h1 className="text-3xl font-semibold text-slate-950">Contacto</h1>
       <p className="mt-2 text-sm text-slate-600">Completa el formulario y te responderemos lo antes posible.</p>
       <form className="mt-8 max-w-xl space-y-4" onSubmit={onSubmit}>
+        <input
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          value={honeypot}
+          onChange={(event) => setHoneypot(event.target.value)}
+          className="hidden"
+          name="company"
+        />
         <input required value={name} onChange={(event) => setName(event.target.value)} placeholder="Nombre" className={fieldClass} />
         <input required value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="Telefono" className={fieldClass} />
         <textarea required value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Mensaje" className={`${fieldClass} h-32 resize-none`} />

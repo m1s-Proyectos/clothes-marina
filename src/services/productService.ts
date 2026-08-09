@@ -2,6 +2,13 @@ import env from "@/config/env";
 import { supabase } from "@/lib/supabase";
 import type { Product, ProductSort } from "@/types";
 import { improveSpanishText, normalizeProductText } from "@/utils/spanishTextNormalize";
+import { isAllowedCatalogImageUrlFromEnv } from "@/utils/imageUrlValidation";
+
+function assertAllowedImageUrl(url: string, fieldName: string): void {
+  if (!isAllowedCatalogImageUrlFromEnv(url)) {
+    throw new Error(`La URL de ${fieldName} debe ser local, Supabase Storage o Unsplash.`);
+  }
+}
 
 function normalizeProductPayload(
   payload: Partial<Omit<Product, "id" | "created_at" | "categories" | "product_images">>,
@@ -12,6 +19,9 @@ function normalizeProductPayload(
   if (typeof next.brand === "string") next.brand = improveSpanishText(next.brand);
   if (typeof next.color === "string") next.color = improveSpanishText(next.color);
   if (typeof next.size === "string") next.size = improveSpanishText(next.size);
+  if (typeof next.main_image_url === "string") {
+    assertAllowedImageUrl(next.main_image_url, "imagen principal");
+  }
   return next;
 }
 

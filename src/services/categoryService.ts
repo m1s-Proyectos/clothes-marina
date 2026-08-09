@@ -2,6 +2,13 @@ import env from "@/config/env";
 import { supabase } from "@/lib/supabase";
 import type { Category } from "@/types";
 import { improveSpanishText } from "@/utils/spanishTextNormalize";
+import { isAllowedCatalogImageUrlFromEnv } from "@/utils/imageUrlValidation";
+
+function assertAllowedImageUrl(url: string): void {
+  if (!isAllowedCatalogImageUrlFromEnv(url)) {
+    throw new Error("La URL de imagen debe ser local, Supabase Storage o Unsplash.");
+  }
+}
 
 function normalizeCategoryRow(category: Category): Category {
   return { ...category, name: improveSpanishText(category.name) };
@@ -20,6 +27,7 @@ export const categoryService = {
   },
 
   async create(payload: Pick<Category, "name" | "slug" | "image_url">): Promise<void> {
+    assertAllowedImageUrl(payload.image_url);
     const { error } = await supabase.from("categories").insert({
       ...payload,
       name: improveSpanishText(payload.name),
@@ -28,6 +36,9 @@ export const categoryService = {
   },
 
   async update(id: string, payload: Partial<Pick<Category, "name" | "slug" | "image_url">>): Promise<void> {
+    if (typeof payload.image_url === "string") {
+      assertAllowedImageUrl(payload.image_url);
+    }
     const next =
       typeof payload.name === "string" ? { ...payload, name: improveSpanishText(payload.name) } : payload;
     const { error } = await supabase.from("categories").update(next).eq("id", id);
