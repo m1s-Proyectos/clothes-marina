@@ -31,6 +31,7 @@ test("CSP img-src uses explicit hosts", () => {
   assert.match(csp, /img-src[^;]*https:\/\/\*\.supabase\.co/);
   assert.match(csp, /img-src[^;]*https:\/\/images\.unsplash\.com/);
   assert.match(csp, /img-src[^;]*https:\/\/img\.freepik\.com/);
+  assert.match(csp, /img-src[^;]*https:\/\/img\.magnific\.com/);
 });
 
 test("Report-Only CSP exists for future tightening", () => {
