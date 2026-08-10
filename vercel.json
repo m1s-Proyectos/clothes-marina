@@ -1,4 +1,5 @@
 {
+  "installCommand": "npm install && npm rebuild sharp",
   "headers": [
     {
       "source": "/api/share/image",

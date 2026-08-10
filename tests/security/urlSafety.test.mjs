@@ -8,7 +8,7 @@ import {
   isAllowedProductImageUrl,
   normalizeUrl,
   resolveTrustedProductImageUrl,
-} from "../../api/_lib/urlSafety.ts";
+} from "../../api/share/urlSafety.ts";
 
 const supabaseUrl = "https://example.supabase.co";
 

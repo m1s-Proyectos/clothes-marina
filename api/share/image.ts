@@ -1,5 +1,7 @@
-import sharp from "sharp";
-import { fetchAllowedProductImage, resolveTrustedProductImageUrl } from "../_lib/urlSafety";
+import {
+  fetchAllowedProductImage,
+  resolveTrustedProductImageUrl,
+} from "./urlSafety";
 
 const OG_WIDTH = 1200;
 const OG_HEIGHT = 630;
@@ -14,8 +16,19 @@ interface ApiResponse {
   status(code: number): { send(body: string | Buffer): void };
 }
 
+type SharpModule = typeof import("sharp");
+
 function getEnv(name: string, fallback = ""): string {
   return process.env[name] || fallback;
+}
+
+async function loadSharp(): Promise<SharpModule["default"] | null> {
+  try {
+    const mod = await import("sharp");
+    return mod.default;
+  } catch {
+    return null;
+  }
 }
 
 async function fetchProductImage(productId: string): Promise<string | null> {
@@ -39,7 +52,10 @@ async function fetchProductImage(productId: string): Promise<string | null> {
   return item.main_image_url as string;
 }
 
-async function buildOgImage(sourceBuffer: Buffer): Promise<Buffer> {
+async function buildOgImage(
+  sharp: SharpModule["default"],
+  sourceBuffer: Buffer,
+): Promise<Buffer> {
   const meta = await sharp(sourceBuffer).metadata();
   const srcW = meta.width || 800;
   const srcH = meta.height || 600;
@@ -72,9 +88,12 @@ async function buildOgImage(sourceBuffer: Buffer): Promise<Buffer> {
     .toBuffer();
 }
 
-export const config = {
-  maxDuration: 15,
-};
+function sendImageResponse(res: ApiResponse, buffer: Buffer, contentType = "image/jpeg"): void {
+  res.setHeader("Content-Type", contentType);
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+  res.setHeader("Cache-Control", "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800");
+  res.status(200).send(buffer);
+}
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   const productId = typeof req.query?.id === "string" ? req.query.id : "";
@@ -106,14 +125,22 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       return;
     }
 
+    const contentType = imageResponse.headers.get("content-type") ?? "image/jpeg";
     const arrayBuffer = await imageResponse.arrayBuffer();
     const sourceBuffer = Buffer.from(arrayBuffer);
-    const ogBuffer = await buildOgImage(sourceBuffer);
 
-    res.setHeader("Content-Type", "image/jpeg");
-    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-    res.setHeader("Cache-Control", "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800");
-    res.status(200).send(ogBuffer);
+    const sharp = await loadSharp();
+    if (sharp) {
+      try {
+        const ogBuffer = await buildOgImage(sharp, sourceBuffer);
+        sendImageResponse(res, ogBuffer);
+        return;
+      } catch {
+        /* fall through to passthrough */
+      }
+    }
+
+    sendImageResponse(res, sourceBuffer, contentType.startsWith("image/") ? contentType : "image/jpeg");
   } catch {
     res.status(500).send("Unable to generate image");
   }
