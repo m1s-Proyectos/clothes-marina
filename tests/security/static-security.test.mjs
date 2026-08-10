@@ -3,7 +3,8 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const vercel = JSON.parse(readFileSync("vercel.json", "utf8"));
-const headers = vercel.headers?.[0]?.headers ?? [];
+const globalHeaderBlock = vercel.headers?.find((block) => block.source === "/(.*)");
+const headers = globalHeaderBlock?.headers ?? [];
 const csp = headers.find((entry) => entry.key === "Content-Security-Policy")?.value ?? "";
 const reportOnly = headers.find((entry) => entry.key === "Content-Security-Policy-Report-Only")?.value ?? "";
 

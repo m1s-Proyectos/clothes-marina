@@ -14,19 +14,31 @@ function isSocialCrawler(userAgent: string): boolean {
   return SOCIAL_CRAWLERS.some((bot) => ua.includes(bot));
 }
 
+function extractProductId(pathname: string): string | null {
+  const match = pathname.match(/^\/product\/([^/?#]+)/);
+  if (!match?.[1]) return null;
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return null;
+  }
+}
+
 export const config = {
   matcher: ["/product/:path*"],
 };
 
-export default async function middleware(request: Request) {
+export default async function middleware(request: Request): Promise<Response | undefined> {
   const userAgent = request.headers.get("user-agent") || "";
-
-  if (!isSocialCrawler(userAgent)) return;
+  if (!isSocialCrawler(userAgent)) {
+    return undefined;
+  }
 
   const url = new URL(request.url);
-  const segments = url.pathname.split("/product/");
-  const productId = segments[1];
-  if (!productId) return;
+  const productId = extractProductId(url.pathname);
+  if (!productId) {
+    return undefined;
+  }
 
   const apiUrl = new URL("/api/share/product", url.origin);
   apiUrl.searchParams.set("id", productId);
@@ -34,6 +46,7 @@ export default async function middleware(request: Request) {
   return fetch(apiUrl.toString(), {
     headers: {
       "User-Agent": userAgent,
+      Accept: "text/html",
     },
   });
 }

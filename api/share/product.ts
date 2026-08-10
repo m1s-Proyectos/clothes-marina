@@ -32,11 +32,9 @@ function truncate(value: string, max = 220): string {
   return `${value.slice(0, max - 1)}…`;
 }
 
-function buildProxyImageUrl(siteUrl: string, productId: string, imageUrl?: string): string {
+function buildProxyImageUrl(siteUrl: string, productId: string): string {
   const base = siteUrl.replace(/\/$/, "");
-  const params = new URLSearchParams({ id: productId });
-  if (imageUrl) params.set("img", imageUrl);
-  return `${base}/api/share/image?${params.toString()}`;
+  return `${base}/api/share/image?id=${encodeURIComponent(productId)}`;
 }
 
 async function fetchProduct(productId: string) {
@@ -154,7 +152,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
     const title = product.name || "Producto";
     const description = truncate(product.description || "Descubre este producto en Marina's clothes.");
-    const image = buildProxyImageUrl(siteUrl, productId, product.main_image_url);
+    const image = buildProxyImageUrl(siteUrl, productId);
     const html = renderShareHtml({ siteUrl, productId, productUrl, title, description, image });
 
     res.setHeader("Content-Type", "text/html; charset=utf-8");

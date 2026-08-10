@@ -8,7 +8,12 @@ const BLOCKED_HOSTNAMES = new Set([
   "metadata.google.internal.",
 ]);
 
-const ALLOWED_EXTERNAL_IMAGE_HOSTS = new Set(["images.unsplash.com"]);
+/** Explicit allowlist for catalog stock/CDN hosts used in product.main_image_url. */
+export const ALLOWED_EXTERNAL_IMAGE_HOSTS = new Set([
+  "images.unsplash.com",
+  "img.freepik.com",
+  "img.magnific.com",
+]);
 
 function isPrivateIpv4(hostname: string): boolean {
   const parts = hostname.split(".").map(Number);
@@ -95,10 +100,68 @@ export function isAllowedRemoteFetchUrl(url: string, supabaseUrl: string): boole
   return isAllowedProductImageUrl(url, supabaseUrl);
 }
 
+const MAX_IMAGE_REDIRECTS = 1;
+
+/**
+ * Fetches a product image from an allowlisted URL with at most one controlled redirect.
+ * Both the initial URL and redirect target must pass isAllowedProductImageUrl.
+ */
+export async function fetchAllowedProductImage(
+  url: string,
+  supabaseUrl: string,
+): Promise<Response | null> {
+  if (!isAllowedProductImageUrl(url, supabaseUrl)) {
+    return null;
+  }
+
+  let currentUrl = url;
+
+  for (let hop = 0; hop <= MAX_IMAGE_REDIRECTS; hop += 1) {
+    const response = await fetch(currentUrl, {
+      headers: { Accept: "image/*" },
+      redirect: "manual",
+    });
+
+    if (response.status >= 300 && response.status < 400) {
+      if (hop >= MAX_IMAGE_REDIRECTS) {
+        return null;
+      }
+
+      const location = response.headers.get("location");
+      if (!location) {
+        return null;
+      }
+
+      const nextUrl = normalizeUrl(new URL(location, currentUrl).toString());
+      if (!isAllowedProductImageUrl(nextUrl, supabaseUrl)) {
+        return null;
+      }
+
+      currentUrl = nextUrl;
+      continue;
+    }
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const contentType = response.headers.get("content-type") ?? "";
+    if (!contentType.startsWith("image/")) {
+      return null;
+    }
+
+    return response;
+  }
+
+  return null;
+}
+
 export const ALLOWED_IMAGE_HOSTS = [
   "'self'",
   "data:",
   "blob:",
   "https://*.supabase.co",
   "https://images.unsplash.com",
+  "https://img.freepik.com",
+  "https://img.magnific.com",
 ] as const;

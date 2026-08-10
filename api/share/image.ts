@@ -1,5 +1,5 @@
 import sharp from "sharp";
-import { isAllowedProductImageUrl, resolveTrustedProductImageUrl } from "../_lib/urlSafety";
+import { fetchAllowedProductImage, resolveTrustedProductImageUrl } from "../_lib/urlSafety";
 
 const OG_WIDTH = 1200;
 const OG_HEIGHT = 630;
@@ -48,12 +48,12 @@ async function buildOgImage(sourceBuffer: Buffer): Promise<Buffer> {
   const maxH = OG_HEIGHT - PADDING * 2;
   const scale = Math.min(maxW / srcW, maxH / srcH);
 
-  const resizedW = Math.round(srcW * scale);
-  const resizedH = Math.round(srcH * scale);
+  const resizedW = Math.max(1, Math.round(srcW * scale));
+  const resizedH = Math.max(1, Math.round(srcH * scale));
 
   const resized = await sharp(sourceBuffer)
-    .resize(resizedW, resizedH, { fit: "inside" })
-    .png()
+    .resize(resizedW, resizedH, { fit: "inside", withoutEnlargement: true })
+    .jpeg({ quality: 85 })
     .toBuffer();
 
   const left = Math.round((OG_WIDTH - resizedW) / 2);
@@ -63,14 +63,18 @@ async function buildOgImage(sourceBuffer: Buffer): Promise<Buffer> {
     create: {
       width: OG_WIDTH,
       height: OG_HEIGHT,
-      channels: 4,
-      background: { r: 250, g: 249, b: 247, alpha: 1 },
+      channels: 3,
+      background: { r: 250, g: 249, b: 247 },
     },
   })
     .composite([{ input: resized, left, top }])
     .jpeg({ quality: 85 })
     .toBuffer();
 }
+
+export const config = {
+  maxDuration: 15,
+};
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   const productId = typeof req.query?.id === "string" ? req.query.id : "";
@@ -91,36 +95,23 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const productImageUrl = await fetchProductImage(productId);
     const imageUrl = resolveTrustedProductImageUrl(productImageUrl, imageFromQuery, supabaseUrl);
 
-    if (!imageUrl || !isAllowedProductImageUrl(imageUrl, supabaseUrl)) {
+    if (!imageUrl) {
       res.status(404).send("Image not found");
       return;
     }
 
-    const imageResponse = await fetch(imageUrl, {
-      headers: { Accept: "image/*" },
-      redirect: "manual",
-    });
-    if (imageResponse.status >= 300 && imageResponse.status < 400) {
-      res.status(404).send("Image redirect blocked");
-      return;
-    }
-    if (!imageResponse.ok) {
+    const imageResponse = await fetchAllowedProductImage(imageUrl, supabaseUrl);
+    if (!imageResponse) {
       res.status(404).send("Image not available");
-      return;
-    }
-
-    const contentType = imageResponse.headers.get("content-type") ?? "";
-    if (!contentType.startsWith("image/")) {
-      res.status(415).send("Unsupported media type");
       return;
     }
 
     const arrayBuffer = await imageResponse.arrayBuffer();
     const sourceBuffer = Buffer.from(arrayBuffer);
-
     const ogBuffer = await buildOgImage(sourceBuffer);
 
     res.setHeader("Content-Type", "image/jpeg");
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
     res.setHeader("Cache-Control", "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800");
     res.status(200).send(ogBuffer);
   } catch {
