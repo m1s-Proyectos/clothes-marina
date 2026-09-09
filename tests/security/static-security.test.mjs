@@ -50,3 +50,19 @@ test("Production build disables source maps", () => {
   const viteConfig = readFileSync("vite.config.ts", "utf8");
   assert.match(viteConfig, /sourcemap:\s*false/);
 });
+
+test("Supabase keep-alive uses scheduled GitHub Actions and repo secrets", () => {
+  const workflow = readFileSync(".github/workflows/supabase-heartbeat.yml", "utf8");
+  const sql = readFileSync("supabase/migrations/add_system_heartbeat.sql", "utf8");
+
+  assert.match(workflow, /workflow_dispatch/);
+  assert.match(workflow, /cron:\s*"0 12 \* \* \*"/);
+  assert.match(workflow, /secrets\.SUPABASE_URL/);
+  assert.match(workflow, /secrets\.SUPABASE_ANON_KEY/);
+  assert.doesNotMatch(workflow, /SUPABASE_SERVICE_ROLE/);
+  assert.doesNotMatch(workflow, /eyJ/);
+  assert.match(workflow, /expected HTTP 2xx/);
+  assert.match(sql, /record_system_heartbeat/);
+  assert.match(sql, /system_heartbeats_single_row/);
+  assert.doesNotMatch(sql, /whatsapp_leads|contact_requests|product_ratings/);
+});

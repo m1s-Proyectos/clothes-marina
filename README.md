@@ -177,6 +177,7 @@ Service layer keeps UI decoupled from query logic and supports future caching/an
    2. `supabase/rls.sql`
    3. `supabase/storage.sql`
    4. `supabase/admin_security.sql`
+   5. Remaining files in `supabase/migrations/` (including `add_system_heartbeat.sql`)
 3. Create admin user via Auth UI.
 4. Assign app metadata role `admin`.
 5. (Optional) Deploy Edge Function:
@@ -230,3 +231,35 @@ Service layer keeps UI decoupled from query logic and supports future caching/an
 - Use strong passwords and 2FA on Vercel, GitHub, and Supabase accounts.
 - Run periodic dependency updates and `npm audit` checks.
 - Set up monitoring/alerts for auth failures and suspicious admin activity.
+
+## 12) Supabase Free keep-alive (technical heartbeat)
+
+This is **not** a sale, order, WhatsApp lead, contact request, or product rating. It only updates `public.system_heartbeats` (single row `id = 1`) through `record_system_heartbeat`.
+
+### Apply the SQL
+
+Run `supabase/migrations/add_system_heartbeat.sql` in the Supabase SQL Editor.
+
+### GitHub secrets (repo → Settings → Secrets and variables → Actions)
+
+| Secret | Value | Do not use |
+|---|---|---|
+| `SUPABASE_URL` | Project URL (`https://<ref>.supabase.co`) | — |
+| `SUPABASE_ANON_KEY` | Same **anon** / **publishable** key as `VITE_SUPABASE_ANON_KEY` | `service_role` / secret key |
+
+### Run the workflow manually
+
+1. GitHub → **Actions** → **Supabase keep-alive** → **Run workflow**.
+2. Confirm the job is green (HTTP 2xx). A non-2xx response fails the job.
+
+The schedule also runs once every 24 hours (`0 12 * * *` UTC).
+
+### Verify in SQL Editor
+
+```sql
+select id, source, last_ping_at, ping_count, note
+from public.system_heartbeats
+where id = 1;
+```
+
+After a successful run: `source` is `github_actions`, `last_ping_at` is recent, and `ping_count` increased by 1.

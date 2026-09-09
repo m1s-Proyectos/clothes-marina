@@ -1,0 +1,57 @@
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Record technical heartbeat
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_ANON_KEY:-}" ]; then
+            echo "Missing GitHub secrets SUPABASE_URL and/or SUPABASE_ANON_KEY."
+            echo "Use the project anon/publishable key. Do not use the secret/service role key."
+            exit 1
+          fi
+
+          BASE_URL="${SUPABASE_URL%/}"
+          ENDPOINT="${BASE_URL}/rest/v1/rpc/record_system_heartbeat"
+
+          HTTP_CODE="$(
+            curl -sS -o /tmp/supabase-heartbeat-body -w "%{http_code}" \
+              -X POST "${ENDPOINT}" \
+              -H "apikey: ${SUPABASE_ANON_KEY}" \
+              -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+              -H "Content-Type: application/json" \
+              -H "Prefer: return=minimal" \
+              --data '{"p_source":"github_actions"}'
+          )"
+
+          echo "Supabase heartbeat HTTP ${HTTP_CODE}"
+          if [ -s /tmp/supabase-heartbeat-body ]; then
+            echo "Response body:"
+            cat /tmp/supabase-heartbeat-body
+            echo
+          fi
+
+          case "${HTTP_CODE}" in
+            2[0-9][0-9])
+              echo "Keep-alive succeeded."
+              ;;
+            *)
+              echo "Keep-alive failed: expected HTTP 2xx from Supabase, got ${HTTP_CODE}."
+              exit 1
+              ;;
+          esac
