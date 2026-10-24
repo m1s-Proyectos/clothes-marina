@@ -36,9 +36,23 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-luxury-300/30 bg-white/90 backdrop-blur-xl">
-      <div className="container-shell flex h-16 items-center justify-between">
-        <NavLink to="/" className="text-2xl text-slate-950 transition hover:text-luxury-800">
-          Marina&apos;s Clothes
+      <div className="container-shell flex h-16 items-center justify-between gap-3 sm:h-[4.5rem] lg:h-20">
+        <NavLink
+          to="/"
+          aria-label="Marina's Clothes, ir al inicio"
+          className="group flex min-w-0 items-center gap-2 sm:gap-2.5 md:gap-3"
+        >
+          <img
+            src="/brand/marina-logo.png"
+            alt="Logotipo de Marina's Clothes"
+            width={737}
+            height={655}
+            decoding="async"
+            className="h-9 w-auto shrink-0 object-contain transition-transform duration-300 ease-out group-hover:scale-[1.045] sm:h-10 md:h-12 lg:h-14"
+          />
+          <span className="truncate font-['Cormorant_Garamond',serif] text-[1.28rem] font-medium leading-none tracking-[0.012em] text-slate-950 transition-colors duration-300 ease-out group-hover:text-luxury-800 sm:text-[1.55rem] md:text-[1.8rem] lg:text-[2rem]">
+            Marina&apos;s Clothes
+          </span>
         </NavLink>
         <button
           type="button"
