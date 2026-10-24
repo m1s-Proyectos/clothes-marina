@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit",
-    "test:security": "node --experimental-strip-types --test tests/security/**/*.test.mjs",
+    "test:security": "node --test tests/security/**/*.test.mjs",
     "verify:security": "node --test tests/security/static-security.test.mjs",
     "sbom": "npx --yes @cyclonedx/cyclonedx-npm --output-file sbom.cdx.json --omit dev"
   },
